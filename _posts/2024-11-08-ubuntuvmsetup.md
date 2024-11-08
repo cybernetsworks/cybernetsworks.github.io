@@ -11,7 +11,6 @@ tags:
   - standard
 ---
 
-## 
 - Download the Ubuntu Desktop VM iso from the official Ubuntu website 
 https://ubuntu.com/download/desktop.
 
