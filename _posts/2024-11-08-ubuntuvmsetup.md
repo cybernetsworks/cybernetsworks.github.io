@@ -10,3 +10,8 @@ tags:
 ---
 
 ## SETTING UP AN UBUNTU DESKTOP VM
+Download the Ubuntu Desktop VM iso from the official Ubuntu website 
+https://ubuntu.com/download/desktop
+
+**LAUNCH VIRTUALBOX**
+(/assets/)
