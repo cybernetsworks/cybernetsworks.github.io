@@ -13,7 +13,7 @@ tags:
 
 ## SETTING UP AN UBUNTU DESKTOP VM
 - Download the Ubuntu Desktop VM iso from the official Ubuntu website 
-https://ubuntu.com/download/desktop
+https://ubuntu.com/download/desktop.
 
 - Launch VirtualBox and click *NEW*
   ![Alt text](/assets/images/UbuntuDesktopInstall0.png)
