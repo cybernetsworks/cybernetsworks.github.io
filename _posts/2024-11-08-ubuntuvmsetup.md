@@ -1,8 +1,8 @@
 ---
 layout: posts
 title: "SETTING UP AN UBUNTU DESKTOP VM"
-last_modified_at: 2024-11-09T16:20:02-05:00
-image: /assets/images/UbuntuDesktop-Interface.png
+date: 2024-11-09T16:20:02-05:00
+image: /assets/images/UbuntuDesktopInstall0.png
 categories:
   - Blog
 tags:
