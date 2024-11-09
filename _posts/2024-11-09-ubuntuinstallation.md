@@ -11,5 +11,5 @@ tags:
   - readability
   - standard
 ---
-If you are yet to setup your Ubuntu Desktop VM on your Virtual Box click [HERE](/_posts/2024-11-08-ubuntuvmsetup.md) to do so before proceeding. 
+If you are yet to setup your Ubuntu Desktop VM on your Virtual Box click [HERE](https://github.com/cybernetsworks/cybernetsworks.github.io/_posts/2024-11-08-ubuntuvmsetup.md) to do so before proceeding. 
 
