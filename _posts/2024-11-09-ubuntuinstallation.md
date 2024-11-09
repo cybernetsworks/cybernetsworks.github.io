@@ -10,7 +10,7 @@ tags:
   - readability
   - standard
 ---
-If you are yet to setup your Ubuntu Desktop VM on your Virtual Box click [here](/_posts/2024-11-08-ubuntuvmsetuo.md) to do so before proceeding. 
+If you are yet to setup your Ubuntu Desktop VM on your Virtual Box click [HERE](/_posts/2024-11-08-ubuntuvmsetup.md) to do so before proceeding. 
 - Select the Ubuntu vm on virtualbox and click **START** to proceed.
 > ![Alt text](/assets/images/UbuntuDesktopInstall5.png)
 
