@@ -4,7 +4,7 @@ title: "SETTING UP AN UBUNTU DESKTOP VM"
 author: Snowdiamond
 categories: [post]
 tags: [vm]
-image: /assets/images/UbuntuDesktopInstall10.png
+image: /assets/images/UbuntuDesktop-Interface
 ---
 
 - Download the Ubuntu Desktop VM iso from the official Ubuntu website 
