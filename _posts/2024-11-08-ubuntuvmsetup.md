@@ -1,14 +1,10 @@
 ---
-layout: posts
+layout: post
 title: "SETTING UP AN UBUNTU DESKTOP VM"
-last_modified_at: 2024-11-09T16:20:02-05:00
+author: Snowdiamond
+categories: [post]
+tags: [vm]
 image: /assets/images/UbuntuDesktopInstall10.png
-categories:
-  - Blog
-tags:
-  - Post Formats
-  - readability
-  - standard
 ---
 
 - Download the Ubuntu Desktop VM iso from the official Ubuntu website 
