@@ -6,9 +6,9 @@ categories: [post]
 tags: [vm]
 image: assets/images/UbuntuDesktop-Interface.png
 ---
-
-- Download the Ubuntu Desktop VM iso from the official Ubuntu website 
-https://ubuntu.com/download/desktop.
+**REQUIREMENT**
+* VirtualBox 
+* Ubuntu Desktop VM. Download the Ubuntu Desktop VM iso from the official Ubuntu [website](https://ubuntu.com/download/desktop).
 
 - Launch VirtualBox and click *NEW*
   ![Alt text](/assets/images/UbuntuDesktopInstall0.png)
@@ -30,3 +30,23 @@ https://ubuntu.com/download/desktop.
 - Finalization
   ![Alt text](/assets/images/UbuntuDesktopInstall4.png)
   Confirm the setup and click *Finish* to complete the process.
+
+  ###INSTALLING UBUNTU DESKTOP
+  On your VirtualBox click *start* to start the Ubuntu Desktop VM and installation process.
+  ![Sart VM](/assets/images/UbuntuDesktopInstall5.png)
+  Select *Try or Install Ubuntu*
+  ![Select Ubuntu](/assets/images/UbuntuDesktopInstall6.png)
+  Select *Install Ubuntu* and click *Next*
+  ![Select Ubuntu](/assets/images/UbuntuDesktopInstall7.png)
+  Select *Interactive installation*
+  ![Select Ubuntu](/assets/images/UbuntuDesktopInstall8.png)
+  Select *Default Selection*
+  ![Select Ubuntu](/assets/images/UbuntuDesktopInstall9.png)
+  This next step is optional.
+  ![Select Ubuntu](/assets/images/UbuntuDesktopInstall10.png)
+  Select *Erase disk and install Ubuntu*
+  ![Select Ubuntu](/assets/images/UbuntuDesktopInstall11.png)
+  Proceed to reviewing your installation choice
+  ![Select Ubuntu](/assets/images/UbuntuDesktopInstall12.png)
+  Restart Ubuntu Desktop to complete the setup process.
+  ![Select Ubuntu](/assets/images/UbuntuDesktopInstall14.png)
