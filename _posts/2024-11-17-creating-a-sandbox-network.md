@@ -6,6 +6,7 @@ tags: [vm]
 image: assets/images/UbuntuDesktop-Interface.png
 ---
 **WHAT IS A SANDBOX NETWORK**
+
 According to VMWare, A network sandbox is an isolated testing environment that enables security teams to observe, analyze, detect, and block suspicious artifacts traversing the network. [Read More](https://www.vmware.com/topics/network-sandbox)
 **USE OF SANDBOX NETWORK**
 
