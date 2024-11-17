@@ -2,7 +2,7 @@
 layout: post
 title: "SETTING UP AN UBUNTU DESKTOP VM"
 author: Snowdiamond
-categories: [post]
+categories: [Jekyll, post]
 tags: [vm]
 image: assets/images/UbuntuDesktop-Interface.png
 ---
