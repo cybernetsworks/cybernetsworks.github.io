@@ -70,9 +70,10 @@ image: assets/images/UbuntuDesktop-Interface.png
   ![Select Ubuntu](/assets/images/ubuntu-installation13.png)
 
  **COMMON PROBLEMS/ERROR**
-    - Ubuntu 24.04 is not starting completely
-    - Ubuntu 24.04 is freezing or working slow.
-   **Reason**
+  - Ubuntu 24.04 is not starting completely
+  - Ubuntu 24.04 is freezing or working slow.
+    
+ **Reason**
     Ubuntu 24.04 unlike other versions requires more memory to function correctly. <br>
     You'll need to increase the base memory more if the issue persists after using the one suggested in the above screenshot.
     
