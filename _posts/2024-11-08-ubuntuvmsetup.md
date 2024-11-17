@@ -2,7 +2,7 @@
 layout: post
 title: "SETTING UP AN UBUNTU DESKTOP VM"
 author: Snowdiamond
-categories: [jekyll, post]
+categories: [post]
 tags: [vm]
 image: assets/images/3.jpg
 ---
