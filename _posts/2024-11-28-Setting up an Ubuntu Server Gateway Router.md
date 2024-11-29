@@ -3,7 +3,7 @@ layout: post
 title:  "Setting Up an Ubuntu Server Gateway Router"
 author:  Snowdiamond
 categories: [ Jekyll, post ]
-image: assets/images/14.jpg
+image: assets/images/ubuntu-server-image.jpeg
 tags: Networking
 ---
 ### Setting Up an Ubuntu Server with Three Network Interfaces
