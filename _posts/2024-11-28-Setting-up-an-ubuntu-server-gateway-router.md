@@ -46,9 +46,11 @@ To have the Ubuntu server act as a gateway router that does the following
   
   **NOTE:** You can use any name. it doesn't have to be *"00-installer-config"*
   ![Ubuntu Desktop](/assets/images/gateway-configuration.png)
-  Type *sudo netplan apply* to save changes
+
+  **Type *sudo netplan apply* to save changes**
   
 **COMMON QUESTION**
+
   Why did we add nameservers?
   
   We added the nameserver to the Ubuntu server configuration to ensure proper DNS resolution, enabling the server to  translate domain names into their corresponding IP addresses for internet connectivity and functionality. For example if i ping google.com without the nameservers it won't work.
