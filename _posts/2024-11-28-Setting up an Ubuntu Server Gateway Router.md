@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Three ways communication server setup (Ubuntu Server)"
+title:  "Setting Up an Ubuntu Server Gateway Router"
 author:  Snowdiamond
 categories: [ Jekyll, post ]
 image: assets/images/14.jpg
