@@ -20,4 +20,4 @@ download filezilla [here](https://filezilla-project.org/)
     
 - STEP TWO: Navigate to the right directory for the website. In this example it is /var/www.
 - STEP THREE: Drag and drop files from your local machine to the connected host.
-  ![alt image](assets/images/Filezilla-connection.png)
+  ![alt image](/assets/images/Filezilla-connection.png)
