@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  "NMAP FOR BEGINNERS"
-author: sal
+author: Snowdiamond
 categories: [ Jekyll ]
-image: assets/images/2.jpg
+image: assets/images/nmap-logo.jpg
 tag: [Networking]
 ---
