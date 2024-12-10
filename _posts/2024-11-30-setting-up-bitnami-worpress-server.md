@@ -8,7 +8,7 @@ image: assets/images/bitnami-wordpress-logo.png
 ---
 **REQUIREMENT**
 * VirtualBox 
-* BITNAMI WORDPRESS VM. Download the Ubuntu Desktop VM iso from the official Ubuntu [website](https://ubuntu.com/download/desktop).
+* BITNAMI WORDPRESS VM. Download the Bitnami OVA file [Here](https://bitnami.com/stack/wordpress/virtual-machine).
 
 ### SETTING UP UBUNTU DESKTOP VM
 - Launch VirtualBox and click *NEW*
