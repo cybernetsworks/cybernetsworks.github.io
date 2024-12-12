@@ -8,25 +8,25 @@ image: assets/images/UbuntuDesktop-Interface.png
 ---
 **REQUIREMENT**
 * VirtualBox 
-* Ubuntu Server Image. Download the Ubuntu server iso from the official Ubuntu [website](https://ubuntu.com/download/server#manual-install).
+* Ubuntu Server Image. You can download the Ubuntu server iso from the official Ubuntu [website](https://ubuntu.com/download/server#manual-install).
 
 ### SETTING UP UBUNTU DESKTOP VM
 - Launch VirtualBox and click *NEW*
   ![Alt text](/assets/images/UbuntuDesktopInstall0.png)
 - Fill in the requirements
-  ![Alt text](/assets/images/UbuntuDesktopInstall1.png)
-  - Enter a desired name. Here we used *UbuntuDesktop*
+  ![Alt text](/assets/images/ubuntu-server-setup-1.png)
+  - Enter a desired name. Here we used *Ubuntu-server-gateway*
   - Select the Ubuntu Desktop image from the stored folder. Here it is in the Download Folder
   - Check Skip Unattended Installation
   - Click Next
 - Memory Allocation
-  ![Alt text](/assets/images/UbuntuDesktopInstall2.png)
-  ![Alt text](/assets/images/UbuntuDesktopInstall3.png)
+  ![Alt text](/assets/images/ubuntu-server-setup-2.png)
+  ![Alt text](/assets/images/ubuntu-server-setup-3.png)
 - Finalization
-  ![Alt text](/assets/images/UbuntuDesktopInstall4.png)
+  ![Alt text](/assets/images/ubuntu-server-setup-4.png)
   Confirm the setup and click *Finish* to complete the process.
 
-  ### INSTALLING UBUNTU DESKTOP
+  ### INSTALLING UBUNTU SERVER
   On your VirtualBox click on the Ubuntu Desktop VM and click *start* to begin the Ubuntu Desktop VM installation process.
   ![Start VM](/assets/images/UbuntuDesktopInstall5.png)
 
