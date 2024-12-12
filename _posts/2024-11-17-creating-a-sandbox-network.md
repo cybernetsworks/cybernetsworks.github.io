@@ -64,7 +64,7 @@ According to VMWare, A network sandbox is an isolated testing environment that e
     **IMPORTANT**
     The gateway address on the Ubuntu Desktop must be the address of the gateway router interface **enp0s3 (192.168.3.1)** else it won't connect.
   
-- [configure your Bitnami WordPress(Application server)](./setting-up-bitnami-wordpress-server.md)
+- Configure your Bitnami WordPress(Application server)
   
   - Detect your network interface name using the command **ip a**
     ![Ubuntu Desktop](/assets/images/Bitnami-wordpress-interface-check.png)
