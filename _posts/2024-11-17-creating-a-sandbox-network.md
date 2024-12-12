@@ -70,7 +70,7 @@ According to VMWare, A network sandbox is an isolated testing environment that e
     ![Ubuntu Desktop](/assets/images/Bitnami-wordpress-interface-check.png)
 
   - Enter the command **sudo nano /etc/systemd/network/25-wired.network** to configure the
-    ![Ubuntu Desktop](/assets/images/bitnami-wordpress-configuration.png)
+    ![Ubuntu Desktop](/assets/images/bitnami-worpress-configuration.png)
   - Enter the command **sudo systemctl restart systemd-networkd.service** to restart the network.
     
   **SUBNET USED**
