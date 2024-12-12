@@ -32,54 +32,61 @@ According to VMWare, A network sandbox is an isolated testing environment that e
 
 **PROCESS**
 - [Download and Install an Ubuntu Destop VM](https://cybernetsworks.github.io/ubuntuvmsetup)
-- [Download and Install an Ubuntu Server VM](./2024-12-12-setting-up-an-ubuntu-server-vm.md)
-- [Download and Install a Bitnami WordPress Server VM](./2024-11-30-setting-up-bitnami-wordpress-server.md)
-- [Configure your Ubuntu Server gateway router with three network interfaces](./2024-11-28-Setting-up-an-ubuntu-server-gateway-router.md).
+- [Download and Install an Ubuntu Server VM](https://cybernetsworks.github.io/setting-up-an-ubuntu-server-vm)
+- Download and Install a Bitnami WordPress Server VM
+  - Download Bitnami Wordpress Server OVA file [Here](https://bitnami.com/stack/wordpress/virtual-machine)
+    - SETTING UP BITNAMI WORDPRESS SERVER
+       - Launch VirtualBox and click **FILE**
+       - Click **Import Appliances**
+       - Select the downloaded ova file
+       - Click finish.
+       -  Launch the virtual machine
+- [Configure your Ubuntu Server gateway router with three network interfaces](https://cybernetsworks.github.io/Setting-up-an-ubuntu-server-gateway-router)
   
   ![Ubuntu Desktop](/assets/images/gateway-configuration.png)
   
   **SUBNETS USED**
-  - Subnet one: 192.168.3.0/24. Interface IP address is 192.168.3.1. This belongs to the internal network ***intnet***
-  - Subnet two:192.168.103.0/24. Interface IP address is 192.168.103.1. This belongs to the internal network ***intnet1***
+  - Subnet one: 192.168.3.0/24 Interface IP address is 192.168.3.1 This belongs to the internal network ***intnet***
+  - Subnet two:192.168.103.0/24 Interface IP address is 192.168.103.1 This belongs to the internal network ***intnet1***
   - Domain name servers: 8.8.8.8 and 1.1.1.1
 
   **IMPORTANT:** Always name your internal networks properly for easy identification.
   
-- [Configure your Ubuntu Desktop VM to run an internal network](./2019-02-03-setting-up-internal-network-on-ubuntu-desktop.md).
+- [Configure your Ubuntu Desktop VM to run an internal network](https://cybernetsworks.github.io/setting-up-internal-network-on-ubuntu-desktop).
   
   ![Ubuntu Desktop](/assets/images/UbuntuDesktopNetwork5.png)
   
   **SUBNET USED**
-  - 192.168.3.0/24. IP address of the Ubuntu Desktop VM is 192.168.3.2. This implies the Ubuntu Desktop will be connected to the network interface ***enp0s3*** with the address 192.168.3.1
-  - Ensure you select ***intnet*** as the internal network on your Ubuntu Desktop because it's the name of the internal network on the Ubuntu server gateway we are connecting.
+  - **192.168.3.0/24** IP address of the Ubuntu Desktop VM is **192.168.3.2** This implies the Ubuntu Desktop will be connected to the network interface **enp0s3** of the gateway router with the IP address **192.168.3.1**
+  - Except you name your internal network differently, ensure you select **intnet** as the internal network on your Ubuntu Desktop because it's the name of the internal network on the Ubuntu server gateway we are connecting.
     ![Ubuntu Desktop](/assets/images/UbuntuDesktop-network-name.png)
         
     **IMPORTANT**
-    The gateway address on the Ubuntu Desktop must be the address of the gateway router interface ***enp0s3 (192.168.3.1)*** else it won't connect.
+    The gateway address on the Ubuntu Desktop must be the address of the gateway router interface **enp0s3 (192.168.3.1)** else it won't connect.
   
 - [configure your Bitnami WordPress(Application server)](./setting-up-bitnami-wordpress-server.md)
   
-  - Detect your network interface name using the command *ip a*
+  - Detect your network interface name using the command **ip a**
     ![Ubuntu Desktop](/assets/images/Bitnami-wordpress-interface-check.png)
 
-  - Enter the command *sudo nano /etc/systemd/network/25-wired.network* to configure the
+  - Enter the command **sudo nano /etc/systemd/network/25-wired.network** to configure the
     ![Ubuntu Desktop](/assets/images/bitnami-wordpress-configuration.png)
-  - Enter the command *sudo systemctl restart system-networkd.service* to restart the network.
+  - Enter the command **sudo systemctl restart systemd-networkd.service** to restart the network.
     
   **SUBNET USED**
-  - 192.168.103.0/24. The IP address of the Bitnami WordPress server is 192.168.103.2. This implies the Bitnami WordPress server will be connected to the network interface ***enp0s8*** with the address 192.168.103.1
-  - Ensure you select **intnet1** as the internal network on your Bitnami WordPress because it's the name of the internal network on the Ubuntu server gateway we are connecting.
+  - **192.168.103.0/24** The IP address of the Bitnami WordPress server is **192.168.103.2** This implies the Bitnami WordPress server will be connected to the network interface **enp0s8** of the gateway router with the IP address 192.168.103.1
+  - Except you name your internal network differently, ensure you select **intnet1** as the internal network on your Bitnami WordPress because it's the name of the internal network on the Ubuntu server gateway we are connecting.
     ![Ubuntu Desktop](/assets/images/Bitnami-wordpress-network.png)
   
 - Enable IP forwarding on your Ubuntu server gateway router.
   
-  - Enter the command ***sudo nano /etc/sysctl.conf***
-  - Uncomment the ***net.ipv4.ip_forward=1*** as shown below.
+  - Enter the command **sudo nano /etc/sysctl.conf**
+  - Uncomment the **net.ipv4.ip_forward=1** as shown below.
     
     ![Ubuntu Desktop](/assets/images/ip-forwarding-1.png)
     
-  - exit the terminal with ***ctrl x***
-  - type ***y*** when prompted then hit *enter* button to continue.
+  - Exit the terminal with **ctrl x**
+  - Type **y** when prompted then hit **enter** button to continue.
 
     **PURPOSE**
     To enable routing between the two different subnets
