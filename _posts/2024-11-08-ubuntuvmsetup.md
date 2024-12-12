@@ -30,43 +30,43 @@ image: assets/images/UbuntuDesktop-Interface.png
   On your VirtualBox click on the Ubuntu Desktop VM and click *start* to begin the Ubuntu Desktop VM installation process.
   ![Start VM](/assets/images/UbuntuDesktopInstall5.png)
 
-   **Select a preferred language and click *Next***
+  - Select a preferred language and click **Next**
   ![Sart VM](/assets/images/ubuntu-installation1.png)
 
-  **On the accessibility settings, Click *Next***
+  - On the accessibility settings, Click **Next**
   ![Ubuntu Installation](/assets/images/ubuntu-installation2.png)
   
-  **Select a preferred keyboard layout and click *Next***
+  - Select a preferred keyboard layout and click **Next**
   ![Ubuntu Installation](/assets/images/ubuntu-installation3.png)
   
-  **Select *Use wired connection* and click *Next*** This will enable access to the internet for all necessary downloads during the installation process.
+  - Select **Use wired connection** and click **Next** This will enable access to the internet for all necessary downloads during the installation process.
   ![Ubuntu Installation](/assets/images/ubuntu-installation4.png)
   
-  **Select *Install Ubuntu* and click *Next***
+  - Select **Install Ubuntu** and click **Next**
   ![Ubuntu Installation](/assets/images/ubuntu-installation5.png)
 
-  **Select *Interactive Installation* and click *Next*** This ensures you get instructions as needed during the installation process.
+  - Select **Interactive Installation** and click **Next** This ensures you get instructions as needed during the installation process.
   ![Ubuntu installation](/assets/images/ubuntu-installation6.png)
   
-  **Select *Default selection* and click *Next***
+  - Select **Default selection** and click **Next**
   ![Ubuntu Installation](/assets/images/ubuntu-installation7.png)
   
-  **This step is optional but it's a good practice to install recommended software and click *Next***
+  - This step is optional but it's a good practice to install recommended software and click **Next**
   ![Select Ubuntu](/assets/images/ubuntu-installation8.png)
 
-  **Select *Erase disk and install Ubuntu* and click *Next***
+  - Select **Erase disk and install Ubuntu** and click **Next**
   ![Select Ubuntu](/assets/images/ubuntu-installation9.png)
 
-  **Enter the required details as instructed and click *Next***  
+  - Enter the required details as instructed and click **Next**  
   ![Select Ubuntu](/assets/images/ubuntu-installation10.png)
 
-  **Select a timezone of your choice and click *Next***
+  - Select a timezone of your choice and click **Next**
   ![Select Ubuntu](/assets/images/ubuntu-installation11.png)
 
-  **Review your setup and click *Install* to proceed with the installation.** 
+  - Review your setup and click **Install** to proceed with the installation. 
   ![Select Ubuntu](/assets/images/ubuntu-installation12.png)
 
-  **Click *Restart now* to finalize the process.**
+  - Click **Restart now** to finalize the process.
   ![Select Ubuntu](/assets/images/ubuntu-installation13.png)
 
  **COMMON PROBLEMS/ERROR**
