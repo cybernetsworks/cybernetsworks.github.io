@@ -9,7 +9,12 @@ image: assets/images/bitnami-wordpress-logo.png
 **REQUIREMENT**
 * VirtualBox 
 * BITNAMI WORDPRESS VM. Download the Bitnami OVA file [Here](https://bitnami.com/stack/wordpress/virtual-machine).
-
-### SETTING UP UBUNTU DESKTOP VM
-- Launch VirtualBox and click *NEW*
-  ![Alt text](/assets/images/UbuntuDesktopInstall0.png)
+  
+**SETUP PURPOSE**
+This server is setup to connect with an Ubuntu Desktop VM Through a [gateway server](https://) that permits routing of traffic between different subnets.
+### SETTING UP BITNAMI WORDPRESS SERVER
+- Launch VirtualBox and click ***FILE***
+- Click **Import Appliances**
+- Select the downloaded ova file
+- Click finish.
+- Launch the virtual machine
