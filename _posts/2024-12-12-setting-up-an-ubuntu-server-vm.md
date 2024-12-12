@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "SETTING UP AN UBUNTU DESKTOP VM"
+title: "SETTING UP AN UBUNTU SERVER VM"
 author: Snowdiamond
 categories: [Jekyll, post]
 tags: [vm]
