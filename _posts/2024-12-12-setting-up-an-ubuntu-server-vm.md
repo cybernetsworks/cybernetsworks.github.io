@@ -8,7 +8,7 @@ image: assets/images/UbuntuDesktop-Interface.png
 ---
 **REQUIREMENT**
 * VirtualBox 
-* Ubuntu Desktop VM. Download the Ubuntu Desktop VM iso from the official Ubuntu [website](https://ubuntu.com/download/desktop).
+* Ubuntu Server Image. Download the Ubuntu server iso from the official Ubuntu [website](https://ubuntu.com/download/server#manual-install).
 
 ### SETTING UP UBUNTU DESKTOP VM
 - Launch VirtualBox and click *NEW*
