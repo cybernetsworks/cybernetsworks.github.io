@@ -14,7 +14,7 @@ According to VMWare, A network sandbox is an isolated testing environment that e
 
 **KEY FEATURES**
 - An Ubuntu desktop connected to a gateway server interface
-- An Ubuntu WordPress server connected to another interface of the gateway
+- A Bitnami WordPress server connected to another interface of the gateway
 - An Interface of the gateway configure for internet access using the Ubuntu Desktop
 - An active communication between the Ubuntu desktop which is on one subnet and the Ubuntu WordPress server on another subnet.
 
@@ -27,7 +27,7 @@ According to VMWare, A network sandbox is an isolated testing environment that e
 
 **PROCESS**
 - [Download and Install an Ubuntu Destop VM](_posts/2024-11-08-ubuntuvmsetup.md)
-- [Download and Install an Ubuntu Server VM] 
+- [Download and Install an Ubuntu Server VM] (_posts/2024-12-12-setting-up-an-ubuntu-server-vm.md)
 - [Download and Install a Bitnami WordPress Server VM](_posts/2024-11-30-setting-up-bitnami-worpress-server.md)
 - [Configure your Ubuntu Server gateway router with three network interfaces](_posts/2024-11-28-Setting-up-an-ubuntu-server-gateway-router.md).
   
@@ -52,7 +52,7 @@ According to VMWare, A network sandbox is an isolated testing environment that e
     **IMPORTANT**
     The gateway address on the Ubuntu Desktop must be the address of the gateway router interface ***enp0s3 (192.168.3.1)*** else it won't connect.
   
-- [configure your Ubuntu WordPress(Application server)]()
+- [configure your Bitnami WordPress(Application server)]()
   
   - Detect your network interface name using the command *ip a*
     ![Ubuntu Desktop](/assets/images/Bitnami-wordpress-interface-check.png)
