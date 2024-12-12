@@ -11,17 +11,22 @@ image: assets/images/UbuntuDesktop-Interface.png
 According to VMWare, A network sandbox is an isolated testing environment that enables security teams to observe, analyze, detect, and block suspicious artifacts traversing the network. [Read More](https://www.vmware.com/topics/network-sandbox)
 
 **USE OF SANDBOX NETWORK**
+- Configuration testing
+- Cybersecurity scenario simulation such as routing, subnetting, or network troubleshooting.
+- Understanding network protocols.
+- Educational purposes.
 
 **KEY FEATURES**
-- An Ubuntu desktop connected to a gateway server interface
-- A Bitnami WordPress server connected to another interface of the gateway
-- An Interface of the gateway configure for internet access using the Ubuntu Desktop
+- An Ubuntu desktop connected to a gateway server interface (enp0s3).
+- A Bitnami WordPress server connected to another interface of the gateway (enp0s8).
+- An Interface of the gateway configure for internet access using the Ubuntu Desktop (enp0s9).
 - An active communication between the Ubuntu desktop which is on one subnet and the Ubuntu WordPress server on another subnet.
+- Access to the internet from the Ubuntu Desktop.
 
 **REQUIREMENT**
 * An Ubuntu Desktop VM
 * A Gateway Router (Here we are using an Ubuntu Server)
-* An Application Server (Here we are using an Bitnami WordPress server)
+* An Application Server (Here we are using a Bitnami WordPress server)
 
 **IMPORTANT NOTICE:** All IP addresses used in this demonstration are for educational purposes only.
 
