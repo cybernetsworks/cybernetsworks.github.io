@@ -9,14 +9,15 @@ image: assets/images/UbuntuDesktop-Interface.png
 **REQUIREMENT**
 * VirtualBox 
 * Ubuntu Server Image. You can download the Ubuntu server iso from the official Ubuntu [website](https://ubuntu.com/download/server#manual-install).
-
+**NOTE: WE ARE USING UBUNTU SERVER 22.04 FOR THIS INSTALLATION PROCESS.**
+  
 ### SETTING UP UBUNTU DESKTOP VM
 - Launch VirtualBox and click *NEW*
   ![Alt text](/assets/images/UbuntuDesktopInstall0.png)
 - Fill in the requirements
   ![Alt text](/assets/images/ubuntu-server-setup-1.png)
   - Enter a desired name. Here we used *Ubuntu-server-gateway*
-  - Select the Ubuntu Desktop image from the stored folder. Here it is in the Download Folder
+  - Select the Ubuntu Server image from the stored folder. Here it is in the Download Folder
   - Check Skip Unattended Installation
   - Click Next
 - Memory Allocation
@@ -27,53 +28,58 @@ image: assets/images/UbuntuDesktop-Interface.png
   Confirm the setup and click *Finish* to complete the process.
 
   ### INSTALLING UBUNTU SERVER
-  On your VirtualBox click on the Ubuntu Desktop VM and click *start* to begin the Ubuntu Desktop VM installation process.
+  On your VirtualBox click on the Ubuntu Server VM and click *start* to begin the Ubuntu Server installation process.
   ![Start VM](/assets/images/UbuntuDesktopInstall5.png)
 
+  **Select the option to try and install ubuntu server**
+   ![Start VM](/assets/images/ubuntu-server-install-1.png)
+
    **Select a preferred language and click *Next***
-  ![Sart VM](/assets/images/ubuntu-installation1.png)
+  ![Sart VM](/assets/images/ubuntu-server-install-2.png)
 
-  **On the accessibility settings, Click *Next***
-  ![Ubuntu Installation](/assets/images/ubuntu-installation2.png)
+  **You have the option to continue without updating to a new installer or update to a new install, always use the update option except you have a need to use an older version like in this situation. Select the right option and press *ENTER*** 
+  ![Ubuntu Installation](/assets/images/ubuntu-server-install-3.png)
   
-  **Select a preferred keyboard layout and click *Next***
-  ![Ubuntu Installation](/assets/images/ubuntu-installation3.png)
+  **Select a preferred keyboard layout and click *Done* to proceed.**
+  ![Ubuntu Installation](/assets/images/ubuntu-server-install-4.png)
   
-  **Select *Use wired connection* and click *Next*** This will enable access to the internet for all necessary downloads during the installation process.
-  ![Ubuntu Installation](/assets/images/ubuntu-installation4.png)
+  **Select *ubuntu server* as the base for the installation. Select *Done* and press *Enter***
+  ![Ubuntu Installation](/assets/images/ubuntu-server-install-5.png)
+
+  **There are two options to proceed from this step. We can either configure the network interface from the terminal or proceed and do the configuration later. Here we'll proceed and configure it later. So, select *Done* and press *Enter* to proceed**
+  ![Ubuntu installation](/assets/images/ubuntu-server-install-6.png)
   
-  **Select *Install Ubuntu* and click *Next***
-  ![Ubuntu Installation](/assets/images/ubuntu-installation5.png)
-
-  **Select *Interactive Installation* and click *Next*** This ensures you get instructions as needed during the installation process.
-  ![Ubuntu installation](/assets/images/ubuntu-installation6.png)
+  **We do not require a proxy to continue this installation so select *Done* and press *Enter* to proceed**
+  ![Ubuntu Installation](/assets/images/ubuntu-server-install-7.png)
   
-  **Select *Default selection* and click *Next***
-  ![Ubuntu Installation](/assets/images/ubuntu-installation7.png)
+  **Check "use the entire disk and set up this disk as LVM group" then navigate to *Done* and press *Enter* to proceed. You have the option to encrypt your disk at this stage if you need extra layer of security**
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-9.png)
+
+  **Review the setup then navigate to *Done* and press *Enter* to proceed**
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-10.png)
+
+  **When prompted, select *Continue* then press *Enter***  
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-11.png)
+
+  **Fill in the required information, navigate to *Done* and press *Enter* to proceed**
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-12.png)
+
+  **The upgrade step is optional. We are skipping it for this installation. Navigate to *Done* and press *Enter* to proceed with the installation.** 
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-13.png)
+
+  **Check *Install openSSH server* to be able to use ssh when needed. Navigate to *Done* Press *Enter* to proceed.**
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-14.png)
   
-  **This step is optional but it's a good practice to install recommended software and click *Next***
-  ![Select Ubuntu](/assets/images/ubuntu-installation8.png)
+  **Check the needed service. This depends on the intended use of the server. Navigate to *Done* and Press *Enter* to proceed.**
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-15.png)
 
-  **Select *Erase disk and install Ubuntu* and click *Next***
-  ![Select Ubuntu](/assets/images/ubuntu-installation9.png)
+  **Select *Reboot now* and press *Enter* to finalise the installation.**
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-16.png)
+ 
+  **Manually unmount the virtual disk (Click on Devices> optical drive to do so) if the automatic unmounting process fails.**
 
-  **Enter the required details as instructed and click *Next***  
-  ![Select Ubuntu](/assets/images/ubuntu-installation10.png)
-
-  **Select a timezone of your choice and click *Next***
-  ![Select Ubuntu](/assets/images/ubuntu-installation11.png)
-
-  **Review your setup and click *Install* to proceed with the installation.** 
-  ![Select Ubuntu](/assets/images/ubuntu-installation12.png)
-
-  **Click *Restart now* to finalize the process.**
-  ![Select Ubuntu](/assets/images/ubuntu-installation13.png)
-
+  **Enter the username and password when prompted to login.**
+  ![Select Ubuntu](/assets/images/ubuntu-server-install-17.png)
+  
  **COMMON PROBLEMS/ERROR**
-  - Ubuntu 24.04 is not starting completely
-  - Ubuntu 24.04 is freezing or working slow.
-    
- **Reason**
-    Ubuntu 24.04 unlike other versions requires more memory to function correctly. <br>
-    You'll need to increase the base memory more if the issue persists after using the one suggested in the above screenshot.
-    
+  - Not selecting the needed services during installation.
