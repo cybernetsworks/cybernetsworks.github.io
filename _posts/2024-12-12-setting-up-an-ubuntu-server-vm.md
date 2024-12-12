@@ -4,7 +4,7 @@ title: "SETTING UP AN UBUNTU SERVER VM"
 author: Snowdiamond
 categories: [Jekyll, post]
 tags: [vm]
-image: assets/images/UbuntuDesktop-Interface.png
+image: assets/images/ubuntu-server-logo.jpg
 ---
 **REQUIREMENT**
 * VirtualBox 
