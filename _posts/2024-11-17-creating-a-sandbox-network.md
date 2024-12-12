@@ -26,7 +26,7 @@ According to VMWare, A network sandbox is an isolated testing environment that e
 **IMPORTANT NOTICE:** All IP addresses used in this demonstration are for educational purposes only.
 
 **PROCESS**
-- [Download and Install an Ubuntu Destop VM](/2024-11-08-ubuntuvmsetup.md)
+- [Download and Install an Ubuntu Destop VM](https://cybernetsworks.github.io/_posts/2024-11-08-ubuntuvmsetup.md)
 - [Download and Install an Ubuntu Server VM] (_posts/2024-12-12-setting-up-an-ubuntu-server-vm.md)
 - [Download and Install a Bitnami WordPress Server VM](_posts/2024-11-30-setting-up-bitnami-wordpress-server.md)
 - [Configure your Ubuntu Server gateway router with three network interfaces](_posts/2024-11-28-Setting-up-an-ubuntu-server-gateway-router.md).
