@@ -3,8 +3,8 @@ layout: post
 title: "CREATING A SANDBOX NETWORK"
 author: Snowdiamond
 categories: [Jekyll, post]
+image: assets/images/Network-Diagram-Potfolio-2.png
 tags: [Networking]
-image: assets/images/UbuntuDesktop-Interface.png
 ---
 **WHAT IS A SANDBOX NETWORK**
 
@@ -119,7 +119,7 @@ According to VMWare, A network sandbox is an isolated testing environment that e
     - 192.168.103.1 using ping 192.168.103.1
     - 192.168.3.1 using ping 192.168.3.1
     - 192.168.3.2 using ping 192.168.3.2
-  - On the Ubuntu Desktop Vm try browsing the internet using the web browser.
+  - On the Ubuntu Desktop Vm try browsing the internet using the web browser.    
 
 **COMMON MISTAKES**
 
@@ -127,4 +127,4 @@ According to VMWare, A network sandbox is an isolated testing environment that e
   
 **SOLUTION**
 - Ensure you are not using same name for two internal networks on your Ubuntu server gateway router.
-- Select the right internal network for the each vm connecting with the Ubuntu server gateway router. For example the ubuntu desktop here is connecting with the network interface enp0s3 which has the name intnet. If I select *intnet1* as the internal network on the Ubuntu Desktop, it won't work.
+- Select the right internal network for the each vm connecting with the Ubuntu server gateway router. For example the ubuntu desktop here is connecting with the network interface enp0s3 which has the name intnet. If I select **intnet1** as the internal network on the Ubuntu Desktop, it won't work.
