@@ -16,7 +16,7 @@ According to VMWare, A network sandbox is an isolated testing environment that e
 - Understanding network protocols.
 - Educational purposes.
 
-**KEY FEATURES**
+**KEY FEATURES OF THIS SANDBOX NETWORK**
 - An Ubuntu desktop connected to a gateway server interface (enp0s3).
 - A Bitnami WordPress server connected to another interface of the gateway (enp0s8).
 - An Interface of the gateway configure for internet access using the Ubuntu Desktop (enp0s9).
