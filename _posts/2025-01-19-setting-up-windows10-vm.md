@@ -3,11 +3,11 @@ layout: post
 title:  "Setting Up a Windows10 Virtual Machine"
 author: Snowdiamond
 categories: [ Jekyll, tutorial ]
-image: assets/images/windows-logo.jpg
+image: assets/images/windows10/windows-logo.jpg
 tag: [featured]
 ---
 
-##SETTING UP A WINDOWS 10 VM
+## SETTING UP A WINDOWS 10 VM
 
 Creating windows10 virtual machine requires the following steps 
 
