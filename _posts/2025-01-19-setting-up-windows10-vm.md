@@ -1,9 +1,9 @@
 ---
 layout: post
-title:  "Setting Up a MacOS Virtual Machine"
+title:  "Setting Up a Windows10 Virtual Machine"
 author: Snowdiamond
 categories: [ Jekyll, tutorial ]
-image: assets/images/13.jpg
+image: assets/images/windows-logo.jpg
 tag: [featured]
 ---
 
