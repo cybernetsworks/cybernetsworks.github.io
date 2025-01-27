@@ -65,7 +65,7 @@ sudo apt install zabbix-agent
 
 **CONFIGURE ZABBIX AGENT**
 ```
-sudo nano /etc/zabbix/zabbix_server.conf
+sudo nano /etc/zabbix/zabbix_agentd.conf
 
 NAVIGATE TO THE SERVER AND EDIT THE SERVER IP TO YOUR ZABBIX SERVER IP
 NAVIGATE TO SERVER ACTIVE AND EDIT THE IP TO YOUR ZABBIX SERVER IP

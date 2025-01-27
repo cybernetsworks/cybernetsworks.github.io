@@ -39,7 +39,7 @@ sudo systemctl restart apache2
 ```
 **- UNINSTALLING PHP7.0 IF ALREADY INSTALLED**
 ```
-type php -v to check
+type **php -v** to check the actively running php version
 sudo a2dismod php7.0
 sudo a2enmod php7.4
 sudo systemctl restart apache2
@@ -76,10 +76,11 @@ RELOAD PRIVILEGE TABLES
 Press "y" and press Enter to proceed.
 ```
 **- MYSQL LOGIN AND DB CREATION**
-`
+```
 sudo mysql -u root -p
 Enter password
-`
+
+```
 
 **WORDPRESS DB CREATION**
 ```
