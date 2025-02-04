@@ -14,7 +14,14 @@ AUTOMATED INSTALLATION
 
 NOTE: For seamless result, run script on a freshly installed ubuntu 22.04 server.
 
-See [here]() for details on how to install ubuntu 22.04 server vm.
+See [HERE](https://cybernetsworks.github.io/setting-up-an-ubuntu-server-vm/) for details on how to install ubuntu 22.04 server vm.
+
+**IMPORTANT**
+For the script to run effectively, your server must meetup with the minimum requirements 
+```
+4 CPU
+16 GB RAM
+```
 
 Open your Ubuntu 22.04 server and run the following commands.
 ```
