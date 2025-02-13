@@ -3,7 +3,7 @@ layout: post
 title:  "CREATING A FORENSIC IMAGE WITH FTK IMAGER"
 author: Sal
 categories: [ Digital Forensic ]
-image: assets/images/UbuntuDesktop-Interface.png
+image: assets/images/ftk/ftk-imager-logo.jpg
 tags: [Forensic]
 ---
 **CREATING A FORENSIC E01 IMAGE WITH FTK IMAGER**
