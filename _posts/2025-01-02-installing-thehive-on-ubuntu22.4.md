@@ -47,9 +47,10 @@ Allow the automated installation take place.
 
 Access thehive dashboard using the provided login data
 
+!["The hive installation"](/assets/images/thehive/automated-hive-install-4.png).
+
 ```
 Username: admin
 Password: secret
 ```
 
-!["The hive installation"](/assets/images/thehive/automated-hive-install-4.png).
