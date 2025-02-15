@@ -2,15 +2,15 @@
 layout: post
 title:  "Installing theHive on Ubuntu22.4"
 author: Snowdiamond
-categories: [ Security testing ]
-image: assets/images/UbuntuDesktop-Interface.png
-tags: [Networking]
+categories: [ Security Automation ]
+image: assets/images/thehive-logo.jpg
+tags: [Security Automation]
 ---
 **INSTALLING THEHIVE ON UBUNTU 22.4**
 
 **THE HIVE**
 
-AUTOMATED INSTALLATION
+**AUTOMATED INSTALLATION**
 
 NOTE: For seamless result, run script on a freshly installed ubuntu 22.04 server.
 
@@ -28,7 +28,7 @@ Open your Ubuntu 22.04 server and run the following commands.
 sudo apt update
 sudo apt upgrade
 ```
-Run the automated script provided by theHive
+**RUN THE AUTOMATED SCRIPT PROVIDED BY THEHIVE**
 
 ```
 wget -q -O /tmp/install.sh https://archives.strangebee.com/scripts/install.sh ; sudo -v ; bash /tmp/install.sh
@@ -39,7 +39,7 @@ A warning might pop up
 ```
 Type **yes**
 ```
-In the installation option displayed, select ``Inatall thehive`` 
+In the installation option displayed, select ``Install thehive`` 
 !["The hive installation"](/assets/images/thehive/automated-hive-install-3.png)
 
 Allow the automated installation take place.
