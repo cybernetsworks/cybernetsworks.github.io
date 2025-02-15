@@ -85,5 +85,13 @@ NOTE:
 
 **SETUP THE DESIRED LOGIN DETAIL**
 
+Enter default login credentials
+
+```
+admin@admin.test
+admin
+```
+Setup a new password.
+
 HAVE FUN!!
 
