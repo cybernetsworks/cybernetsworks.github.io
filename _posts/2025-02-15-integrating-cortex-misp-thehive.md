@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Installing cortex on Ubuntu22.4"
+title:  "Integrating Cortex and MISP with Thehive"
 author: Snowdiamond
 categories: [ Security Automation]
 image: /assets/images/cortex/cortex-logo.jpg
