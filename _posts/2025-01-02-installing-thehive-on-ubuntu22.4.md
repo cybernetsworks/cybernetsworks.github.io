@@ -3,7 +3,7 @@ layout: post
 title:  "Installing theHive on Ubuntu22.4"
 author: Snowdiamond
 categories: [ Security Automation ]
-image: /assets/images/thehive/thehive-logo.jpg
+image: assets/images/thehive/thehive-logo.jpg
 tags: [Security Automation]
 ---
 **INSTALLING THEHIVE ON UBUNTU 22.4**
