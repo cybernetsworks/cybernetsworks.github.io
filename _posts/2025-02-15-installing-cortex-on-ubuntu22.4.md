@@ -26,7 +26,6 @@ For the script to run effectively, your server must meetup with the minimum requ
 Open your Ubuntu 22.04 server and run the following commands.
 ```
 sudo apt update
-sudo apt upgrade
 ```
 
 **ADD DOCKER GROUP**
