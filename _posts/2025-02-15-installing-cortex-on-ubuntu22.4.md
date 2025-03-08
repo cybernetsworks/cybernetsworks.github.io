@@ -3,7 +3,7 @@ layout: post
 title:  "Installing cortex on Ubuntu22.4"
 author: Snowdiamond
 categories: [ Security Automation]
-image: /assets/images/cortex/cortex-logo.jpg
+image: /assets/images/cortex/centos-7-logo.png
 tags: [Security Automation]
 ---
 **INSTALLING CORTEX ON UBUNTU 22.4**
