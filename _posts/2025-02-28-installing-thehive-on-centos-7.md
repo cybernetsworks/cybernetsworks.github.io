@@ -3,7 +3,7 @@ layout: post
 title:  "Installing TheHive4 On CentOs"
 author: Snowdiamond
 categories: [ Security Automation]
-image: /assets/images/thehive/thehive-logo.jpg
+image: /assets/images/thehive/hive-logo.png
 tags: [Security Automation]
 ---
 **INSTALLING THEHIVE ON CENTOS**
