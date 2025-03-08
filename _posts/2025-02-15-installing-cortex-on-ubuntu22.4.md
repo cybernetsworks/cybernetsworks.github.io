@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Installing cortex on Ubuntu22.4"
+title:  "Installing cortexx on Ubuntu22.4"
 author: Snowdiamond
 categories: [ Security Automation]
 image: /assets/images/centos/centos-7-logo.png
