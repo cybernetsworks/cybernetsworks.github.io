@@ -3,7 +3,7 @@ layout: post
 title:  "Installing CentOS vm on VirtualBox"
 author: Snowdiamond
 categories: [ Security Automation]
-image: /assets/images/centos/centos-7-logo.jpg
+image: /assets/images/centos/centos-7-logo.png
 tags: [Security Automation]
 ---
 **INSTALLING CENTOS ON VIRTUALBOX**
