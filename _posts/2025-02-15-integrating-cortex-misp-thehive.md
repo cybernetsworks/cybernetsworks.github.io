@@ -19,7 +19,7 @@ STEPS
 
 - [Install theHive on an Ubuntu22.04 server](https://cybernetsworks.github.io/installing-thehive-on-ubuntu22.4/)
 - [Install cortex on an Ubuntu22.04 server](https://cybernetsworks.github.io/installing-cortex-on-ubuntu22.4/)
-- Install MISP on an Ubuntu24.04 server or [Download]() a prebuilt VM 
+- [Install MISP on an Ubuntu24.04](https://cybernetsworks.github.io/install-misp-on-ubuntu22.4/) a prebuilt VM 
 
 **INTEGRATION**
 
@@ -61,7 +61,7 @@ Create an Auth Key
 ```
 Click on the view icon at the righthand side of the user
 ```
-!["Auth key"](/assets/images/misp/Authkey-1.png)
+!["Auth key"](/assets/images/misp/AuthKey-1.png)
 
 ```
 Click on "Auth Keys"
@@ -134,7 +134,7 @@ Click "reveal" to see the API Key
 
 **INTEGRATION ON THEHIVE**
 
-**Add Cortex Integration to thehive configuration** file
+**Add Cortex Integration to thehive configuration file** 
 
 Enter this comand
 ```
@@ -159,27 +159,26 @@ cortex {
  ]
 }
 ```
-Restart thehive
-
-```
-sudo systemctl restart thehive
-```
-Verify the Integration on thehive dashboard.
-
-```
-Click "Platform Management" icon
-Click on licence 
-```
-!["Cortex-integration](/assets/images/cortex/cortex-integrated-verification-1.png)
-
-```
-Click on "connector"
-Click on cortex
-```
-
-Verify the presence of the server
-
-!["cortex-integration](/assets/images/coretex/cortex-integrated-verification-2.png)
 
 **Add MISP Integration**
-To avoid error on the MISP due to certificate error. We have to enable trust all certificate
+```
+play.modules.enabled += org.thp.thehive.connector.misp.MispModule
+misp {
+ interval: 1 hour
+ Servers: [
+    {
+        name = "MISP" 
+        url =  "<cortex ip address/>"
+        auth {
+            type =  "bearer"
+            key =  "<put the generated key here>"
+        }
+        wsConfig {}
+            wsConfig.ssl.loose.acceptAnyCertificate: true
+            tags = ["misp"]
+            caseTemplate = "MISP-EVENT"
+    }
+ ]
+}
+```
+
