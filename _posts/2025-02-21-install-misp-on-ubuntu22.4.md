@@ -3,7 +3,7 @@ layout: post
 title:  "Installing MISP on Ubuntu22.4"
 author: Snowdiamond
 categories: [ Security Automation]
-image: /assets/images/misp/misp-logo.png
+image: assets/images/misp/misp-logo.png
 tags: [Security Automation]
 ---
 **INSTALLING MISP ON UBUNTU 22.4**
