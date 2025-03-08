@@ -181,4 +181,11 @@ misp {
  ]
 }
 ```
+Confirm Both MISP and Cortex Integration
 
+```
+Login to Hive dashboard
+Click on the Username at the top right corner
+Click about
+```
+!["Integration confirmed"](/assets/images/thehive/integration-confirmation.png)
