@@ -12,7 +12,7 @@ tags: [Security Automation]
 
 NOTE: This is an instruction for installing miniaml CentOS version 7.9.
 
-Download Minimal CentOs 7.9  [HERE](https://vault.centos.org/7.9.2009/isos/x86_64/setting-up-an-ubuntu-server-vm/).
+Download Minimal CentOs 7.9  [HERE](https://vault.centos.org/7.9.2009/isos/x86_64/).
 
 **IMPORTANT**
 The resource allocation might vary depended on intended use. This will be used for running thehive4 later. So we are allocating enough resources for that purpose.
