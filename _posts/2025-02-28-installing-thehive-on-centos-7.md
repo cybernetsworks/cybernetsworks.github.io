@@ -23,7 +23,7 @@ NOTE: This is an instruction for installing TheHive on CentOS.
 
 **STEPS**
 
-["CentOS VM Installation"](CentOS VM Installation)
+["CentOS VM Installation"](https://cybernetsworks.github.io/installing-centos-vm/)
 
 JAVA INSTALLATION
 
