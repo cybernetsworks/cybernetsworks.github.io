@@ -17,7 +17,7 @@ STEPS
 
 **VM SETUP**
 
-- [Install theHive on an Ubuntu22.04 server](https://cybernetsworks.github.io/installing-thehive-on-ubuntu22.4/)
+- [Install theHive4 on CentOS](https://cybernetsworks.github.io/installing-thehive-on-centos-7/)
 - [Install cortex on an Ubuntu22.04 server](https://cybernetsworks.github.io/installing-cortex-on-ubuntu22.4/)
 - [Install MISP on an Ubuntu24.04](https://cybernetsworks.github.io/install-misp-on-ubuntu22.4/) a prebuilt VM 
 
