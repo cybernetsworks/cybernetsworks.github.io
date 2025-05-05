@@ -130,7 +130,7 @@ Click "Create API Key"
 ```
 Click "reveal" to see the API Key
 ```
-!["Cortex-API-Key"](/assets/images/cortex/user-api-2.png)
+!["Cortex-API-Key"](/assets/images/cortex/cortex-user-api-2.png)
 
 **INTEGRATION ON THEHIVE**
 
