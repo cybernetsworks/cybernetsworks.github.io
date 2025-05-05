@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Integrating Cortex and MISP with Thehive"
+title:  "Integrating Cortex with MISP"
 author: Snowdiamond
 categories: [ Security Automation]
 image: /assets/images/cortex/cortex-logo.jpg
