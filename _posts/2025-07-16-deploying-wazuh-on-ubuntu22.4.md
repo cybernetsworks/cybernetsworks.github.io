@@ -35,7 +35,7 @@ Click ![Here]() for instruction on how to install Ubuntu server.
 
 **WAZUH SERVER INSTALLATION**
 
-Server Node Installations
+Server Node Installationss
 
 ```
 echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
