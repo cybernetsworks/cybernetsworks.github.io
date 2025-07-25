@@ -28,9 +28,9 @@ The installation stage consists of three important stages.
 Click ![Here]() for instruction on how to install Ubuntu server.
 
 **STEPS** 
-- [Wazuh Indexer Installation]()
-- [Wazuh Server Installation]()
-- [Wazuh Dashboard Installation]()
+- [Wazuh Indexer Installation](https://cybernetsworks.github.io/installing-wazuh-indexer/)
+- [Wazuh Server Installation](https://cybernetsworks.github.io/installing-wazuh-server/)
+- [Wazuh Dashboard Installation](https://cybernetsworks.github.io/installing-wazuh-dashboard/)
 
 
 **WAZUH SERVER INSTALLATION**
