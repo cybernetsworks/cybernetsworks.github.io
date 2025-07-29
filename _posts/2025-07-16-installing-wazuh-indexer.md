@@ -25,7 +25,7 @@ curl -sO https://packages.wazuh.com/4.12/config.yml
 ```
 sudo nano ./config.yml
 ```
-["Wazuh"](/assets/images/wazuh/indexer-config.png)
+!["Wazuh"](/assets/images/wazuh/indexer-config.png)
 
 Save the configuration using 
 
