@@ -25,7 +25,7 @@ According to the Wazuh documentation, an environment with 80 workstations, 10 se
 **INSTALLATION PROCESS**
 The installation stage consists of three important stages.
 
-Click ![Here](https://cybernetsworks.github.io/setting-up-an-ubuntu-server-vm/) for instruction on how to install Ubuntu server.
+Click [Here](https://cybernetsworks.github.io/setting-up-an-ubuntu-server-vm/) for instruction on how to install Ubuntu server.
 
 **STEPS** 
 - [Wazuh Indexer Installation](https://cybernetsworks.github.io/installing-wazuh-indexer/)
