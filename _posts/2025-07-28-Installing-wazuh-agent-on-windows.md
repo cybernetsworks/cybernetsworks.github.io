@@ -43,5 +43,40 @@ Using this method requires three steps
 !["Wazuh"](/assets/images/wazuh/agent-start-confirmation-windows.png)
 
 **CLI**
+This method follows two steps 
+
+**STEP ONE:** Download the installer using the link to the official Wazuh website provided above
+
+**STEP TWO:** Installation
+There are two available installation methods.
+
+**METHOD ONE:** USING CMD
+
+- Press the *windows key* on the keyboard
+- Type *cmd*
+- Run the program as administrator by clicking *Run as administrator*
+- Navigate to the folder where the downloaded installer is stored
+
+example: If the file is in the download folder, you can navigate the folder using the below command. Replace *Username* with your pc username.
+
+!["wazuh"](/assets/images/wazuh/cmd-install-1.png)
+
+- Enter the below command to run the installer
+```
+wazuh-agent-4.12.0-1.msi /q WAZUH_MANAGER="IP ADDRESS"
+```
+**NOTE:** Insert the wazuh manager ip address where "IP ADDRESS" is written.
+
+**METHOD TWO:** USING POWERSHELL
+- Press the *windows key* on the keyboard
+- Type *powershell*
+- Run the program as administrator by clicking *Run as administrator*
+- Navigate to the folder where the downloaded installer is stored. **Follow the navigation step used in the cmd terminal**
+- Enter the below command to run the installer
+
+```
+.\wazuh-agent-4.12.0-1.msi /q WAZUH_MANAGER="IP ADDRESS"
+```
+**NOTE:** Insert the wazuh manager ip address where "IP ADDRESS" is written.
 
 ENJOY !!!

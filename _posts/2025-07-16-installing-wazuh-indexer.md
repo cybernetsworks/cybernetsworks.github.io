@@ -35,10 +35,10 @@ press "y"
 press "enter"
 ```
 
-- Run the * ./wazuh-certs-tool.sh* script for certificate creation by typing
+- Run the * ./wazuh-certs-tool.sh* script for certificate creation by typing. run as root
 
 ```
-bash ./wazuh-certs-tools.sh -A
+sudo bash ./wazuh-certs-tools.sh -A
 ```
 - Compress the following files into a tar file
 
