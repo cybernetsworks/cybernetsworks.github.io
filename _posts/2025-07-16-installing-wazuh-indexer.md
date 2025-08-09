@@ -11,6 +11,14 @@ This is a scalable full-text search engine tat functions to provide advanced sec
 
 **INSTALLATION PROCESS**
 
+**IMPORTANT:** For easy installation, please login as a root user.
+
+This is achievable using the command 
+
+```
+sudo su
+```
+
 **STEP ONE:** Certificate Creation
 
 - Download the wazuh-certs-tool.sh script and the config.yml
@@ -23,7 +31,7 @@ curl -sO https://packages.wazuh.com/4.12/config.yml
 - Edit *config.yml* file 
 
 ```
-sudo nano ./config.yml
+nano ./config.yml
 ```
 !["Wazuh"](/assets/images/wazuh/indexer-config.png)
 
@@ -38,7 +46,7 @@ press "enter"
 - Run the * ./wazuh-certs-tool.sh* script for certificate creation by typing. run as root
 
 ```
-sudo bash ./wazuh-certs-tools.sh -A
+bash ./wazuh-certs-tools.sh -A
 ```
 - Compress the following files into a tar file
 
@@ -53,18 +61,18 @@ tar -xf wazuh-certificates.tar
 
 - Make a dir in *etc*
 ```
-sudo mkdir -p /etc/wazuh-certificates/
+mkdir -p /etc/wazuh-certificates/
 ```
 
 - Move the extracted files into these created directory
 
 ```
-sudo mv wazuh-certificates/* /etc/wazuh-certificates/
+mv wazuh-certificates/* /etc/wazuh-certificates/
 ```
 **NOTE:**If you get an error because the files were not compressed into a folder, move the files using this command 
 
 ```
-sudo mv *.pem root-ca.key /etc/wazuh-certificates/
+mv *.pem root-ca.key /etc/wazuh-certificates/
 ```
 **NOTE:** The *root-ca.key* doesn't need to be used in wazuh config files but keeping it secured is important so changing the permission is advisable 
 
@@ -78,20 +86,18 @@ sudo chown root:root /etc/wazuh-certificates/root-ca.key
 - Install the package dependencies 
 
 ```
-sudo apt-get install debconf adduser procps
+apt-get install debconf adduser procps
 ```
 
 - Add the Wazuh repository
 
 ```
-sudo apt-get install gnupg apt-transport-https
+apt-get install gnupg apt-transport-https
 ```
 - Install the GPG key
 
-**NOTE:** You need to be a root user for this to work. you might still face issues even if you run the command using *sudo*
-
 ```
-sudo curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg
+curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg
 ```
 
 - Add the repository
@@ -100,25 +106,24 @@ echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4
 ```
 - Update the packages information
 ```
-sudo apt-get update
+apt-get update
 ```
 
 **STEP THREE:** Wazuh Indexer Installation
 
 - Run the Installation
 ```
-sudo apt-get -y install wazuh-indexer
+apt-get -y install wazuh-indexer
 ```
 
 - Wazuh Indexer Configuration
 
-**NOTE:** This is a single node installation.
 **NOTE:** This is a single node installation so there won't be need to copy the certificate to different nodes. Instead it will be extracted and kept in a safe location.
 
 - Edit the opensearch.yml
 
 ```
-sudo nano /etc/wazuh-indexer/opensearch.yml
+nano /etc/wazuh-indexer/opensearch.yml
 ```
 
 !["Wazuh"](/assets/images/wazuh/opensearch.png)
@@ -143,7 +148,7 @@ Create *certs* directory in the *wazuh-indexer* directory
 ```
 mkdir /etc/wazuh-indexer/certs
 ```
-Compress and move the content of wazuh-certificates 
+Extract the content of *certificate.tar* and move it to */etc/wazuh-indexer/certs/* 
 
 ```
 tar -xf ./wazuh-certificates.tar -C /etc/wazuh-indexer/certs/ ./$NODE_NAME.pem ./$NODE_NAME-key.pem ./admin.pem ./admin-key.pem ./root-ca.pem
@@ -153,6 +158,13 @@ tar -xf ./wazuh-certificates.tar -C /etc/wazuh-indexer/certs/ ./$NODE_NAME.pem .
 ```
 tar -xf ./wazuh-certificates.tar -C /etc/wazuh-indexer/certs/ ./node-1.pem ./node-1-key.pem ./admin.pem ./admin-key.pem ./root-ca.pem
 ```
+
+**NOTE:** If you run into an error during this process, navigate to the *wazuh-certificates* directory and copy the files to */etc/wazuh-indexer/certs/* using this command
+
+```
+cp *.pem root-ca.key /etc/wazuh-indexer/certs/
+```
+
 Rename *$NODE_NAME.pem and $NODE_NAME-key* to *indexer.pem and indexer-key.pem*
 
 ```
@@ -167,35 +179,38 @@ chmod 500 /etc/wazuh-indexer/certs
 chmod 400 /etc/wazuh-indexer/certs/*
 chown -R wazuh-indexer:wazuh-indexer /etc/wazuh-indexer/certs
 ```
+
 - Enable and Start the Indexer
 
 ```
-sudo systemctl daemon-reload
-sudo systemctl enable wazuh-indexer
-sudo systemctl start wazuh-indexer
+systemctl daemon-reload
+systemctl enable wazuh-indexer
+systemctl start wazuh-indexer
 ```
+
 - Disable Wazuh Updates
 
 ```
-sudo sed -i "s/^deb /#deb /" /etc/apt/sources.list.d/wazuh.list
+sed -i "s/^deb /#deb /" /etc/apt/sources.list.d/wazuh.list
 ```
 - Run Update
 
 ```
-sudo apt update
+apt update
 ```
 
 - Cluster Initialization
 
 ```
-sudo /usr/share/wazuh-indexer/bin/idexer-security-init.sh
+/usr/share/wazuh-indexer/bin/idexer-security-init.sh
 ```
+
 - Test the Cluster Installation
 
 ```
 curl -k -u admin:admin https://<WAZUH_INDEXER_IP_ADDRESS>:9200
 ```
-["Wazuh"](/assets/images/wazuh/test-output.png)
+!["Wazuh"](/assets/images/wazuh/test-output.png)
 
 Test node and clusters are working
 
@@ -208,4 +223,4 @@ In this situation, mine will be
 curl -k -u admin:admin https://192.168.3.1:9200/_cat/nodes?v
 ```
 
-["Wazuh"](/assets/images/wazuh/node-check-result.png)
+!["Wazuh"](/assets/images/wazuh/node-check-result.png)
