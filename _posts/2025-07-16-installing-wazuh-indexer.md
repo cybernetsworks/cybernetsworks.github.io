@@ -48,40 +48,41 @@ press "enter"
 ```
 bash ./wazuh-certs-tools.sh -A
 ```
-- Compress the following files into a tar file
+!["wazuh"](/assets/images/wazuh/cert-creation.png)
+
+- Compress the required files into a tar file
 
 ```
 tar -cvf ./wazuh-certificates.tar
 ```
-- Extract the compressed file 
+- Extract the compressed file
 
 ```
 tar -xf wazuh-certificates.tar
 ```
-
-- Make a dir in *etc*
+- Create a directory in */etc* to securely keep the files for later access/use
 ```
 mkdir -p /etc/wazuh-certificates/
 ```
-
-- Move the extracted files into these created directory
-
+- Move the extracted files into the created directory
 ```
 mv wazuh-certificates/* /etc/wazuh-certificates/
 ```
-**NOTE:**If you get an error because the files were not compressed into a folder, move the files using this command 
+**NOTE:** If you get an error because the files were not compressed into a folder, move the files using this command 
 
 ```
 mv *.pem root-ca.key /etc/wazuh-certificates/
+
 ```
 **NOTE:** The *root-ca.key* doesn't need to be used in wazuh config files but keeping it secured is important so changing the permission is advisable 
 
+- Ensure proper permission
 ```
-sudo chmod 600 /etc/wazuh-certificates/root-ca.key
-sudo chown root:root /etc/wazuh-certificates/root-ca.key
+chmod 600 /etc/wazuh-certificates/*
+chown root:root /etc/wazuh-certificates/*
 ```
 
-**STEP TWO:** Packages (Node) Installation
+**STEP TWO:** Packages (Nodes) Installation
 
 - Install the package dependencies 
 
@@ -90,24 +91,23 @@ apt-get install debconf adduser procps
 ```
 
 - Add the Wazuh repository
+    - Install missing packages 
+    ```
+    apt-get install gnupg apt-transport-https
+    ```
+    - Install the GPG key
 
-```
-apt-get install gnupg apt-transport-https
-```
-- Install the GPG key
-
-```
-curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg
-```
-
-- Add the repository
-```
-echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
-```
-- Update the packages information
-```
-apt-get update
-```
+    ```
+    curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg
+    ```
+    - Add the repository
+    ```
+    echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
+    ```
+    - Update the packages information
+    ```
+    apt-get update
+    ```
 
 **STEP THREE:** Wazuh Indexer Installation
 
