@@ -20,11 +20,11 @@ sudo apt update
 
 **STEP TWO:** Suricata Installation
 
-![Installing Suricata](https://cybernetsworks.github.io/Installing-suricata-on-ubuntu24/)
+["Installing Suricata"](https://cybernetsworks.github.io/Installing-suricata-on-ubuntu24/)
 
 **STEP THREE:** Wazuh Client Installation
 
-![Installing Wazuh Client on Linux](https://cybernetsworks.github.io/Installing-wazuh-agent-on-linux/)
+["Installing Wazuh Client on Linux"](https://cybernetsworks.github.io/Installing-wazuh-agent-on-linux/)
  
 **STEP FOUR:** Suricata Logging Configuration
 

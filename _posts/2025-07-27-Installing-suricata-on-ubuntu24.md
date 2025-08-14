@@ -83,6 +83,7 @@ sudo systemctl enable suricata
 ```
 
 **STEP FOUR:** Start Suricata
+
 **NOTE:** To prevent “No rule files match” error follow the below steps before starting the service
 
 - Run Suricata Update
@@ -118,6 +119,7 @@ This command runs suricata in test mode (-T), allow the detection of configurati
 !["suricata"](/assets/images/suricata/suricata-test-check.png)
 
 - Confirm that suricata can see traffic from endpoints 
+
 **NOTE:** All traffics from the endpoints must be route through suricata for it to see them.
 
 On the server running the suricata, enter the below command
