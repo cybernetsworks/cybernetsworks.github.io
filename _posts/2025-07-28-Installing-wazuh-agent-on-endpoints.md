@@ -15,8 +15,8 @@ Wazuh agent acts as a link that permits communication between an endpoint and th
 **INSTALLATION PROCESS**
 
 **STEPS** 
-- [Windows](https://cybernetsworks.github.io/installing-wazuh-agent-on-windows/)
-- [Linux](https://cybernetsworks.github.io/installing-wazuh-agent-on-linux/)
+- [Windows](https://cybernetsworks.github.io/Installing-wazuh-agent-on-windows/)
+- [Linux](https://cybernetsworks.github.io/Installing-wazuh-agent-on-linux/)
 
 [Setting up wazuh agents on endpoints]()
 
