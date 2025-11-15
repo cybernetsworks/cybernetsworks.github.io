@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Setting Up an Ubuntu Server Gateway Router"
-author:  Snowdiamond
+author:  wisdom
 categories: [ Jekyll, post ]
 image: assets/images/ubuntu-server-image.jpeg
 tags: Networking
