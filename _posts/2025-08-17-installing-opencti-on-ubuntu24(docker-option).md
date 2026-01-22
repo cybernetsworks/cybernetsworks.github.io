@@ -66,6 +66,7 @@ sudo apt update
 **STEP TWO:** Docker Compose Installation (If not already present)
 
 - Certificate Installation
+
 ```
 sudo apt update
 sudo apt install -y ca-certificates curl gnupg
