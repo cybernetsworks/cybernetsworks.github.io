@@ -98,7 +98,7 @@ sudo reboot
 mkdir opencti
 ```
 
-**STEP THREE:** Navigate to the director and clone opencti repository.
+**STEP FOUR:** Navigate to the director and clone opencti repository.
 
 ```
 cd opencti
