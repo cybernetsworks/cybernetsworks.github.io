@@ -17,7 +17,8 @@ Minimum Requirement (For Testing)
 - Testing and very small datasets
 - Limited connector usage
 - Elasticsearch/OpenSearch running with small heap
-**This might have the consequences of UI appearing slow.**
+
+This might have the consequences of UI appearing slow.
 ```
 
 ```
@@ -50,20 +51,21 @@ Recommended Minimum (For Efficient Operation)
 
 **INSTALLATION PROCESS**
 
-**NOTE:** This installation process assumes you already have an ubuntu server installed and running. if not see Here on how to install an Ubuntu server
+**NOTE:** This installation process assumes you already have an ubuntu server installed and running. if not see Here on how to install an Ubuntu server.
 
 - System update
 - Install docker and docker compose if not already present
-- Configure system limit
+- 
 - Install OpenCTI
 
 
-**STEP ONE:** Run an update
-- System update
+**STEP ONE:** System Update
 ```
 sudo apt update
 ```
-- Install docker compose if not present yet.
+**STEP TWO:** Docker Compose Installation (If not already present)
+
+- Certificate Installation
 ```
 sudo apt update
 sudo apt install -y ca-certificates curl gnupg
@@ -72,12 +74,16 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o 
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
+```
+- system update
+```
 sudo apt update
-
+```
+- Docker compose installation
+```
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
-- Verify Installation
+- Installation Verification
 ```
 docker --version
 docker compose version.
@@ -87,12 +93,12 @@ docker compose version.
 sudo usermod -aG docker $USER
 sudo reboot
 ```
-**STEP TWO:** Creat OpenCTI directory 
+**STEP THREE:** Creat OpenCTI directory 
 ```
 mkdir opencti
 ```
 
-**STEP THREE:** Navigate to the director and clone opencti repository.
+**STEP FOUR:** Navigate to the director and clone opencti repository.
 
 ```
 cd opencti
