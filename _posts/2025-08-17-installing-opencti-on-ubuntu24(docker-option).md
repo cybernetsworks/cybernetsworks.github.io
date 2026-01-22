@@ -136,7 +136,7 @@ docker compose up -d
 ```
 On your Ubuntu Desktop, access the OpenCTI dashboard using http://openctiip:8080
 ```
-**Adding Connector (AlienVault)**
+**Adding a Connector (AlienVault)**
 
 ```
 - Navigate to the [Opencti github repository]()
