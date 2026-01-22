@@ -94,6 +94,7 @@ docker compose version.
 sudo usermod -aG docker $USER
 sudo reboot
 ```
+
 **STEP THREE:** Creat OpenCTI directory 
 ```
 mkdir opencti
@@ -106,7 +107,7 @@ cd opencti
 git clone https://github.com/OpenCTI-Platform/docker.git
 ```
 
-**STEP FOUR:** Environment Configuration
+**STEP FIVE:** Environment Configuration
 
 - Copy the sample environment for editing
 ```
@@ -119,12 +120,11 @@ sudo nano .env
 ```
 - Edit the following configuration
 ```
-MINIO_ROOT_PASSWORD
-RABBITMQ_DEFAULT_PASS
-OPENCTI_ADMIN_PASSWORD
+MINIO_ROOT_PASSWORD - Add a password of your choice
+RABBITMQ_DEFAULT_PASS - Add a password of your choice
+OPENCTI_ADMIN_PASSWORD - Add a password of your choice
 OPENCTI_ADMIN_TOKEN (Generate the token using online uuid generator [Online uuid](https://www.uuidgenerator.net/version4))
 OPENCTI_HEALTHCHECK_ACCESS_KEY (Use one of the connector id provided)
-
 ```
 
 **STEP FIVE:** Run the container
