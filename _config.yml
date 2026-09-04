@@ -1,6 +1,6 @@
 # Site
 name: 'Cybernetswork'
-description: 'Mundana is a free Jekyll theme for awesome people like you, Medium like.'
+description: Beyond reading, build stacks applicable in real-world scenarios.'
 logo: 'assets/images/logo.png'
 favicon: 'assets/images/favicon.ico'
 baseurl: ''
@@ -20,7 +20,7 @@ plugins:
   
 authors:
     wisdom:
-      name:           Wisdom
+      name:           Cybernetswork
       site:           https://www.wowthemes.net
       avatar:         /assets/images/avatar1.jpg
       #bio:            "Hi, I am Sal, the author of Mundana, the theme you're currently previewing. I hope you like it!"
@@ -43,7 +43,7 @@ defaults:
       path: "_posts"
     values:
       layout: post
-      author: sal
+      author: Cybernetswork
       avatar: /assets/images/avatar1.jpg
       
   # all pages
@@ -51,8 +51,23 @@ defaults:
       path: "_pages"
     values:
       layout: page
-      
-# Syntax
+  
+  # all IAM lessons
+  - scope:
+      path: ""
+      type: iam
+    values:
+      layout: post
+      author: Cybernetswork
+      avatar: /assets/images/avatar1.jpg
+
+# Collections
+collections: 
+  iam:
+    output: true
+    permalink: /iam/:title/
+
+
 markdown: kramdown
 highlighter: rouge
 
