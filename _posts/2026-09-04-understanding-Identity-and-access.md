@@ -6,6 +6,7 @@ categories: [Jekyll, post]
 image: assets/images/active-directory/ad.png
 tags: [IAM]
 ---
+
 **Introduction**
 
 Have you ever wondered how everything seems to work so smoothly when you join a new organisation?
