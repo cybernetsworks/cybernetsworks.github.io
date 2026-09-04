@@ -2,9 +2,9 @@
 layout: post
 title: "Identity Before Detection: Designing IAM for Wire Finance"
 author: Cybernetswork
-categories: [Jekyll, post]
+categories: [IAM]
 image: assets/images/active-directory/ad.png
-tags: [IAM]
+tags: [iam]
 ---
 
 **Introduction**
