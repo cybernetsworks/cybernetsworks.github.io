@@ -57,7 +57,7 @@ defaults:
       path: ""
       type: iam
     values:
-      layout: post
+      layout: lesson
       author: Cybernetswork
       avatar: /assets/images/avatar1.jpg
 

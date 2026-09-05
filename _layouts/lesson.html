@@ -1,0 +1,46 @@
+---
+layout: post
+---
+
+{{ content }}
+
+{% assign lessons = site.iam | where: "series", page.series | sort: "chapter" %}
+
+{% assign current_index = nil %}
+
+{% for lesson in lessons %}
+  {% if lesson.url == page.url %}
+    {% assign current_index = forloop.index0 %}
+  {% endif %}
+{% endfor %}
+
+{% if current_index != nil %}
+
+  {% assign previous_index = current_index | minus: 1 %}
+  {% assign next_index = current_index | plus: 1 %}
+
+  <hr>
+
+  <div class="lesson-navigation">
+
+    <div>
+      {% if current_index > 0 %}
+        {% assign previous_lesson = lessons[previous_index] %}
+        ← <a href="{{ previous_lesson.url | relative_url }}">
+          {{ previous_lesson.title }}
+        </a>
+      {% endif %}
+    </div>
+
+    <div>
+      {% if next_index < lessons.size %}
+        {% assign next_lesson = lessons[next_index] %}
+        <a href="{{ next_lesson.url | relative_url }}">
+          {{ next_lesson.title }}
+        </a> →
+      {% endif %}
+    </div>
+
+  </div>
+
+{% endif %}
