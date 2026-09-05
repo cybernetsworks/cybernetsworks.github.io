@@ -6,41 +6,43 @@ layout: post
 
 {% assign lessons = site.iam | where: "series", page.series | sort: "chapter" %}
 
-{% assign current_index = nil %}
+{% assign previous_lesson = nil %}
+{% assign next_lesson = nil %}
+{% assign found_current = false %}
 
 {% for lesson in lessons %}
-  {% if lesson.url == page.url %}
-    {% assign current_index = forloop.index0 %}
+
+  {% if found_current %}
+    {% assign next_lesson = lesson %}
+    {% break %}
   {% endif %}
+
+  {% if lesson.url == page.url %}
+    {% assign found_current = true %}
+  {% else %}
+    {% assign previous_lesson = lesson %}
+  {% endif %}
+
 {% endfor %}
 
-{% if current_index != nil %}
+<hr>
 
-  {% assign previous_index = current_index | minus: 1 %}
-  {% assign next_index = current_index | plus: 1 %}
+<div class="lesson-navigation" style="display:flex; justify-content:space-between; gap:20px; margin-top:30px;">
 
-  <hr>
-
-  <div class="lesson-navigation">
-
-    <div>
-      {% if current_index > 0 %}
-        {% assign previous_lesson = lessons[previous_index] %}
-        ← <a href="{{ previous_lesson.url | relative_url }}">
-          {{ previous_lesson.title }}
-        </a>
-      {% endif %}
-    </div>
-
-    <div>
-      {% if next_index < lessons.size %}
-        {% assign next_lesson = lessons[next_index] %}
-        <a href="{{ next_lesson.url | relative_url }}">
-          {{ next_lesson.title }}
-        </a> →
-      {% endif %}
-    </div>
-
+  <div class="lesson-previous">
+    {% if previous_lesson %}
+      ← <a href="{{ previous_lesson.url | relative_url }}">
+        {{ previous_lesson.title }}
+      </a>
+    {% endif %}
   </div>
 
-{% endif %}
+  <div class="lesson-next" style="text-align:right;">
+    {% if next_lesson %}
+      <a href="{{ next_lesson.url | relative_url }}">
+        {{ next_lesson.title }}
+      </a> →
+    {% endif %}
+  </div>
+
+</div>
