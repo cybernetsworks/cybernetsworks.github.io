@@ -1,5 +1,5 @@
 ---
-layout: lesson
+layout: post
 title: "Welcome to Wire Finance"
 chapter: 1
 series: wire-finance
