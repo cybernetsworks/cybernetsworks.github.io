@@ -22,7 +22,7 @@ In this series, we'll pull back the curtain and explore how it all comes togethe
 {% assign lessons = site.iam | |where: "series", "wire-finance" | sort: "chapter" %}
 
 {% for lesson in lessons %}
-# [{{ lesson.title }}]({{ lesson.url | relative_url }})
+#### [{{ lesson.title }}]({{ lesson.url | relative_url }})
 
 {{ lesson.description }}
 
