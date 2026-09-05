@@ -7,8 +7,6 @@ author: Cybernetswork
 description: Meet Wire Finance and discover the environment we will build and secure throughout this journey.
 ---
 
-**Welcome to Wire Finance**
-
 Wire Finance is a fictional professional and financial services organisation created as a practical environment for exploring modern identity, security, and cloud operations.
 
 With 25 employees working across Finance, HR, Operations, Sales, and IT, the company operates from a single office while also supporting remote workers. Its technology environment is built around Microsoft 365 and Azure, with Microsoft Entra ID providing the initial identity foundation, alongside Intune, Microsoft Defender, and Microsoft Sentinel for endpoint management, threat protection, monitoring, and security operations.
@@ -24,3 +22,4 @@ And like any real organisation, it all starts with one important question:
 That question will shape how we design identities, assign permissions, manage privileged access, onboard and offboard employees, secure devices, and eventually monitor the environment for suspicious activity.
 
 As we build Wire Finance, we will follow those decisions from design through implementation and into security operations — understanding not just **how** to configure the technology, but **why** each decision matters.
+
