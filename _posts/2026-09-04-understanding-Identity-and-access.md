@@ -15,7 +15,10 @@ You arrive on your first day, you're handed a company device, given your login d
 
 But behind that seemingly simple experience is a much bigger story involving identity, access, roles, permissions, devices, authentication, and security.
 
-In this series, we'll pull back the curtain and explore how it all comes together as we build the identity foundation for Wire Finance — our fictional organisation — from the ground up.      [Read More](https://www.vmware.com/topics/network-sandbox)
+In this series, we'll pull back the curtain and explore how it all comes together as we build the identity foundation for Wire Finance — our fictional organisation — from the ground up.      
+
+
+[Welcome to Wire Finance](https://learning.cybernetswork.com/iam/welcome-to-wire-finance)
 
 **Wire Finance**
 
