@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "Welcome to Wire Finance"
-Chappter: 1
-Series: wire-finance
+chapter: 1
+series: wire-finance
 author: Cybernetswork
 description: Meet Wire Finance and discover the environment we will build and secure throughout this journey.
 ---
