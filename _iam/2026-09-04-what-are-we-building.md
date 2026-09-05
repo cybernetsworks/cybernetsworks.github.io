@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: lesson
 title: "What are we Building"
 chapter: 2
 series: wire-finance
