@@ -19,10 +19,11 @@ In this series, we'll pull back the curtain and explore how it all comes togethe
 
 **Follow the Wire Finance Journey**
 
-{% assign lessons = site.iam | |where: "series", "wire-finance" | sort: "chapter" %}
+{% assign lessons = site.iam | where: "series", "wire-finance" | where: "show_on_master", true | sort: "chapter" %}
 
 {% for lesson in lessons %}
-#### [{{ lesson.title }}]({{ lesson.url | relative_url }})
+
+### [{{ lesson.title }}]({{ lesson.url | relative_url }})
 
 {{ lesson.description }}
 

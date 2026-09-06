@@ -3,6 +3,7 @@ layout: lesson
 title: "Company Profile"
 chapter: 3
 series: wire-finance
+show_on_master: true
 author: Cybernetswork
 image: assets/images/active-directory/profile.png
 description: Meet the people, departments, technologies, and operating model that will shape every security decision inside Wire Finance.
@@ -76,3 +77,5 @@ The challenge is therefore not simply to create user accounts.
 It is to create an identity and access model that can answer a much more important question:
 
 **Who should have access to what — and why?**
+
+Answering that question is where identity design really begins. In the next lesson, we’ll look at how Wire Finance approaches **Identity and Access Management Design.**
