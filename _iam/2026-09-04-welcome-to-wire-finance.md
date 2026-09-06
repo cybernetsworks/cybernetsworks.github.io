@@ -3,6 +3,7 @@ layout: lesson
 title: "Welcome to Wire Finance"
 chapter: 1
 series: wire-finance
+show_on_master: true
 author: Cybernetswork
 image: assets/images/active-directory/welcome.png
 description: Meet Wire Finance and discover the environment we will build and secure throughout this journey.

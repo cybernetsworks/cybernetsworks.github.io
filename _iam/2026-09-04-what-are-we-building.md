@@ -3,6 +3,7 @@ layout: lesson
 title: "What are we Building"
 chapter: 2
 series: wire-finance
+show_on_master: true
 author: Cybernetswork
 image: assets/images/active-directory/building.png
 description: Discover how Wire Finance will evolve from an identity foundation into a connected security environment spanning endpoints, cloud, monitoring, detection, and incident response.
