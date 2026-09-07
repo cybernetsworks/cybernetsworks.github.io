@@ -4,13 +4,35 @@ layout: post
 
 {{ content }}
 
-{% assign lessons = site.iam | where: "series", page.series | sort: "chapter" %}
+{% if page.parent %}
+
+  {% assign nav_items = site.iam
+    | where: "series", page.series
+    | where: "parent", page.parent
+    | sort: "order"
+  %}
+
+  {% assign parent_page = site.iam
+    | where: "series", page.series
+    | where: "nav_id", page.parent
+    | first
+  %}
+
+{% else %}
+
+  {% assign nav_items = site.iam
+    | where: "series", page.series
+    | where: "show_on_master", true
+    | sort: "chapter"
+  %}
+
+{% endif %}
 
 {% assign previous_lesson = nil %}
 {% assign next_lesson = nil %}
 {% assign found_current = false %}
 
-{% for lesson in lessons %}
+{% for lesson in nav_items %}
 
   {% if found_current %}
     {% assign next_lesson = lesson %}
@@ -26,6 +48,16 @@ layout: post
 {% endfor %}
 
 <hr>
+
+{% if page.parent and parent_page %}
+
+<div style="margin-bottom: 25px;">
+  <a href="{{ parent_page.url | relative_url }}">
+    ← Back to {{ parent_page.title }}
+  </a>
+</div>
+
+{% endif %}
 
 <div class="lesson-navigation" style="display:flex; justify-content:space-between; gap:20px; margin-top:30px;">
 
