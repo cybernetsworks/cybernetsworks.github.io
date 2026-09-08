@@ -4,7 +4,7 @@ title: "Identity and Access Management"
 chapter: 4
 series: wire-finance
 show_on_master: true
-nav_id: iam_design
+nav_id: iam-design
 children_heading: "Explore the IAM Design"
 author: Cybernetswork
 image: assets/images/active-directory/profile.png
