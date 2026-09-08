@@ -42,6 +42,7 @@ Wire Finance therefore begins organising access around something much more stabl
 This is where groups become important.
 
 ---
+
 ##### Start With the Organisation
 
 Before we create groups, we first need to understand how Wire Finance is structured.
@@ -72,7 +73,7 @@ That structure gives us our first clue about how access should be organised.
 
 ---
 
-## Department Groups
+#### Department Groups
 
 Wire Finance represents each department with its own security group.
 
@@ -107,7 +108,7 @@ If another Finance employee joins later, we do not need to recreate Olivia's per
 
 We can place the new employee into the appropriate group and allow the access model to do the rest.
 
-## Groups Have Different Purposes
+##### Groups Have Different Purposes
 
 Department groups are only one part of the design.
 
@@ -139,7 +140,7 @@ They begin to represent the structure, responsibilities, devices, and deployment
 
 ---
 
-## Department Is Not the Same as Role
+##### Department Is Not the Same as Role
 
 This distinction is important.
 
@@ -177,7 +178,7 @@ But we still need to decide **what access those groups should actually provide**
 
 ---
 
-## Device Groups
+#### Device Groups
 
 People are not the only objects that need organisation.
 
@@ -200,7 +201,7 @@ These groups will become particularly useful when Wire Finance begins implementi
 
 ---
 
-## Pilot Groups
+#### Pilot Groups
 
 Some changes are too important to deploy to the entire organisation immediately.
 
@@ -229,7 +230,7 @@ This gives Wire Finance a controlled way to introduce changes and observe their 
 
 ---
 
-## Licensing Groups
+#### Licensing Groups
 
 Wire Finance also defines groups for organising licences and services.
 
@@ -253,7 +254,7 @@ That difference becomes increasingly valuable as the environment grows.
 
 ---
 
-## From Groups to Entitlements
+#### From Groups to Entitlements
 
 At this point, the Wire Finance identity model is beginning to develop several layers.
 

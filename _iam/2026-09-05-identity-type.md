@@ -38,6 +38,8 @@ Before Wire Finance can decide **who should have access to what**, we first need
 
 The important thing here is that these identities may exist inside the same organisation, but they do not serve the same purpose and should not automatically be treated the same way.
 
+---
+
 ##### Standard User Identity
 
 The standard user identity is the account an employee uses for normal day-to-day work.
@@ -129,6 +131,8 @@ Wire Finance therefore recognises **Workload Identities**, such as:
 These identities allow applications and automation to operate without pretending to be a human user.
 
 As the Wire Finance environment grows, workload identities will become increasingly important because cloud services, scripts, automation, and integrations will all need controlled ways to access resources.
+
+---
 
 ##### Why Separate Identity Types?
 

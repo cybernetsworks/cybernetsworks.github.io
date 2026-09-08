@@ -4,48 +4,144 @@ layout: post
 
 {{ content }}
 
+{% assign collection_items = site[page.collection] %}
+
+{% assign major_items = collection_items
+  | where: "series", page.series
+  | where: "show_on_master", true
+  | sort: "chapter"
+%}
+
+{% assign parent_page = nil %}
+{% assign previous_lesson = nil %}
+{% assign next_lesson = nil %}
+
 {% if page.parent %}
 
-  {% assign nav_items = site.iam
+  {% assign sibling_items = collection_items
     | where: "series", page.series
     | where: "parent", page.parent
     | sort: "order"
   %}
 
-  {% assign parent_page = site.iam
+  {% assign parent_page = collection_items
     | where: "series", page.series
     | where: "nav_id", page.parent
     | first
   %}
 
+  {% assign found_current = false %}
+
+  {% for lesson in sibling_items %}
+
+    {% if found_current %}
+      {% assign next_lesson = lesson %}
+      {% break %}
+    {% endif %}
+
+    {% if lesson.url == page.url %}
+      {% assign found_current = true %}
+    {% else %}
+      {% assign previous_lesson = lesson %}
+    {% endif %}
+
+  {% endfor %}
+
+  {% if previous_lesson == nil and parent_page %}
+    {% assign previous_lesson = parent_page %}
+  {% endif %}
+
+  {% if next_lesson == nil and parent_page %}
+
+    {% assign found_parent = false %}
+
+    {% for lesson in major_items %}
+
+      {% if found_parent %}
+        {% assign next_lesson = lesson %}
+        {% break %}
+      {% endif %}
+
+      {% if lesson.url == parent_page.url %}
+        {% assign found_parent = true %}
+      {% endif %}
+
+    {% endfor %}
+
+  {% endif %}
+
 {% else %}
 
-  {% assign nav_items = site.iam
-    | where: "series", page.series
-    | where: "show_on_master", true
-    | sort: "chapter"
-  %}
+  {% assign found_current = false %}
+
+  {% for lesson in major_items %}
+
+    {% if found_current %}
+      {% assign next_lesson = lesson %}
+      {% break %}
+    {% endif %}
+
+    {% if lesson.url == page.url %}
+      {% assign found_current = true %}
+    {% else %}
+      {% assign previous_lesson = lesson %}
+    {% endif %}
+
+  {% endfor %}
+
+  {% if page.nav_id %}
+
+    {% assign child_items = collection_items
+      | where: "series", page.series
+      | where: "parent", page.nav_id
+      | sort: "order"
+    %}
+
+    {% if child_items.size > 0 %}
+      {% assign next_lesson = child_items | first %}
+    {% endif %}
+
+  {% endif %}
 
 {% endif %}
 
-{% assign previous_lesson = nil %}
-{% assign next_lesson = nil %}
-{% assign found_current = false %}
+{% if page.nav_id %}
 
-{% for lesson in nav_items %}
+  {% assign sections = collection_items
+    | where: "series", page.series
+    | where: "parent", page.nav_id
+    | sort: "order"
+  %}
 
-  {% if found_current %}
-    {% assign next_lesson = lesson %}
-    {% break %}
+  {% if sections.size > 0 %}
+
+    <hr>
+
+    <h4>
+      {% if page.children_heading %}
+        {{ page.children_heading }}
+      {% else %}
+        Explore This Chapter
+      {% endif %}
+    </h4>
+
+    {% for section in sections %}
+
+      <h5>
+        <a href="{{ section.url | relative_url }}">
+          {{ section.title }}
+        </a>
+      </h5>
+
+      {% if section.description %}
+        <p>{{ section.description }}</p>
+      {% endif %}
+
+    {% endfor %}
+
   {% endif %}
 
-  {% if lesson.url == page.url %}
-    {% assign found_current = true %}
-  {% else %}
-    {% assign previous_lesson = lesson %}
-  {% endif %}
-
-{% endfor %}
+{% endif %}
 
 <hr>
 

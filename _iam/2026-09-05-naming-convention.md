@@ -86,6 +86,8 @@ The names begin to tell their own story.
 
 This becomes increasingly useful as the environment expands and the same systems begin appearing in management portals, security alerts, logs, investigations, and administrative tools.
 
+---
+
 #### Why Define This Before Implementation?
 
 The important point is not simply that the names look tidy.
