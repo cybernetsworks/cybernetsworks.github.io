@@ -1,7 +1,7 @@
 ---
 layout: lesson
 title: "Identity Lifecycle"
-chapter: 5
+chapter: 6
 series: wire-finance
 show_on_master: true
 nav_id: identity-lifecycle
