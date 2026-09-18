@@ -1,7 +1,7 @@
 ---
 layout: lesson
 title: "Entra ID Implementation"
-chapter: 6
+chapter: 7
 series: wire-finance
 author: Cybernetswork
 image: assets/images/active-directory/entra.png

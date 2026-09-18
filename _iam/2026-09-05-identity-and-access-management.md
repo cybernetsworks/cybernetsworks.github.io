@@ -1,7 +1,7 @@
 ---
 layout: lesson
 title: "Identity and Access Management"
-chapter: 4
+chapter: 5
 series: wire-finance
 show_on_master: true
 nav_id: iam-design
