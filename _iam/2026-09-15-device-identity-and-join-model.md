@@ -152,7 +152,7 @@ Microsoft Intune becomes the management platform.
 
 This gives Wire Finance a cloud-native device foundation without requiring on-premises Active Directory during the first phase.
 
-![Wire Finance Device Identity and Join Model]({{ '/assets/images/device-management/device_identity_join_model.png' | relative_url }})
+![Wire Finance Device Identity and Join Model]({{ '/assets/images/device_identity_join_model.png' | relative_url }})
 
 #### Microsoft Entra Device States
 

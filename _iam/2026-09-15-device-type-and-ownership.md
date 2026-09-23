@@ -54,7 +54,7 @@ Assigned for a Defined Purpose
 Managed Through Microsoft Intune
 ```
 
-![Wire Finance Managed Endpoint Journey]({{ '/assets/images/device-management/managed_endpoint_journey.png' | relative_url }})
+![Wire Finance Managed Endpoint Journey]({{ '/assets/images/managed_endpoint_journey.png' | relative_url }})
 
 The important idea is that a device does not become trusted simply because it appears inside Microsoft Entra ID or Microsoft Intune.
 
