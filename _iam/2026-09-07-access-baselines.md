@@ -3,580 +3,391 @@ layout: lesson
 title: "Access Baselines"
 series: wire-finance
 parent: iam-design
-order: 5
-description: Access at Wire Finance is built in layers. Every employee starts with a common foundation, then receives additional access based on where they work and what they actually do.
+order: 4
+description: Access at Wire Finance is built in layers. Every employee starts with a common foundation, then receives additional access based on where they work, what they do, and any separately approved requirements
 ---
 
 We have organised Wire Finance into departments, roles, and security groups.
 
 Now those groups need to mean something.
 
-Being placed into `SG-DEPT-FINANCE-USERS` tells us that someone belongs to Finance.
+Being a member of `SG-DEPT-FINANCE-USERS` tells us that someone belongs to Finance.
 
-Being placed into `SG-ROLE-SOC-ANALYST` tells us that someone performs the SOC Analyst role.
+Being a member of `SG-ROLE-SOC-ANALYST` tells us that someone performs the SOC Analyst role.
 
-But neither group is useful until we define **what access membership should actually provide**.
+But neither group is useful until we define **what access that relationship should actually provide**.
 
 This is where Wire Finance introduces **access baselines**.
 
-Rather than building permissions separately for every employee, access is constructed in layers:
+Instead of designing permissions separately for every employee, normal access is built in layers.
+
+```text
+Effective Access
+=
+Company Baseline
++ Department Baseline
++ Role Baseline
++ Approved Exceptions
+```
+
+Privileged administrative access is deliberately kept outside this formula and authorised separately.
 
 ![Wire Finance Access Entitlement Flow]({{ '/assets/images/active-directory/access_entitlement_flow.png' | relative_url }})
 
----
-#### Company-Wide Baseline
-The first layer applies to everyone.
+### What Is an Access Baseline?
+
+An access baseline defines the access that should normally exist because of a known business relationship.
+
+For example:
+
+- every employee needs certain company-wide services
+- Finance employees need Finance resources
+- a Finance Analyst needs resources specific to financial analysis
+- some employees may require additional access that falls outside their normal role
+
+Each layer answers a different question.
+
+```text
+What does every employee need?
+        ↓
+Company Baseline
+
+Where does the employee work?
+        ↓
+Department Baseline
+
+What does the employee do?
+        ↓
+Role Baseline
+
+Do they need something outside the normal model?
+        ↓
+Approved Exception
+```
+
+The objective is not to give users as much access as possible.
+
+It is to make **normal access predictable, explainable, and reviewable**.
+
+> These baselines describe the intended Wire Finance access model. Individual services, applications, policies, and permissions are implemented and validated separately as the environment is built.
+
+### Company-Wide Baseline
+
+The first layer applies to the normal Wire Finance workforce.
 
 Wire Finance defines this as:
 
 `WF-BASE-001 – Standard Employee Baseline`
 
-Regardless of whether someone works in Finance, HR, Operations, Sales, or IT, every employee begins with the same basic foundation.
+The group representing this relationship is:
+
+`SG-BASE-ALL-STAFF`
+
+Regardless of whether someone works in Finance, HR, Operations, Sales, or IT, every standard employee begins with the same foundation.
 
 | Access Area | Standard Employee Baseline |
 |---|---|
 | **Identity** | Named Microsoft Entra user account |
-| **Account Type** | Standard User |
-| **Authentication** | MFA required |
-| **Productivity** | Outlook, Teams, Office |
-| **Collaboration** | Company-wide SharePoint and intranet resources |
+| **Account Type** | Standard user |
+| **Authentication** | MFA required as part of the security baseline |
+| **Productivity** | Standard Microsoft 365 productivity services |
+| **Collaboration** | Approved company-wide collaboration resources |
 | **General Company Resources** | Employee-wide resources only |
-| **Department Resources** | Granted through department baseline |
-| **Role-Specific Resources** | Granted through role baseline |
-| **Additional or Sensitive Access** | Requires separate approval |
+| **Department Resources** | Added through department baseline |
+| **Role-Specific Resources** | Added through role baseline |
+| **Sensitive or Exceptional Access** | Requires separate approval |
 | **Privileged Access** | None by default |
 | **Local Administrator Rights** | None by default |
 
-The purpose of `WF-BASE-001` is to give every employee enough access to function as part of Wire Finance without assuming anything about their department or job role.
+The purpose of `WF-BASE-001` is to give an employee what they need simply because they work for Wire Finance.
 
-An employee receives a named identity, standard productivity tools, company-wide collaboration resources, and MFA as part of that common starting point.
-
-But the baseline also establishes clear boundaries.
-
-Being an employee does **not** automatically provide access to departmental resources, sensitive information, privileged systems, or local administrator rights.
-
-Those permissions must come from another layer of the access model.
-
-So whether the employee is Olivia in Finance, Maya in HR, Noah in Sales, or Taylor in IT, they all begin here:
+It deliberately makes no assumption about their department, job function, or administrative responsibilities.
 
 ```text
 Employee
+   │
+   ▼
+SG-BASE-ALL-STAFF
    │
    ▼
 WF-BASE-001
 Standard Employee Baseline
 ```
----
-#### Department Access Baseline
 
-The company-wide baseline gives every Wire Finance employee the same starting point.
+Olivia in Finance, Maya in HR, Noah in Sales, and Taylor in IT all begin here.
 
-The next layer adds access based on **where the employee works**.
+Being an employee does **not** automatically provide access to departmental data, sensitive systems, privileged services, or administrator rights.
 
-Wire Finance defines a separate baseline for Finance, HR, Operations, Sales, and IT so that employees receive the resources normally required by their department without automatically inheriting access to everything else.
+Those relationships must be established separately.
 
-##### Finance Department Baseline
+### Department Access Baselines
 
-**Group:** `SG-DEPT-FINANCE-USERS`
+The next layer answers:
 
-| Access Area | Finance Baseline |
-|---|---|
-| **Company baseline** | Included |
-| **Finance Teams workspace** | Member access |
-| **Finance SharePoint** | Standard departmental access |
-| **Finance documents** | Standard departmental resources |
-| **Finance applications** | Approved general Finance applications |
-| **Finance data** | Access limited to department-appropriate information |
-| **Payment processing** | Not included by default |
-| **Payroll information** | Not included by default |
-| **HR resources** | No access |
-| **IT administrative resources** | No access |
+**Where does the employee work?**
 
-The Finance baseline provides the resources normally required to work within the department, but it deliberately stops before more sensitive activities are introduced.
+Wire Finance maintains a baseline for each department.
 
-Being a member of Finance does not automatically provide payment-processing authority or access to payroll information.
+| Department | Group | Standard Department Access | Not Included Automatically |
+|---|---|---|---|
+| **Finance** | `SG-DEPT-FINANCE-USERS` | Finance collaboration, documents, and approved departmental resources | Payment authority, payroll administration, privileged access |
+| **HR** | `SG-DEPT-HR-USERS` | HR collaboration, recruitment, and approved employee-information resources | Payroll administration, Finance resources, privileged access |
+| **Operations** | `SG-DEPT-OPERATIONS-USERS` | Operational collaboration, workflows, and approved customer-processing resources | Sensitive financial systems, privileged access |
+| **Sales** | `SG-DEPT-SALES-USERS` | Sales collaboration, customer/account resources, and approved sales tools | Finance administration, HR resources, privileged access |
+| **IT** | `SG-DEPT-IT-USERS` | IT collaboration, technical documentation, and service-management resources | Administrative roles, security administration, privileged systems |
 
-Those requirements need to be justified separately.
+The important word here is **baseline**.
 
-##### Human Resources Department Baseline
+A department baseline provides the resources normally associated with working in that department.
 
-**Group:** `SG-DEPT-HR-USERS`
+It does not grant every capability that might exist within that business area.
 
-| Access Area | HR Baseline |
-|---|---|
-| **Company baseline** | Included |
-| **HR Teams workspace** | Member access |
-| **HR SharePoint** | Standard departmental access |
-| **Recruitment resources** | Standard HR access |
-| **Employment information** | Access according to job responsibility |
-| **Payroll administration** | Not included by default |
-| **Finance resources** | No access |
-| **IT administrative resources** | No access |
+#### Finance Example
 
-HR employees need access to information that would be inappropriate for most of the organisation, particularly employee and recruitment information.
-
-But even within HR, access still has limits.
-
-Payroll administration is not included simply because someone belongs to the HR department.
-
-##### Operations Department Baseline
-
-**Group:** `SG-DEPT-OPERATIONS-USERS`
-
-| Access Area | Operations Baseline |
-|---|---|
-| **Company baseline** | Included |
-| **Operations Teams workspace** | Member access |
-| **Operations SharePoint** | Standard departmental access |
-| **Operational workflow resource** | Standard access |
-| **Customer-processing resources** | Access according to operational responsibility |
-| **Finance resources** | No access |
-| **HR resources** | No access |
-| **IT administrative resources** | No access |
-
-Operations employees receive the collaboration and workflow resources needed to support day-to-day business activity.
-
-Where customer-processing information is involved, access is determined by the employee's operational responsibility rather than department membership alone.
-
-##### Sales Department Baseline
-
-**Group:** `SG-DEPT-SALES-USERS`
-
-| Access Area | Sales Baseline |
-|---|---|
-| **Company baseline** | Included |
-| **Sales Teams workspace** | Member access |
-| **Sales SharePoint** | Standard departmental access |
-| **Sales applications** | Standard sales tools |
-| **Customer and account information** | Access according to sales responsibility |
-| **Finance administration** | No access |
-| **HR resources** | No access |
-| **IT administrative resources** | No access |
-
-Sales employees receive the tools and customer information required to perform their responsibilities.
-
-But access to customer and account information is still linked to what the employee is responsible for rather than treating the entire department as one unrestricted access boundary.
-
-##### IT Department Baseline
-
-**Group:** `SG-DEPT-IT-USERS`
-
-| Access Area | IT Department Baseline |
-|---|---|
-| **Company baseline** | Included |
-| **IT Teams workspace** | Member access |
-| **IT SharePoint** | Standard departmental access |
-| **Technical documentation** | Standard IT access |
-| **Service-management resources** | Standard access |
-| **Administrative privileges** | Not granted through department membership |
-| **Security administration** | Not granted through department membership |
-| **Privileged systems** | Requires separate privileged access assignment |
-
-The IT baseline makes one of the most important boundaries in the design explicit:
-
-**Working in IT does not automatically make someone an administrator.**
-
-Membership of `SG-DEPT-IT-USERS` provides access to the resources needed to operate as a member of the IT department.
-
-Administrative privileges, security administration, and access to privileged systems remain separate.
-
-That keeps departmental membership from becoming a shortcut to elevated access.
-
-Across all five departments, the same pattern appears.
-
-Department membership provides **standard departmental access**, but it does not automatically provide every permission associated with that area of the business.
-
-Finance does not automatically receive payment authority.
-
-HR does not automatically receive payroll administration.
-
-Operations and Sales only receive information appropriate to their responsibilities.
-
-IT membership does not automatically provide administrative privileges.
-
-A department therefore tells us **where someone works**.
-
-It still does not completely tell us **what they do**.
-
-Two employees can belong to the same department and require very different access because their job functions are different.
-
-That brings us to the third layer of the access model:
-
----
-#### Role Access Baselines
-
-A department tells us **where someone works**.
-
-A role tells us **what they actually do**.
-
-Wire Finance therefore uses role access baselines to provide additional entitlements based on an employee's specific job function.
-
-These permissions build on the company-wide and department baselines rather than replacing them.
+Olivia Carter belongs to Finance.
 
 ```text
-Employee
-   │
-   ▼
-Company-Wide Baseline
-   │
-   ▼
-Department Baseline
-   │
-   ▼
-Role Access Baseline
+Olivia Carter
+        │
+        ▼
+SG-BASE-ALL-STAFF
+        │
+        ▼
+SG-DEPT-FINANCE-USERS
 ```
 
-##### Finance Analyst
+Her Finance membership provides the normal resources required to work within the department.
 
-**Role ID:** `WF-ROLE-FIN-ANL-001`  
-**Group:** `SG-ROLE-FINANCE-ANALYST`
+It does **not** automatically provide payment-processing authority.
 
-| Field | Baseline |
-|---|---|
-| **Department** | Finance |
-| **Company baseline** | Required |
-| **Department baseline** | Finance |
-| **Default Applications** | Outlook, Teams, Office |
-| **Finance resources** | Standard Finance resources |
-| **Role-specific resources** | Finance analyst resources |
-| **Sensitive data** | Financial records within approved scope |
-| **Payment authority** | Not included |
-| **Privileged access** | None |
-| **Access owner** | Finance manager |
-| **Additional approval** | Required for sensitive financial systems |
-
-The Finance Analyst role adds the resources needed for financial analysis while keeping more sensitive capabilities outside the normal baseline.
-
-Access to financial records is limited to the approved scope, payment authority is not included, and sensitive financial systems require additional approval.
-
-##### HR Manager
-
-**Role ID:** `WF-ROLE-HR-MGR-001`  
-**Group:** `SG-ROLE-HR-MANAGER`
-
-| Field | Baseline |
-|---|---|
-| **Department** | Human Resources |
-| **Company baseline** | Required |
-| **Department baseline** | HR |
-| **Default Applications** | Outlook, Teams, Office |
-| **HR resources** | Standard HR resources |
-| **Employee records** | Access within approved responsibility |
-| **Payroll processing** | Separate approval required |
-| **Privileged access** | None |
-| **Access owner** | HR manager |
-
-The HR Manager role provides access to employee records within approved responsibilities.
-
-But even here, the role has boundaries.
-
-Payroll processing is not automatically included simply because someone manages HR resources. It requires separate approval.
-
-##### Operations Specialist
-
-**Role ID:** `WF-ROLE-OPS-SPEC-001`  
-**Group:** `SG-ROLE-OPERATIONS-SPECIALIST`
-
-| Field | Baseline |
-|---|---|
-| **Department** | Operations |
-| **Company baseline** | Required |
-| **Department baseline** | Operations |
-| **Default Applications** | Outlook, Teams, Office |
-| **Operations resources** | Standard operational resources |
-| **Customer-processing systems** | Access within assigned responsibilities |
-| **Sensitive financial systems** | No access by default |
-| **Privileged access** | None |
-| **Access owner** | Operations manager |
-
-The Operations Specialist receives access to the operational resources needed for the role, including customer-processing systems within assigned responsibilities.
-
-Sensitive financial systems remain outside the baseline.
-
-##### Sales Representative
-
-**Role ID:** `WF-ROLE-SALES-REP-001`  
-**Group:** `SG-ROLE-SALES-REPRESENTATIVE`
-
-| Field | Baseline |
-|---|---|
-| **Department** | Sales |
-| **Company baseline** | Required |
-| **Department baseline** | Sales |
-| **Default Applications** | Outlook, Teams, Office |
-| **Sales resources** | Standard Sales resources |
-| **Customer information** | Access within assigned accounts |
-| **Finance administration** | No access |
-| **HR resources** | No access |
-| **Privileged access** | None |
-| **Access owner** | Sales manager |
-
-The Sales Representative role provides access to standard Sales resources and customer information associated with assigned accounts.
-
-It does not extend into Finance administration, HR resources, or privileged access.
-
----
-
-##### IT Administrator
-
-**Group:** `SG-ROLE-IT-ADMIN`
-
-The IT Administrator role works slightly differently.
-
-The employee's standard account receives the normal company-wide baseline together with standard IT departmental resources.
-
-Administrative permissions are **not** added to that normal productivity account.
-
-Instead, administrative activity requires a separate privileged identity.
+That distinction matters because:
 
 ```text
-IT Administrator
-      │
-      ├── Standard Account
-      │      └── Company + IT departmental access
-      │
-      └── Privileged Identity
-             └── Approved IT administration
+Works in Finance
+        ≠
+Authorised to process payments
 ```
 
-This allows the employee to perform normal day-to-day work without carrying administrative privileges everywhere they go.
+#### IT Example
 
-##### SOC Analyst
+The same principle becomes even more important in IT.
 
-**Group:** `SG-ROLE-SOC-ANALYST`
+Membership of:
 
-The SOC Analyst's standard account provides access to normal company and IT collaboration resources.
+`SG-DEPT-IT-USERS`
 
-Security investigation and response permissions are assigned separately to the analyst's approved privileged identity.
+means someone belongs to the IT department.
+
+It does **not** automatically make that employee an administrator.
 
 ```text
-SOC Analyst
-    │
-    ├── Standard Account
-    │      └── Company + IT collaboration
-    │
-    └── Privileged Identity
-           └── Security investigation
-               and response permissions
+Works in IT
+        ≠
+Has administrative privilege
 ```
 
-The role describes Taylor's security responsibilities, but those responsibilities do not turn the everyday account into a privileged account.
+Administrative authority remains separately controlled.
 
-##### Deployment / Support Engineer
+Across all departments, the principle is the same:
 
-**Group:** `SG-ROLE-ENDPOINT-ADMIN`
+**department membership tells us where someone works, but not everything they are authorised to do.**
 
-The Deployment / Support Engineer also begins with normal employee and IT departmental access.
+### Role Access Baselines
 
-Endpoint-management or deployment privileges are assigned separately through the employee's privileged administrative identity.
+The third layer answers:
 
-```text
-Deployment / Support Engineer
-            │
-            ├── Standard Account
-            │      └── Company + IT departmental access
-            │
-            └── Privileged Identity
-                   └── Endpoint and deployment
-                       administration
-```
+**What does the employee actually do?**
 
-Again, the job may require elevated capability, but the normal account remains separate from the identity used to perform privileged tasks.
+Two employees can belong to the same department and still require different access because their responsibilities are different.
 
-##### Head of Security Operations
+Wire Finance therefore uses role groups alongside department groups.
 
-**Group:** `SG-ROLE-SECURITY-LEADERSHIP`
+| Role | Group | Role-Specific Access | Key Boundary |
+|---|---|---|---|
+| **Finance Analyst** | `SG-ROLE-FINANCE-ANALYST` | Approved financial-analysis resources and financial records within scope | Payment authority not included |
+| **HR Manager** | `SG-ROLE-HR-MANAGER` | Employee and HR-management information within approved responsibility | Payroll processing requires separate approval |
+| **Operations Specialist** | `SG-ROLE-OPERATIONS-SPECIALIST` | Operational and customer-processing resources within assigned responsibility | Sensitive financial systems excluded |
+| **Sales Representative** | `SG-ROLE-SALES-REPRESENTATIVE` | Sales resources and customer information within assigned responsibility | Finance and HR administration excluded |
+| **IT Administrator** | `SG-ROLE-IT-ADMIN` | Represents the IT administration job function | Administrative privilege is separately authorised |
+| **SOC Analyst** | `SG-ROLE-SOC-ANALYST` | Represents security investigation and response responsibilities | Everyday account does not automatically become privileged |
+| **Deployment / Support Engineer** | `SG-ROLE-ENDPOINT-ADMIN` | Represents endpoint deployment and support responsibilities | Endpoint administration is separately authorised |
+| **Head of Security Operations** | `SG-ROLE-SECURITY-LEADERSHIP` | Represents security leadership responsibilities | Elevated security administration remains separately authorised |
 
-The Head of Security Operations uses a standard account for normal business and security collaboration.
+A role group describes a person's **business responsibility**.
 
-Elevated security administration is performed only through a separate privileged account and approved administrative role assignments.
+It does not necessarily grant administrative authority directly.
 
-```text
-Head of Security Operations
-           │
-           ├── Standard Account
-           │      └── Business + security collaboration
-           │
-           └── Privileged Identity
-                  └── Approved elevated
-                      security administration
-```
+That distinction is particularly important for the IT team.
 
-This preserves the same separation we established earlier in the IAM design:
+Taylor Reed may be a SOC Analyst.
 
-**normal work happens through a normal identity, while privileged activity happens through a deliberately separate privileged identity.**
+Casey Ng may be responsible for endpoint deployment.
 
----
+Alex Morgan may work as an IT Administrator.
 
-#### Putting the Baselines Together
+Jordan Lee may lead Security Operations.
 
-We can now see how normal access is built for an employee.
+Their job functions explain **why** elevated capability may eventually be required.
 
-Take Olivia Carter, our Finance Analyst.
+They do not mean those capabilities should automatically exist on their everyday employee identities.
+
+### Putting the Baselines Together
+
+Take Olivia Carter.
+
+Olivia is a Finance Analyst.
+
+Her normal access can be understood as a series of relationships:
 
 ```text
 Olivia Carter
       │
       ▼
-WF-BASE-001
-Company-Wide Baseline
+Company Baseline
+SG-BASE-ALL-STAFF
       │
       ▼
 Finance Department Baseline
+SG-DEPT-FINANCE-USERS
       │
       ▼
 Finance Analyst Role Baseline
+SG-ROLE-FINANCE-ANALYST
 ```
 
-Each layer adds access for a different reason.
+Each layer exists for a different reason.
 
-The **company-wide baseline** provides what Olivia needs simply because she is an employee.
+The **company baseline** provides what Olivia needs because she is an employee.
 
-The **Finance department baseline** adds the resources normally required by someone working in Finance.
+The **Finance department baseline** adds what she normally needs because she works in Finance.
 
-The **Finance Analyst role baseline** adds the resources required to perform her specific job.
+The **Finance Analyst role baseline** adds what she needs because of the job she performs.
 
-The same pattern applies throughout Wire Finance:
+This creates a predictable definition of normal access.
+
+Instead of asking:
+
+**What permissions should we manually give Olivia?**
+
+we can ask:
 
 ```text
-Employee
-   │
-   ├── What does every employee need?
-   │      └── Company-Wide Baseline
-   │
-   ├── Where does the employee work?
-   │      └── Department Baseline
-   │
-   └── What job does the employee perform?
-          └── Role Access Baseline
+Is she an employee?
+        ↓
+Company baseline
+
+Where does she work?
+        ↓
+Finance baseline
+
+What does she do?
+        ↓
+Finance Analyst baseline
 ```
 
-The result is a predictable definition of **normal access**.
+The access model becomes easier to understand because every entitlement has a reason.
 
-Instead of deciding permissions from scratch for every employee, Wire Finance now has a structured way to understand what access should normally exist and why it exists.
+### Exception Access
 
-But not every legitimate access requirement will fit neatly into one of these three baselines.
+Not every legitimate access requirement will fit neatly into the normal company, department, and role baselines.
 
-An employee may occasionally need access to a sensitive resource, application, or dataset that falls outside their normal company, department, or role entitlements.
+An employee may occasionally need:
 
-And when access falls outside the baseline, it should not simply be added and forgotten.
-
-That raises our next question:
-
-**How should Wire Finance handle exceptional or sensitive access that sits outside the normal access model?**
-
-#### Wire Finance Exception Access
-
-The company, department, and role baselines define what **normal access** should look like.
-
-But legitimate access requirements will not always fit neatly inside those predefined boundaries.
-
-An employee may need temporary access to a sensitive resource, additional information for a specific piece of work, or access that falls outside what their normal role would usually provide.
+- access to a sensitive resource
+- additional information for a specific piece of work
+- temporary access outside their normal responsibilities
+- a business capability deliberately excluded from their baseline
 
 Wire Finance treats this as **exception access**.
 
-![Wire Finance IAM Design]({{ '/assets/images/active-directory/access_exception_flow.png' | relative_url }})
+![Wire Finance Exception Access Flow]({{ '/assets/images/active-directory/access_exception_flow.png' | relative_url }})
 
-The goal is not to prevent legitimate access.
+Exception access does not mean bypassing the access model.
 
-It is to make sure that access outside the normal baseline has a clear reason, appropriate approval, an identified owner, and a point at which it should be reviewed.
+It means deliberately recording why additional access is required.
 
-##### Exception Access Requirements
+Wire Finance uses the naming convention:
 
-**Exception Group Naming:** `SG-EXCEPTION-*`
+`SG-EXCEPTION-*`
 
-| Requirement | Required |
+One example is:
+
+`SG-EXCEPTION-PAYMENT-PROCESSING`
+
+This exists because being a Finance employee or Finance Analyst does not automatically mean someone should be allowed to process payments.
+
+```text
+Finance Employee
+        ↓
+Finance Baseline
+
+Finance Analyst
+        ↓
+Finance Analyst Baseline
+
+Approved Payment Authority
+        ↓
+SG-EXCEPTION-PAYMENT-PROCESSING
+```
+
+The additional capability is visible as a separate decision rather than silently becoming part of the employee's normal role.
+
+### Exception Access Requirements
+
+Access outside the normal baseline should have enough information to explain why it exists.
+
+| Requirement | Expected |
 |---|---|
-| **User requesting access** | Yes |
-| **Requested resources** | Yes |
+| **User requiring access** | Yes |
+| **Requested resource or capability** | Yes |
 | **Business justification** | Yes |
 | **Manager approval** | Yes |
-| **Application or data owner approval** | Yes |
+| **Resource or data owner approval** | Where applicable |
 | **Security review** | When required |
 | **Start date** | Yes |
 | **Expiry or review date** | Yes |
-| **Ticket or request reference** | Yes |
+| **Request or ticket reference** | Yes |
 | **Access owner** | Yes |
 
 This gives Wire Finance something the normal baselines cannot provide:
 
-**accountability for access that sits outside the expected model.**
+**accountability for access outside the expected model.**
 
-If someone receives exceptional access, we should be able to answer:
+For every exception, we should be able to answer:
 
-- Who requested it?
-- What resource was requested?
-- Why was it required?
+- Who received the access?
+- What did they receive?
+- Why was it needed?
 - Who approved it?
-- Who owns the access?
+- Who owns the access decision?
 - When should it be reviewed or removed?
 
-That last question matters.
+That final question is particularly important.
 
-Without an expiry or review point, temporary access has a habit of becoming permanent access simply because nobody returns to remove it.
+Temporary access that has no expiry or review point can quietly become permanent access simply because nobody returns to remove it.
 
-Exception access therefore remains possible — but it should never become invisible.
+Exception access therefore remains possible, but it should never become invisible.
 
----
+### The Wire Finance Access Formula
 
-#### Wire Finance Privileged Access Principles
+We can now express normal employee access using a simple model:
 
-Exception access deals with permissions outside the normal baseline.
+```text
+Effective Access
+=
+Company Baseline
++ Department Baseline
++ Role Baseline
++ Approved Exceptions
+```
 
-Privileged access goes a step further.
-
-It gives an identity the ability to administer, configure, investigate, or otherwise affect the environment itself.
-
-Throughout the Wire Finance IAM design, we have deliberately kept those capabilities separate from normal productivity accounts.
-
-![Wire Finance IAM Design]({{ '/assets/images/active-directory/privileged_access_flow.png' | relative_url }})
-
-An IT Administrator may need to manage the tenant.
-
-A SOC Analyst may need investigation and response permissions.
-
-A Deployment / Support Engineer may need endpoint and Intune administration.
-
-The Head of Security Operations may require controlled high-level security administration.
-
-But those responsibilities do not mean their everyday accounts should carry those privileges.
-
-##### Privileged Role Separation
-
-**Privileged Access Group Convention:** `PAG-*`
-
-Example:
-
-`PAG-ENTRA-SECURITY-READER`
-
-| Role | Expected Privileged Area |
-|---|---|
-| **Head of Security Operations** | Security leadership and controlled high-level security administration |
-| **IT Administrator** | Tenant and approved IT administration |
-| **SOC Analyst** | Security investigation and response |
-| **Deployment / Support Engineer** | Endpoint and Intune administration |
-
-The principle is straightforward:
-
-**normal work happens through a normal identity, while privileged activity happens through a deliberately separate privileged identity.**
-
-This gives Wire Finance a much clearer separation between being an employee and acting with administrative authority.
-
----
-
-#### The Access Model Is Now Defined
-
-We started with security groups that told us where people belonged and what roles they performed.
-
-Now those groups have meaning.
-
-Wire Finance can build access through a predictable series of layers:
+Or visually:
 
 ```text
 Employee
    │
    ▼
-Company-Wide Baseline
+Company Baseline
    │
    ▼
 Department Baseline
@@ -585,42 +396,75 @@ Department Baseline
 Role Baseline
    │
    ▼
-Exception / Sensitive Access
-   │
-   ▼
-Privileged Access
-   where separately required
+Approved Exception
+   only when justified
 ```
 
 The first three layers define **normal access**.
 
-Exception access handles justified requirements outside that normal model.
+The fourth layer handles legitimate requirements outside that normal model.
 
-Privileged access remains deliberately separated for activities that require elevated authority.
+There is one category deliberately missing from this formula:
 
-We now have a way to answer the question that has followed us throughout the IAM design:
+**privileged administrative access.**
+
+Privileged access is different because it allows an identity to administer, configure, investigate, or otherwise affect the environment itself.
+
+Wire Finance therefore does not treat privileged authority as simply another employee entitlement.
+
+```text
+Normal Employee Access
+=
+Company
++ Department
++ Role
++ Approved Exceptions
+
+Privileged Access
+=
+Separately authorised
+```
+
+This preserves one of the most important principles in the Wire Finance IAM design:
+
+**having a job that requires administration is not the same thing as carrying administrative privilege everywhere.**
+
+### The Access Model Is Now Defined
+
+We began with groups that described relationships.
+
+Now those relationships have meaning.
+
+Wire Finance can explain normal access by asking four questions:
+
+```text
+Does the person work for Wire Finance?
+        ↓
+Company Baseline
+
+Where do they work?
+        ↓
+Department Baseline
+
+What do they do?
+        ↓
+Role Baseline
+
+Do they have an approved requirement outside the normal model?
+        ↓
+Exception Access
+```
+
+That gives us a structured answer to the question that has followed the IAM design from the beginning:
 
 **Who should have access to what — and why?**
 
-But there is one problem left.
+But administrative authority still needs stronger treatment.
 
-Access cannot remain static.
+We know that some Wire Finance employees will need to manage identities, endpoints, security services, or even recover the tenant when normal administration fails.
 
-People join Wire Finance.
+Those capabilities should not simply be added to the normal access model.
 
-They change roles.
+The next part of the IAM design therefore asks:
 
-They move between departments.
-
-Their responsibilities change.
-
-And eventually, they leave.
-
-A well-designed access model only works if access changes when the person does.
-
-So the next challenge becomes:
-
-**How should Wire Finance manage an identity throughout its entire lifecycle?**
-
-**["Identity Lifecycle"](https://learning.cybernetswork.com/_iam/identity-lifecycle)**
-
+**How should Wire Finance control privileged and emergency access?**

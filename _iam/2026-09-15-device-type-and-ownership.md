@@ -11,64 +11,63 @@ Identity is not the only thing Wire Finance needs to control.
 
 Employees work through devices.
 
-Administrators use devices to perform privileged actions.
+Administrators use devices to perform privileged activity.
 
-Security teams need devices for testing.
+IT and Security need devices for testing changes safely.
 
 Infrastructure services run on their own systems.
 
-And some older technologies may need to exist temporarily without being trusted like normal corporate endpoints.
+And some older technologies may need to exist temporarily without being treated like normal trusted corporate endpoints.
 
-Before we decide how devices are joined, enrolled, grouped, or secured, we first need to answer two questions:
+Before we decide how devices are joined, enrolled, grouped, provisioned, or secured, we first need to answer two questions:
 
 **What kinds of devices does Wire Finance operate, and who owns them?**
 
-#### Corporate Ownership Comes First
+### Corporate Ownership Comes First
 
-Wire Finance primarily operates **corporate-owned Windows endpoints**.
+Wire Finance begins with a simple position:
+
+**the primary managed Windows endpoint is corporate-owned.**
 
 That gives the organisation control over how devices are:
 
-- Purchased
-- Recorded
-- Provisioned
-- Assigned
-- Managed
-- Secured
-- Monitored
-- Retired
+- acquired
+- recorded
+- provisioned
+- assigned
+- managed
+- secured
+- monitored
+- recovered
+- retired
 
-Corporate ownership becomes the foundation for later controls such as Microsoft Intune management, endpoint security, compliance evaluation, and controlled provisioning.
-
-The basic journey looks like this:
+At a high level:
 
 ```text
 Approved Company Device
         ↓
 Ownership Recorded
         ↓
+Purpose Defined
+        ↓
 Provisioned by IT
         ↓
-Assigned for a Defined Purpose
+Assigned to a User or Function
         ↓
-Managed Through Microsoft Intune
+Managed Throughout Its Life
 ```
 
-![Wire Finance Managed Endpoint Journey]({{ '/assets/images/managed_endpoint_journey.png' | relative_url }})
+![Wire Finance Managed Endpoint Journey]({{ '/assets/images/active-directory/managed_endpoint_journey.png' | relative_url }})
 
-The important idea is that a device does not become trusted simply because it appears inside Microsoft Entra ID or Microsoft Intune.
+Corporate ownership gives Wire Finance an authoritative starting point for later management and security decisions.
 
-Its corporate status begins with an approved Wire Finance asset and provisioning process.
+But ownership should not be confused with trust.
 
-##### What Does "Corporate-Owned" Actually Mean?
+A device does not become trusted simply because a record for it exists in Microsoft Entra ID or Microsoft Intune.
 
-A device being visible in Microsoft Entra ID does not automatically make it a corporate device.
+### Device Presence Does Not Equal Device Trust
 
-That distinction matters.
-
-A personal laptop may be capable of creating a device record in an organisation's environment without becoming an approved Wire Finance asset.
-
-So we need to separate several different ideas:
+Several device concepts need to remain separate.
 
 ```text
 Device Exists
@@ -82,482 +81,435 @@ Compliant
 Trusted
 ```
 
-For Wire Finance, corporate ownership begins with an approved asset and provisioning process.
+A personal device may be able to create or appear as a device identity without becoming an approved Wire Finance asset.
+
+Likewise, a corporate-owned device may exist before it has finished provisioning or reached its expected management and security state.
+
+For Wire Finance, the journey starts with an approved asset.
 
 ```text
 Approved Device
       ↓
 Ownership Recorded
       ↓
-Provisioned by IT
+Provisioned Through an Approved Process
       ↓
 Management Established
       ↓
 Security Controls Applied
       ↓
-Compliance Evaluated
+Compliance and Risk Evaluated Later
 ```
-
-Only then do we begin to have the signals needed for stronger trust and access decisions later.
 
 This gives us one of the most important principles in the device model:
 
 **device presence does not equal device trust.**
 
-##### Device Ownership Position
+### Device Ownership Position
 
-Wire Finance does not treat every ownership model equally.
+Wire Finance does not treat every ownership model in the same way.
 
 | Ownership Type | Wire Finance Position |
 |---|---|
-| **Corporate-owned Windows endpoints** | Primary supported model |
+| **Corporate-owned Windows endpoints** | Primary supported endpoint model |
 | **Corporate-owned privileged workstations** | Supported with enhanced controls |
-| **Corporate-owned test devices** | Supported for lab and validation activities |
-| **Personal / BYOD Windows devices** | Outside the initial managed fleet |
-| **Personally owned privileged devices** | Prohibited |
+| **Corporate-owned test devices** | Supported for controlled testing and validation |
+| **Corporate-owned infrastructure systems** | Supported through infrastructure-specific management |
+| **Personal / BYOD Windows devices** | Outside the initial managed Windows fleet |
+| **Personally owned privileged devices** | Not permitted for privileged administration |
 
-This gives the project a clear starting point.
+This gives the project a clear starting boundary.
 
-The normal Wire Finance endpoint is a company-controlled device.
+The normal Wire Finance employee endpoint is company-controlled.
 
 Privileged administration requires an even more controlled device.
 
-Test systems are allowed, but only for defined lab and validation purposes.
+Test systems are allowed for defined validation purposes.
 
-Personally owned devices are not part of the initial managed Windows fleet, and privileged activity is never performed from a personally owned device.
+Personally owned Windows devices are outside the initial managed fleet.
 
-##### Why BYOD Is Outside the Initial Model
+And privileged administration is never intended to take place from a personally owned device.
+
+### Why BYOD Is Outside the Initial Model
 
 Wire Finance is deliberately starting with corporate-owned Windows endpoints.
 
-That does not mean Bring Your Own Device can never exist.
+That does not mean Bring Your Own Device can never be introduced.
 
-It means we want to understand and secure the controlled corporate-device journey before introducing another ownership model.
+It means the organisation wants to understand and secure the controlled corporate-device journey before introducing another ownership model.
 
-Adding BYOD immediately would introduce additional questions around:
+BYOD would create additional questions such as:
 
 ```text
 Who owns the device?
-      ↓
-Who can manage it?
-      ↓
+        ↓
+Who is allowed to manage it?
+        ↓
 Which company controls can be enforced?
-      ↓
-What business data can live on it?
-      ↓
-Should it influence access decisions?
+        ↓
+What organisational data may be stored on it?
+        ↓
+How should the device influence access decisions?
 ```
 
-Those are valid questions, but they do not need to be solved during the first endpoint rollout.
+Those are valid design questions.
 
-The restriction is even stronger for privileged administration:
+They simply do not need to be solved during the first Wire Finance endpoint rollout.
+
+The restriction is stronger for privileged administration:
 
 **a personally owned device cannot become a Wire Finance Privileged Access Workstation.**
 
-Privileged activity requires a company-controlled device with a known provisioning and security history.
+### Ownership and Classification Are Different
 
-##### Device Classifications
+Ownership tells us:
 
-Ownership tells us who controls the asset.
+**who controls the asset?**
 
-Classification tells us **what the device is for**.
+Classification tells us:
 
-Wire Finance defines five functional device classes:
+**what is the device for?**
 
-| Device Class | Naming Pattern | Purpose | Ownership |
-|---|---|---|---|
-| **Standard corporate endpoint** | `WF-LT-###` | Everyday employee productivity | Corporate |
-| **Privileged Access Workstation** | `WF-PAW-###` | Dedicated privileged administration | Corporate |
-| **Deployment / test endpoint** | `WF-TST-###` | Policy, deployment, compliance, and security testing | Corporate |
-| **Infrastructure / server** | `WF-DC-*`, `WF-SRV-*`, `WF-SYNC-*`, `WF-JUMP-*` | Core infrastructure services | Corporate |
-| **Isolated legacy system** | `WF-LEGACY-*` | Controlled legacy-risk testing | Lab-controlled / isolated |
+A company may own many different kinds of systems.
 
-Each class exists for a different reason.
-
-That distinction becomes important later when we begin assigning provisioning methods, security controls, device groups, and compliance expectations.
-
-##### Which Devices Matter First?
-
-Wire Finance defines several device classes, but the first endpoint rollout focuses primarily on three:
+Wire Finance therefore separates ownership from functional purpose.
 
 ```text
-Standard Corporate Endpoint
-Privileged Access Workstation
-Deployment / Test Endpoint
+Corporate Ownership
+        ↓
+What is this device intended to do?
+        ↓
+Device Classification
 ```
 
-These are the device types that will matter most when we begin working with Windows Autopilot and Microsoft Intune.
+### Wire Finance Device Classes
 
-Infrastructure servers and legacy systems remain part of the wider device model, but they follow different provisioning and management paths.
+Wire Finance defines five broad functional classes.
 
-Keeping those paths separate prevents us from treating every Windows system as though it were just another employee laptop.
+| Device Class | Example | Purpose | Ownership |
+|---|---|---|---|
+| **Standard corporate endpoint** | `WF-LT-001` | Everyday employee productivity | Corporate |
+| **Privileged Access Workstation** | `WF-PAW-001` | Controlled privileged administration | Corporate |
+| **Deployment / test endpoint** | `WF-TST-001` | Endpoint, policy, deployment, and security validation | Corporate |
+| **Infrastructure / server** | `WF-DC-001`, `WF-SRV-001`, `WF-SYNC-001` | Core infrastructure services | Corporate |
+| **Isolated legacy system** | `WF-LEGACY-001` | Controlled legacy and risk-testing scenarios | Lab-controlled / isolated |
 
-##### Standard Corporate Endpoint
+The example names are shown here only to make the classes easier to recognise.
 
-The standard corporate endpoint is the default productivity device for Wire Finance employees.
+The detailed naming rules belong in the next part of the Device Provisioning Model.
+
+### Standard Corporate Endpoint
+
+The standard corporate endpoint is the normal productivity device used by Wire Finance employees.
 
 Example:
 
 `WF-LT-001`
 
-This device is intended for everyday business activity.
+Users such as Olivia Carter, Maya Patel, Ethan Brooks, and Noah Williams would normally work from this type of endpoint.
 
-Users such as Olivia Carter, Maya Patel, Ethan Brooks, and Noah Williams would normally work from this type of device.
-
-The current design expects the standard endpoint to be:
+Its purpose is everyday business activity.
 
 ```text
-Corporate Owned
-      +
-Windows
-      +
-Microsoft Entra Joined
-      +
-Managed by Intune
-      +
-Protected by Microsoft Defender
-      +
-Encrypted with BitLocker
-      +
-Standard User Rights
-      +
-Compliance Evaluated
-```
-
-The standard laptop therefore becomes the normal workspace for an employee.
-
-For example:
-
-```text
-Olivia Carter
-      ↓
-WF-LT-001
-      ↓
+Employee
+        ↓
 Standard Corporate Endpoint
-      ↓
-Normal Employee Productivity
+        ↓
+Normal Productivity
 ```
 
-It is not designed for privileged administration.
+The standard corporate endpoint is intended to become:
 
-It is not a test device.
+- company-owned
+- Microsoft Entra joined
+- managed through Microsoft Intune
+- protected through Wire Finance endpoint-security controls
+- evaluated against the organisation's compliance requirements
+- operated by the employee using standard user rights
 
-And it is not an infrastructure server.
+Those controls will be defined and implemented later.
 
-Those responsibilities have separate device classes.
+At this stage, the important point is its purpose:
 
-##### Privileged Access Workstation
+**this is the normal employee workspace.**
 
-A **Privileged Access Workstation**, or PAW, exists for a very different reason.
+It is not intended to be a privileged workstation, infrastructure server, or dedicated test system.
+
+### Privileged Access Workstation
+
+A Privileged Access Workstation, or PAW, exists for administrative activity that carries greater risk.
 
 Example:
 
 `WF-PAW-001`
 
-A PAW is a dedicated hardened device used for approved administrative activity.
-
-It is not simply a more powerful version of a normal employee laptop.
-
-It has a different trust purpose.
-
-A normal corporate laptop may be used for:
+Its purpose is fundamentally different from a standard employee laptop.
 
 ```text
-Email
-Teams
-Office
-Normal Web Use
-Everyday Business Activity
-```
+Standard Endpoint
+        ↓
+Everyday Productivity
 
-A PAW is intended for:
-
-```text
-Privileged Administration
-Sensitive Configuration
-Security Administration
-Controlled Administrative Activity
-```
-
-Wire Finance does not intend PAWs to be used for routine productivity activity.
-
-This pairs directly with the separate identity model designed earlier.
-
-```text
-jordan.lee
-      ↓
-Standard Corporate Endpoint
-      ↓
-Normal Business Activity
-```
-
-while:
-
-```text
-adm-jordan.lee
-      ↓
 Privileged Access Workstation
-      ↓
-Approved Administrative Activity
+        ↓
+Controlled Administration
 ```
 
-The separation exists to reduce the chance that ordinary user activity and highly privileged administration happen in the same workspace.
+A PAW is corporate-owned and designed for a more tightly controlled administrative purpose.
 
-A personally owned computer should never become a Wire Finance PAW.
+It is not simply a standard laptop with a more powerful user account.
 
-##### Deployment and Test Endpoint
+The detailed PAW provisioning journey, restrictions, and security expectations are covered later in the Device Provisioning Model.
 
-Wire Finance also needs somewhere to test changes before they reach ordinary employee devices.
+### Deployment and Test Endpoint
 
-That is the role of the deployment and test endpoint.
+Wire Finance also needs somewhere to test endpoint changes before those changes reach normal employee devices.
 
 Example:
 
 `WF-TST-001`
 
-These devices provide a controlled environment for testing areas such as:
+The purpose of this class is controlled validation.
+
+It may be used to test areas such as:
 
 - Windows Autopilot
-- Microsoft Intune
-- Application deployment
-- Compliance policies
-- Conditional Access
-- Microsoft Defender
-- Remediation activity
-- Failure scenarios
+- Microsoft Intune configuration
+- application deployment
+- compliance behaviour
+- endpoint-security settings
+- remediation
+- failure scenarios
 
-This gives Wire Finance somewhere to answer:
+Conceptually:
+
+```text
+New Endpoint Change
+        ↓
+Test Device
+        ↓
+Observe
+        ↓
+Validate
+        ↓
+Refine
+        ↓
+Pilot / Wider Deployment
+```
+
+A deployment or test endpoint exists so Wire Finance can answer:
 
 **What happens if we apply this change?**
 
-before the answer affects the wider organisation.
+before the answer affects a real employee's normal workstation.
 
-A test endpoint is therefore deliberately separate from a normal employee device.
+The detailed pilot and testing model is covered later.
 
-Its purpose is controlled validation.
-
-Later, test devices can also be deliberately placed into pilot or non-compliant populations without putting a real employee's workstation at unnecessary risk.
-
-##### Infrastructure Devices
+### Infrastructure Devices
 
 Not every Wire Finance device belongs to an employee.
 
-The environment will eventually include infrastructure systems such as:
+The environment will eventually contain systems such as:
 
-```text
-WF-DC-*    → Domain Controllers
-WF-SRV-*   → Member Servers
-WF-SYNC-*  → Hybrid Identity Servers
-WF-JUMP-*  → Management Jump Servers
-```
+- domain controllers
+- member servers
+- hybrid identity servers
+- management systems
 
-These are still corporate assets.
-
-But they are **not part of the standard employee provisioning journey**.
-
-For example:
-
-```text
-WF-LT-001
-      ↓
-Employee Endpoint Provisioning
-```
-
-does not imply:
+Examples include:
 
 ```text
 WF-DC-001
-      ↓
-Same Provisioning Model
+WF-SRV-001
+WF-SYNC-001
+WF-JUMP-001
 ```
 
-Infrastructure systems provide different services and carry different risks.
+These are corporate assets, but they are **not part of the normal employee endpoint-provisioning journey**.
 
-They will therefore require their own provisioning and management approach when Wire Finance later introduces on-premises Active Directory and hybrid identity.
+A standard laptop and a domain controller may both run Windows, but they have completely different purposes and risk profiles.
 
-##### Isolated Legacy Systems
+```text
+WF-LT-001
+        ↓
+Employee Endpoint
 
-Wire Finance also reserves a separate classification for controlled legacy-risk testing:
+WF-DC-001
+        ↓
+Infrastructure System
+```
 
-`WF-LEGACY-*`
+Infrastructure systems will receive their own design and implementation treatment when Wire Finance introduces on-premises Active Directory and hybrid identity.
+
+### Isolated Legacy Systems
+
+Wire Finance also reserves a separate class for controlled legacy-risk testing.
 
 Example:
 
 `WF-LEGACY-001`
 
-These systems may eventually help us investigate areas such as:
+These systems may eventually help the project explore areas such as:
 
-```text
-Unsupported Operating Systems
-Legacy Authentication
-Weak Protocol Exposure
-Segmentation
-Detection
-Risk Management
-```
+- unsupported operating systems
+- legacy authentication
+- weak protocol exposure
+- segmentation
+- detection
+- risk management
 
-They are deliberately isolated.
+Their defining characteristic is **isolation**.
 
 A legacy system should not quietly become part of the normal trusted corporate endpoint population simply because it exists inside the lab.
-
-So:
 
 ```text
 WF-LEGACY-001
         ≠
-Trusted Corporate Endpoint
+Normal Corporate Endpoint
 ```
 
-unless a very specific controlled test requires otherwise.
+Its presence is intentional, but so is its separation.
 
-This reinforces the same principle we established earlier:
+### Which Device Classes Matter First?
 
-**presence does not equal trust.**
-
-##### Ownership Becomes Security-Relevant
-
-Corporate ownership might initially sound like an asset-management label.
-
-But later in the project, ownership can become one of the signals used when deciding how devices are grouped, targeted, managed, or evaluated.
-
-Conceptually:
+Although the wider design contains five classes, the first endpoint rollout focuses primarily on:
 
 ```text
-Ownership
-      ↓
-Device Classification
-      ↓
-Group Membership
-      ↓
-Policy Targeting
-      ↓
-Security Controls
-      ↓
-Potential Access Decisions
+Standard Corporate Endpoint
+        ↓
+Employee Productivity
+
+Privileged Access Workstation
+        ↓
+Administrative Activity
+
+Deployment / Test Endpoint
+        ↓
+Controlled Validation
 ```
 
-That means ownership information must be treated carefully.
+These are the classes most directly connected to Microsoft Entra ID, Microsoft Intune, and Windows Autopilot during the initial endpoint build.
 
-A user should not be able to make a personal laptop appear to be:
+Infrastructure and legacy systems remain part of the overall architecture, but they follow different provisioning paths.
 
-`Company Owned`
+This prevents Wire Finance from treating every Windows system as though it were just another employee laptop.
 
-simply because they want access to corporate resources.
+### Ownership Needs an Authoritative Record
 
-The ownership status needs to come from an approved Wire Finance process.
+A device should not become corporate-owned simply because a user says it is.
 
-##### The Wire Finance Ownership Rule
+Wire Finance therefore needs an authoritative record of the physical asset and its assignment.
+
+For the initial environment, the asset register provides that business record.
+
+It records information such as:
+
+- the device asset
+- company ownership
+- intended purpose
+- assigned user
+- device class
+- lifecycle status
+
+This gives us an important distinction:
+
+```text
+Asset Register
+        ↓
+Who owns the physical device
+and who is it assigned to?
+
+Microsoft Entra ID
+        ↓
+What is the device's cloud identity?
+
+Microsoft Intune
+        ↓
+How is the device managed?
+
+Microsoft Defender
+        ↓
+What security activity and risk do we see?
+```
+
+No single system tells the entire device story.
+
+The asset register remains the authoritative record for physical ownership and assignment, while the Microsoft platforms provide identity, management, compliance, and security information.
+
+### The Wire Finance Ownership Rule
 
 The ownership principle can therefore be stated simply:
 
-> **A device is considered corporate-owned only when Wire Finance has acquired, approved, or formally brought the device under company ownership and IT management. Registration in Microsoft Entra ID alone does not establish corporate ownership.**
+> **A device is considered corporate-owned only when Wire Finance has acquired, approved, or formally brought it under company ownership and its asset status is recorded through an authorised process. A cloud device record alone does not establish corporate ownership.**
 
-This protects us from a dangerous assumption:
+This protects Wire Finance from a dangerous assumption:
 
 ```text
-User Registers Personal Laptop
+User Registers Device
         ↓
-Device Appears in Entra
+Device Appears in Microsoft Environment
         ↓
-Therefore Corporate?
+Therefore Corporate-Owned?
 ```
 
 No.
 
-Instead, the expected path is:
+The expected relationship is closer to:
 
 ```text
-Asset Authority
-      +
+Approved Asset
+        +
 Company Ownership
-      +
-Approved Provisioning
-      +
-Management Enrolment
-      =
+        +
+Authorised Provisioning
+        +
+Management
+        =
 Corporate Managed Endpoint
 ```
 
-##### Who Owns the Device Information?
+### Who Owns Device Decisions?
 
-Different parts of the device record also have different authorities.
+Different parts of the device record have different authorities.
 
 | Device Information | Authority |
 |---|---|
-| **Asset ownership** | IT / Asset Management |
-| **Device purpose** | IT + Manager / Security where relevant |
-| **Device name** | IT / Endpoint Management |
-| **Autopilot classification** | IT / Endpoint Management |
-| **PAW designation** | IT + Security |
+| **Physical asset ownership** | Wire Finance IT / asset record |
+| **Device purpose** | IT, with business or Security input where required |
+| **Device classification** | IT |
+| **Privileged workstation designation** | IT + Security |
 | **Test-device designation** | IT / Security |
-| **Intune enrolment** | Endpoint Management |
 | **Device assignment to user** | IT |
-| **Compliance status** | Intune |
-| **Security / risk state** | Intune / Defender |
-| **Retirement decision** | IT + Business Owner |
-| **Disposal** | IT / Asset Management |
+| **Provisioning classification** | IT |
+| **Management state** | Microsoft Intune |
+| **Compliance state** | Microsoft Intune |
+| **Security / risk state** | Intune and Microsoft Defender |
+| **Reassignment or retirement decision** | IT with business input where required |
+| **Disposal** | IT through the approved asset process |
 
 This prevents device information from becoming arbitrary.
 
-A user does not simply decide that their laptop is now a privileged workstation.
+A user cannot decide that a personal laptop is now a corporate device.
 
-A normal device does not become a test system because someone changes its name.
+A standard laptop does not become a PAW because somebody renames it.
 
-And a device does not become trusted simply because it appears in a management portal.
+And a device does not become trusted simply because it appears in a Microsoft portal.
 
-Each important decision has an owner.
+Important device decisions need an owner.
 
-##### From Device Presence to Device Trust
+### The Device Model Is Taking Shape
 
-The full trust journey looks more like this:
+We now have two important pieces of the device model.
 
-```text
-DEVICE EXISTS
-      ↓
-Ownership Established
-      ↓
-Device Identity Established
-      ↓
-Management Established
-      ↓
-Security Controls Established
-      ↓
-Compliance Evaluated
-      ↓
-Access Decisions Made
-```
-
-Each stage answers a different question.
+First, ownership:
 
 ```text
-Does the device exist?
-        ↓
-Who owns it?
-        ↓
-What device is it?
-        ↓
-Who manages it?
-        ↓
-What security controls are applied?
-        ↓
-Does it meet our requirements?
-        ↓
-Should its state influence access?
+Corporate
+        or
+Outside Initial Managed Fleet
 ```
 
-This prevents Wire Finance from treating trust as a single checkbox.
-
-A device may exist but not be managed.
-
-A managed device may not be compliant.
-
-A compliant device may still have a security problem.
-
-Those signals need to be understood separately before they are combined into access decisions later.
-
-##### The Device Model Is Taking Shape
-
-We now know the major device classes Wire Finance expects to support.
+Second, classification:
 
 ```text
 Standard Corporate Endpoint
@@ -566,11 +518,11 @@ Everyday Productivity
 
 Privileged Access Workstation
         ↓
-Sensitive Administration
+Controlled Administration
 
 Deployment / Test Endpoint
         ↓
-Controlled Testing
+Controlled Validation
 
 Infrastructure Device
         ↓
@@ -581,12 +533,12 @@ Legacy System
 Isolated Risk Testing
 ```
 
-We also know that corporate ownership must come from an approved asset and provisioning process rather than simply from the existence of a cloud device record.
+That gives Wire Finance a consistent way to understand what a device is before we begin provisioning it.
 
-That gives us a foundation for everything that comes next.
+But as the environment grows, those devices will appear in asset records, Microsoft Entra ID, Intune, Defender, logs, and investigations.
 
-But once dozens of devices begin appearing in Microsoft Entra ID, Intune, Defender, and security logs, we need a consistent way to recognise them.
+We therefore need a consistent way to recognise them.
 
-A device name should tell us something useful before we even open its record.
+The next question is:
 
-**So how should Wire Finance name its devices so that purpose and function remain clear as the environment grows?**
+**How should Wire Finance name its devices so that purpose remains clear as the environment grows?**

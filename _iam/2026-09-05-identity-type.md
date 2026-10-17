@@ -19,139 +19,133 @@ But inside a modern organisation, identities represent much more than employees.
 
 **External partners may need identities.**
 
-**Shared services may need identities.**
+**Shared business resources may have identities.**
 
-And if the normal administrative path ever fails, the organisation may need an identity specifically designed for recovery.
+And if the normal administrative path ever fails, the organisation may need an identity designed specifically for recovery.
 
-Before Wire Finance can decide **who should have access to what**, we first need to understand the different types of identities that will exist in the environment.
+Before Wire Finance can decide **who should have access to what**, we first need to understand the different types of identities that exist in the environment.
 
-##### Identity Type in Wire Finance
+> This lesson focuses on human, administrative, collaborative, and workload identities. Devices also receive identities and contribute to access decisions, but device identity is treated separately in the Device Provisioning Model.
+
+### Identity Types in Wire Finance
 
 | Identity Type | Purpose | Example |
 |---|---|---|
-| **Standard User** | Everyday work | `john.doe@wirefinance.com` |
-| **Privileged Administrator** | Administrative activity only | `adm-john.doe@wirefinance.com` |
-| **Emergency Access** | Tenant recovery | `emergency-access-01@wirefinance.com` |
-| **Guest** | External partners or contractors | External Entra B2B user |
-| **Shared / Resource Identity** | Shared mailbox or functional service | `finance@wirefinance.com` |
-| **Workload Identity** | Applications and automation | Managed identity or service principal |
+| **Standard User** | Everyday employee activity | `olivia.carter@wirefinance.com` |
+| **Privileged Administrator** | Approved administrative activity only | `adm-jordan.lee@wirefinance.com` |
+| **Emergency Access** | Tenant recovery when normal administration is unavailable | `emergency-access-01@wirefinance.com` |
+| **Guest** | Controlled access for external collaborators | External Microsoft Entra B2B user |
+| **Shared / Resource Identity** | Represents a shared business function or resource | `finance@wirefinance.com` |
+| **Workload Identity** | Allows applications and automation to access resources | Managed identity or service principal |
 
-The important thing here is that these identities may exist inside the same organisation, but they do not serve the same purpose and should not automatically be treated the same way.
+These identities may exist inside the same organisation, but they do not serve the same purpose and should not automatically be governed in the same way.
 
----
-
-##### Standard User Identity
+### Standard User Identity
 
 The standard user identity is the account an employee uses for normal day-to-day work.
 
-This is the identity used for activities such as accessing company resources, working with Microsoft 365 services, collaborating with colleagues, and performing normal job responsibilities.
-
 For example:
 
-`john.doe@wirefinance.com`
+`olivia.carter@wirefinance.com`
 
-The key idea is that a standard account represents the employee in their normal working capacity.
+Olivia uses this identity to access company resources, work with Microsoft 365 services, collaborate with colleagues, and perform her normal responsibilities as a Finance Analyst.
 
-It should not automatically receive elevated administrative privileges simply because the employee also performs administrative work.
+The key idea is that a standard account represents an employee in their everyday working capacity.
 
-##### Privileged Administrator Identity
+It should not automatically receive elevated administrative privileges simply because the employee may also perform administrative responsibilities.
 
-Some employees will need elevated permissions to manage systems, identities, endpoints, or security services.
+### Privileged Administrator Identity
 
-Wire Finance separates this administrative activity from normal productivity work by assigning a separate privileged identity.
+Some employees need elevated permissions to manage identities, endpoints, security services, or other parts of the environment.
 
-For example:
+Wire Finance separates that administrative activity from normal productivity work by using a separate privileged identity.
 
-`adm-john.doe@wirefinance.com`
+Jordan Lee, for example, may have:
 
-The administrator may therefore have two identities:
+- `jordan.lee@wirefinance.com` for everyday work
+- `adm-jordan.lee@wirefinance.com` for approved administrative activity
 
-- `john.doe@wirefinance.com` for everyday work
-- `adm-john.doe@wirefinance.com` for approved administrative activity
+This creates an important distinction between **being an employee** and **acting as an administrator**.
 
-This separation makes an important distinction between **being an employee** and **acting as an administrator**.
+We will explore privileged identities and their controls in more detail later in the IAM design.
 
-We will explore privileged identities in more detail later in the IAM design.
-
-##### Emergency Access Identity
+### Emergency Access Identity
 
 What happens if normal administrative access stops working?
 
-Perhaps an authentication problem occurs, administrators become locked out, or a configuration change prevents the usual privileged identities from accessing the environment.
+An authentication failure, configuration mistake, or access-control problem could prevent normal privileged identities from reaching the tenant.
 
-Wire Finance therefore includes dedicated emergency access identities.
-
-For example:
+Wire Finance therefore maintains dedicated emergency access identities, such as:
 
 `emergency-access-01@wirefinance.com`
 
-These accounts are not designed for normal administration.
+These accounts are not designed for routine administration.
 
-Their purpose is recovery.
+Their purpose is recovery: providing a controlled way to regain access when the normal administrative path is unavailable.
 
-They provide the organisation with a controlled way to regain access when the usual administrative path is unavailable.
+### Guest Identity
 
-##### Guest Identity
+Not everyone who needs access to Wire Finance is necessarily part of its internal workforce.
 
-Not everyone who needs access to Wire Finance will necessarily be an employee.
+External partners, suppliers, or consultants may need controlled access to selected company resources without becoming normal internal users.
 
-External partners, suppliers, consultants, or contractors may need access to selected company resources without becoming normal internal users.
+Microsoft Entra B2B guest identities provide a way to represent those external collaborators.
 
-These identities are represented as **Guest identities**, such as external Microsoft Entra B2B users.
+The important distinction is that the person belongs outside Wire Finance but has been granted access to specific resources inside the organisation.
 
-The important distinction is that the user exists outside Wire Finance but has been granted access to specific resources within the organisation.
+Their access should therefore be intentionally limited to what the external relationship requires.
 
-Their access therefore needs to be intentionally limited to what the external relationship requires.
+### Shared and Resource Identities
 
-##### Shared and Resource Identities
-
-Some identities represent a shared business function rather than an individual person.
+Some resources represent a shared business function rather than an individual employee.
 
 For example:
 
 `finance@wirefinance.com`
 
-This might represent a shared mailbox or another functional resource used by a team.
+This could represent a Finance shared mailbox used by several authorised employees.
 
-Unlike a named employee identity, the purpose of the identity is tied to a business function or shared service.
+Unlike a named employee identity, its purpose is tied to a business function rather than one person.
 
-This becomes important when we later consider ownership, permissions, and what happens when individual employees join, move, or leave the organisation.
+Where possible, employees should access shared resources through their own named identities rather than signing directly into a common account. This preserves accountability and makes it easier to understand who performed an action.
 
-##### Workload Identities
+That distinction becomes important when we later consider ownership, permissions, and what happens when employees join, move, or leave the organisation.
 
-Not just people alone need to authenticate.
+### Workload Identities
 
-Applications and automated processes may also need to access cloud resources and services.
+People are not the only things that need to authenticate.
 
-Wire Finance therefore recognises **Workload Identities**, such as:
+Applications, scripts, automation, and cloud services may also need controlled access to resources.
 
-- Managed identities
-- Service principals
+Wire Finance therefore recognises workload identities such as:
 
-These identities allow applications and automation to operate without pretending to be a human user.
+- managed identities
+- service principals
 
-As the Wire Finance environment grows, workload identities will become increasingly important because cloud services, scripts, automation, and integrations will all need controlled ways to access resources.
+These allow applications and automation to authenticate without pretending to be a human employee.
 
----
+As the environment grows, workload identities will become increasingly important because integrations and automated processes will need their own controlled and auditable access.
 
-##### Why Separate Identity Types?
+### Why Separate Identity Types?
 
-Imagine if every identity inside Wire Finance were simply treated as a normal user.
+Imagine if every identity inside Wire Finance were treated like a normal user.
 
 An administrator could use the same identity for email and privileged activity.
 
-An application might rely on a normal employee account.
+An application might rely on an employee account.
 
-External users could become difficult to distinguish from employees.
+External collaborators could become difficult to distinguish from the internal workforce.
 
-Emergency accounts could accidentally become part of everyday administration.
+Emergency access identities could accidentally become part of everyday administration.
 
-That would make access much harder to understand, control, and eventually audit.
+Shared accounts could make it difficult to determine who actually performed an action.
+
+Access would quickly become harder to understand, control, and audit.
 
 By defining identity types early, Wire Finance establishes a clearer foundation for the access decisions that come next.
 
 Before we decide what an identity can access, we first need to understand **what kind of identity it is and why it exists**.
 
-And now that we know who — or what — may need access, the next question becomes:
+Now that we know who — or what — may need access, the next question becomes:
 
 **How should we name and identify them consistently as the organisation grows?**

@@ -7,21 +7,15 @@ order: 5
 description: "Before a device is provisioned, Wire Finance needs to know what kind of build it should receive. Autopilot classification separates standard corporate endpoints from privileged workstations before deployment begins."
 ---
 
-We now have device groups capable of separating:
+Wire Finance now has device groups capable of separating different endpoint populations.
 
-- Provisioning populations
-- Operational corporate devices
-- Pilot devices
-- Privileged workstations
-- Controlled test devices
-
-But two of those groups depend on a decision that happens even earlier.
+But some of those groups depend on a decision that happens even earlier.
 
 Before a new Windows device completes Microsoft Entra Join.
 
-Before it enrolls into Intune.
+Before it enrolls into Microsoft Intune.
 
-Before security policies and applications are applied.
+Before applications and security policies are applied.
 
 Wire Finance needs to answer:
 
@@ -29,11 +23,17 @@ Wire Finance needs to answer:
 
 That is the purpose of **Windows Autopilot classification**.
 
-#### Registration and Classification Are Different
+### Registration and Classification Are Different
 
-The central idea is simple:
+Autopilot registration and Autopilot classification answer different questions.
 
-**Autopilot registration identifies the physical device. The Group Tag identifies its intended deployment class.**
+Registration tells the provisioning service:
+
+**Which physical device is this?**
+
+Classification tells Wire Finance:
+
+**What kind of build should this device receive?**
 
 Conceptually:
 
@@ -44,33 +44,31 @@ Registered with Windows Autopilot
       ↓
 Group Tag Assigned
       ↓
-Microsoft Entra Dynamic Group Evaluates Classification
+Dynamic Device Group Evaluates Classification
       ↓
-Correct Autopilot Population Identified
+Correct Provisioning Population Identified
       ↓
-Correct Deployment Profile Applied
+Correct Deployment Path Applied
 ```
 
-The device exists first.
+The device is registered first.
 
-The classification then tells Wire Finance which provisioning path that device should follow.
+Its classification then tells Wire Finance which provisioning path it should follow.
 
-That decision happens before the endpoint reaches its normal operational state.
+That classification exists before the endpoint reaches its normal operational state.
 
-#### Initial Wire Finance Classifications
+### Initial Wire Finance Classifications
 
-Wire Finance deliberately begins with only two Autopilot classifications:
+Wire Finance deliberately begins with only two Autopilot classifications.
 
-| Group Tag | Meaning | Dynamic Group | Deployment Intent |
+| Group Tag | Meaning | Dynamic Group | Provisioning Intent |
 |---|---|---|---|
-| **`CORPORATE`** | Standard employee Windows endpoint | `SG-DEVICES-AUTOPILOT-CORPORATE` | Standard corporate build |
-| **`PAW`** | Privileged Access Workstation | `SG-DEVICES-PRIVILEGED` | Hardened privileged build |
-
-The classification decision creates two different provisioning paths before normal device deployment begins.
+| `CORPORATE` | Standard employee Windows endpoint | `SG-DEVICES-AUTOPILOT-CORPORATE` | Standard corporate build |
+| `PAW` | Privileged Access Workstation | `SG-DEVICES-PRIVILEGED` | Hardened privileged build |
 
 ![Wire Finance Autopilot Classification Model]({{ '/assets/images/active-directory/autopilot_classification_model.png' | relative_url }})
 
-The image brings the full model together:
+The model is:
 
 ```text
 New Device
@@ -79,179 +77,16 @@ Autopilot Registered
       ↓
 Purpose Confirmed
       ↓
-Classification
+Group Tag
       ↓
 Dynamic Device Group
       ↓
-Deployment Profile
+Deployment Path
       ↓
-Microsoft Entra Join + Intune
+Microsoft Entra Join + Intune Enrollment
 ```
 
-Both paths eventually use the same core cloud identity and management platforms.
-
-What changes is the **provisioning intent and security posture applied before the device reaches that operational state**.
-
-So:
-
-```text
-CORPORATE
-      ≠
-PAW
-```
-
-even though both can eventually become:
-
-```text
-Microsoft Entra Joined
-        +
-Intune Managed
-```
-
----
-
-#### How the Group Tag Reaches Microsoft Entra
-
-The Autopilot Group Tag is represented through the device's `OrderID` information.
-
-That gives Microsoft Entra something that dynamic device-group rules can evaluate before normal provisioning has completed.
-
-For Wire Finance:
-
-```text
-Group Tag
-      ↓
-OrderID
-      ↓
-Dynamic Device Rule
-      ↓
-Device Group
-      ↓
-Autopilot Deployment Path
-```
-
-This is important because many of the operational attributes we care about later may not exist yet.
-
-Before provisioning completes, the device may not yet be:
-
-```text
-Intune Managed
-
-Compliant
-
-Fully Configured
-
-Operational
-```
-
-But the provisioning system still needs to know what build it should receive.
-
-The Autopilot classification gives us that early signal.
-
-#### `CORPORATE` Classification
-
-A normal Wire Finance employee endpoint receives:
-
-```text
-Group Tag:
-CORPORATE
-```
-
-The classification appears through:
-
-```text
-[OrderID]:CORPORATE
-```
-
-and is dynamically identified by:
-
-`SG-DEVICES-AUTOPILOT-CORPORATE`
-
-The implemented rule is:
-
-```text
-(device.devicePhysicalIds -any (_ -eq "[OrderID]:CORPORATE"))
-```
-
-The relationship becomes:
-
-```text
-CORPORATE
-      ↓
-[OrderID]:CORPORATE
-      ↓
-SG-DEVICES-AUTOPILOT-CORPORATE
-      ↓
-Standard Wire Finance
-Autopilot Deployment
-```
-
-The eventual standard provisioning journey can then lead toward:
-
-```text
-Microsoft Entra Join
-        +
-Automatic Intune Enrollment
-        +
-Standard Security Controls
-        +
-Required Applications
-        +
-Compliance Evaluation
-```
-
-The important word here is **intent**.
-
-The `CORPORATE` classification means:
-
-**this device should receive the standard Wire Finance corporate build.**
-
-It does not yet prove that the build was completed successfully.
-
-#### `PAW` Classification
-
-Privileged Access Workstations require a different provisioning path.
-
-They receive:
-
-```text
-Group Tag:
-PAW
-```
-
-Wire Finance dynamically identifies those devices through:
-
-`SG-DEVICES-PRIVILEGED`
-
-The tenant-validated rule is preserved as:
-
-```text
-(device.devicePhysicalIds -any (_ -contains "[OrderID]:PAW"))
-```
-
-The relationship becomes:
-
-```text
-PAW
-      ↓
-[OrderID]:PAW
-      ↓
-SG-DEVICES-PRIVILEGED
-      ↓
-Hardened PAW Deployment
-```
-
-This gives Wire Finance a way to identify the privileged workstation **before** the machine becomes a normal operational endpoint.
-
-That matters because the security expectations for a PAW are different from those of an everyday employee laptop.
-
-```text
-CORPORATE
-      ≠
-PAW
-```
-
-even though both devices may later be:
+Both device classes may eventually become:
 
 ```text
 Windows
@@ -263,50 +98,188 @@ Microsoft Entra Joined
 Intune Managed
 ```
 
-The difference is their **intended security and trust function**.
+But they do not have the same purpose.
 
-#### Why Classification Happens Before Provisioning
+```text
+CORPORATE
+      ≠
+PAW
+```
 
-Imagine two physically identical Windows laptops arrive at Wire Finance.
+The difference begins with **provisioning intent**.
 
-The first is intended for Olivia Carter.
+### How the Group Tag Drives Classification
+
+For Autopilot-registered devices, the Group Tag is exposed through the device's physical-ID information using an `OrderID` value.
+
+Wire Finance can then use Microsoft Entra dynamic device-group rules to evaluate that value.
+
+Conceptually:
+
+```text
+Group Tag
+      ↓
+[OrderID]:<VALUE>
+      ↓
+Dynamic Device Rule
+      ↓
+Device Group
+      ↓
+Provisioning Path
+```
+
+This matters because many operational properties do not yet exist before deployment.
+
+The device may not yet be:
+
+- Intune managed
+- compliant
+- fully configured
+- assigned its final applications
+- ready for normal use
+
+But the provisioning service still needs to know what kind of endpoint it is supposed to build.
+
+The Autopilot classification provides that early signal.
+
+### `CORPORATE` Classification
+
+A normal Wire Finance employee endpoint receives the Group Tag:
+
+```text
+CORPORATE
+```
+
+That classification is represented as:
+
+```text
+[OrderID]:CORPORATE
+```
+
+Wire Finance uses:
+
+`SG-DEVICES-AUTOPILOT-CORPORATE`
+
+to identify this provisioning population.
+
+The implemented dynamic membership rule is:
+
+```text
+(device.devicePhysicalIds -any (_ -eq "[OrderID]:CORPORATE"))
+```
+
+The resulting relationship is:
+
+```text
+CORPORATE
+      ↓
+[OrderID]:CORPORATE
+      ↓
+SG-DEVICES-AUTOPILOT-CORPORATE
+      ↓
+Standard Corporate Provisioning
+```
+
+The important word is **intent**.
+
+`CORPORATE` means:
+
+**this device should receive the standard Wire Finance corporate build.**
+
+It does not prove that the build has completed successfully.
+
+### `PAW` Classification
+
+Privileged Access Workstations require a different provisioning path.
+
+They receive the Group Tag:
+
+```text
+PAW
+```
+
+The classification appears as:
+
+```text
+[OrderID]:PAW
+```
+
+Wire Finance uses:
+
+`SG-DEVICES-PRIVILEGED`
+
+to identify the privileged workstation population.
+
+The tenant-validated dynamic membership rule is:
+
+```text
+(device.devicePhysicalIds -any (_ -contains "[OrderID]:PAW"))
+```
+
+The resulting relationship is:
+
+```text
+PAW
+      ↓
+[OrderID]:PAW
+      ↓
+SG-DEVICES-PRIVILEGED
+      ↓
+Privileged Workstation Provisioning
+```
+
+This allows Wire Finance to identify a privileged workstation before it becomes a normal operational endpoint.
+
+A PAW may eventually use the same core cloud platforms as a standard endpoint.
+
+But its intended security function is different.
+
+### Why Classification Happens Before Provisioning
+
+Imagine two physically similar Windows laptops arrive at Wire Finance.
+
+The first will be used by Olivia Carter.
 
 ```text
 Device A
       ↓
+Purpose = Standard Employee Endpoint
+      ↓
 CORPORATE
       ↓
-Standard Employee Build
+Standard Corporate Build
 ```
 
-The second is intended for privileged administration by Jordan Lee.
+The second will be used for privileged administration.
 
 ```text
 Device B
       ↓
+Purpose = Privileged Administration
+      ↓
 PAW
       ↓
-Privileged Hardened Build
+Privileged Workstation Build
 ```
 
-The hardware could be almost identical.
+The hardware may be similar.
 
 The security requirements are not.
 
-Without a classification decision, we effectively have:
+Without classification:
 
 ```text
-New Laptop
+New Device
       ↓
 Which Build?
       ↓
 Unknown
 ```
 
-With Autopilot classification:
+With classification:
 
 ```text
-New Laptop
+New Device
       ↓
 Purpose Confirmed
       ↓
@@ -317,11 +290,17 @@ Correct Device Group
 Correct Provisioning Path
 ```
 
-This is why classification needs to exist before deployment rather than being added as an afterthought.
+Classification therefore sits between **business purpose** and **technical provisioning**.
 
-#### Classification Is Not Ownership
+Wire Finance decides what the device is for.
 
-There is another important boundary.
+The technology then implements that decision.
+
+### Classification Is Not Ownership
+
+A Group Tag should not be confused with device ownership.
+
+For example:
 
 ```text
 Group Tag = CORPORATE
@@ -329,47 +308,43 @@ Group Tag = CORPORATE
 
 means:
 
-**the device has been classified for the standard Wire Finance corporate provisioning path.**
+**the device has been classified for the standard Wire Finance provisioning path.**
 
 It does not independently prove:
 
-```text
-Company Ownership
+- company ownership
+- successful Intune enrollment
+- compliance
+- security health
+- operational readiness
+- trust
 
-Intune Management
+Those states are established through other parts of the device model.
 
-Compliance
-
-Security Health
-
-Trust
-```
-
-Those states are established later.
-
-So:
+The distinction is:
 
 ```text
 AUTOPILOT CLASSIFICATION
+
 "What should we build?"
 ```
 
-is different from:
+versus:
 
 ```text
-OPERATIONAL TRUST
-"Is the completed device secure enough to use?"
-```
+OPERATIONAL STATE
 
-This continues the trust model established earlier.
+"What has actually been built,
+and does it meet our requirements?"
+```
 
 A Group Tag is an input into provisioning.
 
 It is not a certificate of trust.
 
-#### Classification Is Security-Sensitive Metadata
+### Classification Is Security-Sensitive Metadata
 
-The classification may look like a small label:
+A Group Tag may look like a simple label:
 
 ```text
 CORPORATE
@@ -377,44 +352,44 @@ CORPORATE
 PAW
 ```
 
-but those values influence dynamic group membership.
-
-Dynamic group membership can influence the deployment profile and security controls that a device receives.
-
-So the chain becomes:
+but the value can influence what happens next.
 
 ```text
 Group Tag
       ↓
 Dynamic Group Membership
       ↓
-Deployment Profile
+Provisioning Target
       ↓
 Configuration
       ↓
 Security Posture
 ```
 
-That makes the Group Tag **security-sensitive provisioning metadata**.
+That makes Autopilot classification **security-sensitive provisioning metadata**.
 
-The employee receiving the laptop should not decide which classification it receives.
+The employee receiving the device should not decide which classification it receives.
 
-#### Classification Authority
+A device intended for privileged administration should not enter that path merely because somebody renamed the computer or changed an informal label.
 
-Wire Finance therefore defines who is allowed to make classification decisions.
+The classification must come from an authorised Wire Finance process.
+
+### Classification Authority
+
+Wire Finance defines who is allowed to make classification decisions.
 
 | Action | Authority |
 |---|---|
-| **Register standard corporate device** | IT / Endpoint Management |
-| **Assign `CORPORATE` tag** | IT / Endpoint Management |
-| **Assign `PAW` tag** | IT / Endpoint Management + Security approval |
+| **Register standard corporate device** | IT |
+| **Assign `CORPORATE` tag** | IT |
+| **Assign `PAW` tag** | IT with Security approval |
 | **Change `CORPORATE` → `PAW`** | IT + Security |
 | **Change `PAW` → `CORPORATE`** | IT + Security |
-| **Remove Autopilot classification** | IT / Endpoint Management |
+| **Remove Autopilot classification** | IT |
 | **Validate PAW classification** | Security |
-| **Audit classification changes** | IT / Security |
+| **Review classification changes** | IT / Security |
 
-The additional approval around PAWs reflects the stronger security purpose of those devices.
+The additional control around PAWs reflects their more sensitive purpose.
 
 A normal employee cannot simply decide:
 
@@ -422,11 +397,11 @@ A normal employee cannot simply decide:
 I want this laptop to be a PAW.
 ```
 
-Likewise, privileged equipment should not be downgraded into an ordinary employee device without a controlled process.
+Likewise, a privileged workstation should not be downgraded into an ordinary employee device without a controlled process.
 
-#### Standard Corporate Classification Workflow
+### Standard Corporate Classification Workflow
 
-For a normal employee device, the expected decision path is:
+For a standard employee endpoint, the expected classification path is:
 
 ```text
 New Device Acquired
@@ -445,23 +420,19 @@ Dynamic Rule Evaluates
       ↓
 SG-DEVICES-AUTOPILOT-CORPORATE
       ↓
-Standard Deployment Profile
+Standard Corporate Provisioning
 ```
 
-Classification therefore sits between **asset purpose** and **technical provisioning**.
+This connects the physical asset decision to the technical deployment path.
 
-The organisation first decides what the device is for.
+### Privileged Workstation Classification Workflow
 
-Then the technology implements that decision.
-
-#### Privileged Workstation Classification Workflow
-
-A PAW requires an additional governance step.
+A PAW requires stronger governance.
 
 ```text
 Privileged Workstation Required
       ↓
-Business / Security Requirement Confirmed
+Administrative Use Case Confirmed
       ↓
 Security Approval
       ↓
@@ -471,26 +442,24 @@ PAW Tag Assigned
       ↓
 SG-DEVICES-PRIVILEGED
       ↓
-Hardened PAW Provisioning
+Privileged Workstation Provisioning
 ```
 
-This makes the PAW classification deliberate.
+The stronger provisioning path exists because an approved privileged use case exists behind it.
 
-The stronger build exists because there is an approved privileged use case behind it.
+The detailed PAW build is covered later in the Device Provisioning Model.
 
----
+### What Happens If the Wrong Classification Is Applied?
 
-#### What Happens If the Wrong Group Tag Is Assigned?
+Classification mistakes matter because the wrong Group Tag can place a device into the wrong provisioning population.
 
-This is where classification becomes more than organisation.
-
-Imagine:
+Imagine a device intended to become:
 
 ```text
 WF-PAW-001
 ```
 
-is accidentally classified as:
+is accidentally given:
 
 ```text
 CORPORATE
@@ -502,57 +471,39 @@ instead of:
 PAW
 ```
 
-The device could enter the standard corporate provisioning population instead of the privileged-device population.
+The hostname may still suggest that the device is a privileged workstation.
 
-That creates a problem.
-
-The hostname may still say:
-
-```text
-WF-PAW-001
-```
-
-but, as we established earlier:
+But:
 
 **a device name does not create the security state.**
 
-The wrong provisioning classification may mean the device received the wrong build.
+The device may have entered the standard corporate provisioning path instead of the privileged path.
 
-Wire Finance therefore does not treat misclassification as:
-
-```text
-Change the Tag
-      ↓
-Carry On
-```
-
-The response is:
+Wire Finance therefore treats a material classification error as a provisioning problem.
 
 ```text
 Misclassification Detected
         ↓
-Stop Deployment / Privileged Use
+Stop Deployment or Privileged Use
         ↓
-Correct Asset Classification
+Confirm Correct Device Purpose
         ↓
-Correct Autopilot Group Tag
+Correct Autopilot Classification
         ↓
 Verify Dynamic Group Membership
         ↓
-Reset / Reprovision If Incorrect Build Applied
+Reset / Reprovision If Required
         ↓
-Validate Correct Security Baseline
+Validate Correct Security State
         ↓
 Return Device to Service
 ```
 
-For a PAW especially, the safest design assumption is:
+For a PAW in particular, the safest assumption is:
 
 **if the device received the wrong security build, return it to a known-good state before privileged use.**
 
-#### Reclassification Is a Change of Purpose
-
-The same principle applies after deployment.
+### Reclassification Is a Change of Purpose
 
 Changing:
 
@@ -562,13 +513,11 @@ CORPORATE
 PAW
 ```
 
-is not simply changing a text label.
+is not simply changing a text value.
 
-The existing machine was already built according to the `CORPORATE` classification.
+The existing endpoint was built according to one provisioning purpose and is now being assigned another.
 
-The device purpose has now materially changed.
-
-The expected process therefore becomes:
+The expected process is therefore:
 
 ```text
 Change of Device Purpose
@@ -577,11 +526,11 @@ Approval
         ↓
 Update Autopilot Classification
         ↓
-Verify Group Membership
+Verify Expected Group Membership
         ↓
 Reset / Reprovision
         ↓
-Correct Profile Applied
+Correct Provisioning Path Applied
         ↓
 Security State Validated
         ↓
@@ -596,23 +545,20 @@ PAW
 Standard Corporate Endpoint
 ```
 
-should not mean handing the privileged workstation directly to an employee for everyday use.
+should not mean handing the existing privileged workstation directly to an employee for everyday productivity.
 
-Before reassignment, the machine should be brought back through a controlled provisioning process so privileged workstation state does not silently follow it into its new role.
+A controlled rebuild prevents privileged workstation state from silently following the hardware into its new purpose.
 
-#### Classification Values Must Stay Predictable
+### Classification Values Must Stay Predictable
 
-Wire Finance uses uppercase values for Autopilot classifications.
-
-Current approved values are:
+Wire Finance currently uses two approved uppercase Group Tag values:
 
 ```text
 CORPORATE
-
 PAW
 ```
 
-We deliberately avoid creating inconsistent variations such as:
+The organisation deliberately avoids inconsistent alternatives such as:
 
 ```text
 Corp
@@ -624,33 +570,17 @@ VIP
 IT
 ```
 
-because uncontrolled classification values make automation harder to understand and govern.
+Uncontrolled values make automation harder to understand and govern.
 
-New Group Tags should be introduced only when a **genuinely different provisioning path** exists.
+A new Group Tag should therefore be introduced only when there is a **genuinely different foundational provisioning path**.
 
-For example, a future shared or kiosk-device architecture might eventually justify another classification.
-
-But a new department does not automatically need a new Autopilot tag.
-
-#### Why There Is No `FINANCE`, `HR`, or `SALES` Tag
+### Why There Is No `FINANCE`, `HR`, or `SALES` Tag
 
 Autopilot classification is not intended to reproduce the organisational chart.
 
+Finance, HR, Operations, Sales, and IT employees can all use the same underlying standard corporate endpoint architecture.
+
 For example:
-
-```text
-FINANCE
-HR
-OPERATIONS
-SALES
-IT
-```
-
-do not currently need separate Autopilot classifications.
-
-Why?
-
-Because those employees can still receive the same underlying **standard corporate device build**.
 
 ```text
 Finance Employee
@@ -666,49 +596,35 @@ Sales Employee
 CORPORATE
 ```
 
-Department-specific applications or access can be handled through other targeting mechanisms later.
+Department-specific applications, information access, and other user requirements can be targeted through the appropriate identity and application mechanisms.
 
-The Autopilot Group Tag remains focused on:
+The Autopilot classification remains focused on one question:
 
-**Does this device require a materially different provisioning architecture?**
+**Does this device require a materially different foundational provisioning path?**
 
-That prevents the classification model from becoming unnecessarily complicated.
+That keeps the classification model simple.
 
-#### Why Only Two Classifications?
+### Why Pilot and Test Are Not Autopilot Classifications
 
-Wire Finance currently has only two materially different foundational endpoint models:
+Wire Finance also uses groups such as:
 
-```text
-STANDARD CORPORATE
-```
+`SG-DEVICES-WINDOWS-PILOT`
 
 and:
 
-```text
-PRIVILEGED
-```
+`SG-DEVICES-NONCOMPLIANT-TEST`
 
-The pilot and noncompliance-test groups do not require separate Autopilot tags.
+Those groups serve different purposes.
 
-That is because:
+`PILOT` describes how a device is being used during a controlled rollout.
 
-```text
-PILOT
-```
+`NONCOMPLIANT TEST` describes a temporary testing state.
 
-describes **how a device is temporarily being used during rollout**.
+Neither necessarily requires a completely different foundational Windows build.
 
-And:
+A test device might therefore follow the normal corporate Autopilot path while also being deliberately added to testing populations.
 
-```text
-NONCOMPLIANT TEST
-```
-
-describes **a controlled testing function**.
-
-Neither necessarily requires a completely different base build.
-
-For example:
+Conceptually:
 
 ```text
 WF-TST-001
@@ -717,26 +633,25 @@ Autopilot Tag = CORPORATE
       ↓
 Standard Corporate Base Build
       ↓
-Additionally Assigned To:
-SG-DEVICES-WINDOWS-PILOT
-        +
-SG-DEVICES-NONCOMPLIANT-TEST
+Additional Test Membership
+      ├── SG-DEVICES-WINDOWS-PILOT
+      └── SG-DEVICES-NONCOMPLIANT-TEST
 ```
 
-That gives us a cleaner model than creating a different Autopilot tag for every lab activity.
+This is cleaner than creating a new Autopilot classification for every lab or rollout activity.
 
-#### Classification and Device Groups
+### Autopilot Classification and Device Groups
 
-The architecture now connects cleanly:
+The architecture now connects cleanly.
 
 ```text
-Purpose
+Device Purpose
       ↓
-Autopilot Classification
+Autopilot Group Tag
       ↓
 Dynamic Device Group
       ↓
-Deployment Profile
+Provisioning Target
       ↓
 Provisioned Device
 ```
@@ -748,7 +663,7 @@ CORPORATE
       ↓
 SG-DEVICES-AUTOPILOT-CORPORATE
       ↓
-Standard Corporate Deployment
+Standard Corporate Provisioning
 ```
 
 For the privileged path:
@@ -758,47 +673,45 @@ PAW
       ↓
 SG-DEVICES-PRIVILEGED
       ↓
-Hardened PAW Deployment
+Privileged Workstation Provisioning
 ```
 
-The Group Tag determines the provisioning classification.
+The Group Tag establishes provisioning classification.
 
 The dynamic group converts that classification into a targetable population.
 
-The deployment profile can then act on that population.
+The provisioning configuration can then act on that population.
 
-That gives Wire Finance a chain that can be understood and audited.
+### Pre-Provisioning Validation
 
-#### Pre-Provisioning Validation
-
-Before an important device is provisioned, Endpoint Management should be able to verify the expected classification.
+Before an important device begins provisioning, Wire Finance should be able to confirm its expected classification.
 
 | Check | Standard Endpoint | PAW |
 |---|---|---|
-| **Device registered in Autopilot** | Yes | Yes |
+| **Device registered with Autopilot** | Yes | Yes |
 | **Asset ownership confirmed** | Yes | Yes |
-| **Group Tag present** | `CORPORATE` | `PAW` |
+| **Intended purpose confirmed** | Employee endpoint | Privileged administration |
+| **Group Tag** | `CORPORATE` | `PAW` |
 | **Expected dynamic group** | `SG-DEVICES-AUTOPILOT-CORPORATE` | `SG-DEVICES-PRIVILEGED` |
-| **Expected deployment profile** | Standard | Hardened |
-| **Intended user / purpose confirmed** | Yes | Yes |
+| **Expected provisioning path** | Standard | Privileged |
 | **Security approval** | Normal IT process | Required |
 
-This gives Wire Finance a small pre-flight check before deployment begins.
-
-The goal is simple:
+The objective is simple:
 
 **catch a classification problem before it becomes a provisioning problem.**
 
-#### Wire Finance Autopilot Classification Standard
+### Wire Finance Autopilot Classification Standard
 
-The current standard can therefore be recorded as:
+The current standard is:
 
 ```text
-Classification:
+STANDARD CORPORATE DEVICE
+
+Group Tag:
 CORPORATE
 
-Purpose:
-Standard Employee Windows Provisioning
+OrderID:
+[OrderID]:CORPORATE
 
 Dynamic Group:
 SG-DEVICES-AUTOPILOT-CORPORATE
@@ -806,18 +719,23 @@ SG-DEVICES-AUTOPILOT-CORPORATE
 Dynamic Rule:
 (device.devicePhysicalIds -any (_ -eq "[OrderID]:CORPORATE"))
 
-Approval:
-IT / Endpoint Management
+Purpose:
+Standard Wire Finance Windows provisioning
+
+Authority:
+IT
 ```
 
 and:
 
 ```text
-Classification:
+PRIVILEGED ACCESS WORKSTATION
+
+Group Tag:
 PAW
 
-Purpose:
-Privileged Access Workstation Provisioning
+OrderID:
+[OrderID]:PAW
 
 Dynamic Group:
 SG-DEVICES-PRIVILEGED
@@ -825,21 +743,22 @@ SG-DEVICES-PRIVILEGED
 Dynamic Rule:
 (device.devicePhysicalIds -any (_ -contains "[OrderID]:PAW"))
 
-Approval:
-IT / Endpoint Management + Security
+Purpose:
+Privileged workstation provisioning
+
+Authority:
+IT + Security
 ```
 
 The governing principle is:
 
 **Autopilot classification determines provisioning intent; it does not independently establish device trust.**
 
-And when that classification changes the security purpose of an existing device, Wire Finance treats it as more than a label change.
+If the classification changes the device's security purpose, Wire Finance treats that as a controlled reprovisioning event rather than a simple label change.
 
-It requires controlled reprovisioning and validation.
+### We Know the Build — Now We Need the Journey
 
-#### We Know the Build — Now We Need the Journey
-
-At this point, the standard corporate device has a clear identity before provisioning begins.
+Wire Finance can now identify the provisioning path a new corporate endpoint should follow.
 
 ```text
 Corporate Asset
@@ -850,27 +769,23 @@ CORPORATE
       ↓
 SG-DEVICES-AUTOPILOT-CORPORATE
       ↓
-Standard Deployment Path
+Standard Corporate Provisioning
 ```
 
-We know **which build** the device should receive.
+We know **which build** the standard device should receive.
 
-But we have not yet followed that build from beginning to end.
+The next question is what happens from beginning to end.
 
-What happens after the device is acquired?
-
-When is it registered?
+When is the device registered?
 
 When does the employee sign in?
 
-When does Microsoft Entra Join happen?
+When does Microsoft Entra Join occur?
 
-When does Intune take control?
+When does Intune enrollment happen?
 
 When are applications and security controls delivered?
 
-And when do we finally consider the laptop ready to hand to the employee?
+And when is the device finally considered ready for normal employee use?
 
-That brings us to the next part of the design:
-
-**the Standard Corporate Provisioning Journey.**
+That takes us to the **Standard Corporate Provisioning Journey**.

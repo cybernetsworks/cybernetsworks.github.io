@@ -11,14 +11,14 @@ We now know what kinds of devices Wire Finance operates.
 
 We know who owns them.
 
-And we have a consistent naming convention that tells us their intended function.
+And we have a naming convention that tells us their intended function.
 
 But there is still an important gap.
 
 A laptop can be:
 
 ```text
-Corporate Owned
+Corporate-Owned
 ```
 
 without yet being:
@@ -40,30 +40,30 @@ Those are different states.
 
 This is where the **Device Identity and Join Model** begins.
 
-#### Four Different Questions
+### Four Different Questions
 
-It is easy to treat device ownership, identity, management, and compliance as though they mean the same thing.
+It is easy to treat ownership, identity, management, and compliance as though they mean the same thing.
 
 They do not.
 
-Each one answers a different question.
+Each answers a different question.
 
 ```text
 Ownership
-↓
+   ↓
 Who controls the physical asset?
 
 Device Identity
-↓
+   ↓
 How does Microsoft recognise the device?
 
 Management
-↓
-Who configures and controls the endpoint?
+   ↓
+Which platform configures and manages it?
 
 Compliance
-↓
-Does the device currently meet our requirements?
+   ↓
+Does it currently meet our requirements?
 ```
 
 Wire Finance deliberately keeps these concepts separate.
@@ -71,7 +71,7 @@ Wire Finance deliberately keeps these concepts separate.
 That means:
 
 ```text
-Company Purchased
+Company-Owned
       ≠
 Microsoft Entra Joined
 
@@ -88,11 +88,11 @@ Compliant
 Automatically Trusted
 ```
 
-Each stage contributes another piece of information about the device.
+Each stage gives us another piece of information about the endpoint.
 
-#### Why Cloud-First Fits Wire Finance
+### Why Cloud-First Fits Wire Finance
 
-Wire Finance already has:
+Wire Finance already operates around:
 
 ```text
 Microsoft 365
@@ -104,9 +104,9 @@ Microsoft Intune
 
 What it does not yet have is a production on-premises Active Directory environment.
 
-That means there is no current requirement to introduce an on-premises dependency simply so new laptops can receive an identity.
+There is therefore no reason to introduce an on-premises dependency simply so new employee laptops can receive an organisational identity.
 
-The first endpoint architecture can therefore remain straightforward:
+The initial model can remain cloud-first:
 
 ```text
 Employee
@@ -122,13 +122,11 @@ Management
 Microsoft Intune
 ```
 
-Hybrid identity will be introduced later because the project has a reason to study it — not because every new device needs it from day one.
+On-premises Active Directory and hybrid identity will be introduced later because the project has a reason to study them — not because every new Wire Finance endpoint requires them from day one.
 
-#### The Initial Wire Finance Model
+### The Initial Wire Finance Model
 
-The first Wire Finance endpoint deployment is **cloud-first**.
-
-New corporate Windows endpoints will use:
+New corporate Windows endpoints follow this architecture:
 
 ```text
 Corporate-Owned Windows Device
@@ -139,41 +137,41 @@ Microsoft Entra Join
         ↓
 Microsoft Intune Enrollment
         ↓
-Security Controls
+Configuration + Security Controls
         ↓
 Compliance Evaluation
 ```
 
-Microsoft Entra Join provides the device identity.
+![Wire Finance Device Identity and Join Model]({{ '/assets/images/active-directory/device_identity_join_model.png' | relative_url }})
 
-Windows Autopilot helps automate provisioning.
+Each technology has a different responsibility.
 
-Microsoft Intune becomes the management platform.
+**Windows Autopilot** helps establish the provisioning experience.
 
-This gives Wire Finance a cloud-native device foundation without requiring on-premises Active Directory during the first phase.
+**Microsoft Entra Join** establishes the organisational device identity.
 
-![Wire Finance Device Identity and Join Model]({{ '/assets/images/device_identity_join_model.png' | relative_url }})
+**Microsoft Intune** provides management and configuration.
 
-#### Microsoft Entra Device States
+Later security and compliance controls determine whether the endpoint continues to meet Wire Finance requirements.
 
-There are three device identity states that matter to the wider Wire Finance design.
+The technologies work together, but they are not interchangeable.
 
-They may all create device-related records in Microsoft services, but they represent different deployment models.
+### Microsoft Entra Device Identity States
 
-| Device Identity | Meaning | Typical Use | Wire Finance Position |
+Three Microsoft Entra device states matter to the wider Wire Finance design.
+
+| Device Identity | Meaning | Typical Scenario | Wire Finance Position |
 |---|---|---|---|
-| **Microsoft Entra joined** | Device is directly joined to the Wire Finance Microsoft Entra tenant | Corporate Windows devices | Primary model |
-| **Microsoft Entra registered** | A work or school identity is associated with a device without full organisational join | Personal / BYOD devices | Outside initial deployment scope |
-| **Microsoft Entra hybrid joined** | Device is joined to on-premises Active Directory and also represented in Microsoft Entra | Existing domain-joined estates | Future legacy / lab scenario |
+| **Microsoft Entra joined** | Device is directly joined to the Wire Finance Microsoft Entra tenant | Corporate Windows endpoint | Primary model |
+| **Microsoft Entra registered** | A work or school identity is associated with a device without full organisational join | Personal / BYOD device | Outside initial deployment scope |
+| **Microsoft Entra hybrid joined** | Device is joined to on-premises Active Directory and also represented in Microsoft Entra | Existing domain-joined environment | Future hybrid lab |
 
-The important part is not simply remembering the three names.
+These states represent different relationships between a device and the organisation.
 
-It is understanding that they represent different relationships between the device and the organisation.
-
-For the initial rollout, the rule is simple:
+For the initial Wire Finance rollout, the rule is straightforward:
 
 ```text
-NEW CORPORATE WINDOWS DEVICE
+NEW CORPORATE WINDOWS ENDPOINT
         ↓
 Microsoft Entra Joined
 ```
@@ -190,245 +188,183 @@ and not:
 Microsoft Entra Hybrid Joined
 ```
 
-#### Microsoft Entra Joined
+### Microsoft Entra Joined
 
-Microsoft Entra Join is the standard model for new Wire Finance corporate Windows endpoints.
+Microsoft Entra Join is the standard identity model for new Wire Finance corporate Windows endpoints.
 
-The device becomes directly associated with the Wire Finance Entra tenant rather than depending on an on-premises Active Directory domain first.
+The device joins the Wire Finance Microsoft Entra tenant directly rather than first depending on an on-premises Active Directory domain.
 
-For the initial deployment, this applies to:
+The initial client-device classes use this model:
 
 ```text
 WF-LT-###
 WF-PAW-###
 WF-TST-###
-```
-
-So the standard relationship becomes:
-
-```text
-Wire Finance Corporate Device
         ↓
 Microsoft Entra Joined
-        ↓
-Cloud Device Identity
 ```
 
-For example:
+The join type is the same even though the devices serve different purposes.
 
-```text
-WF-LT-001
-      ↓
-Microsoft Entra ID
-      ↓
-Join Type:
-Microsoft Entra Joined
-```
+A standard corporate laptop, a privileged workstation, and a test endpoint can all be Microsoft Entra joined.
 
-This keeps the first phase cloud-native and avoids introducing an on-premises dependency before the project actually needs one.
+What changes is how each device is classified, provisioned, targeted, secured, and evaluated.
 
-#### Microsoft Entra Registered
+This gives us an important principle:
 
-Microsoft Entra registered devices represent a different relationship.
+**same join model does not mean same security posture.**
 
-This model is more appropriate for scenarios where a work or school identity is associated with a device without fully joining that device to the organisation.
+### Microsoft Entra Registered
+
+Microsoft Entra registered represents a different relationship.
 
 Conceptually:
 
 ```text
-Personal Laptop
+Personal Device
       ↓
 User Adds Wire Finance Work Account
       ↓
 Microsoft Entra Registered
 ```
 
-That is **not equivalent to corporate join**.
+That does not make the device equivalent to a corporate Wire Finance endpoint.
 
 ```text
 Microsoft Entra Registered
         ≠
-Corporate-Managed Wire Finance Endpoint
+Corporate-Managed Endpoint
 ```
 
-For Wire Finance, this maps most naturally to a possible future BYOD model.
+This model is most relevant to a possible future BYOD scenario.
 
-But BYOD is outside the initial managed-device deployment.
+Because personally owned Windows endpoints are outside the initial managed fleet, Microsoft Entra registered is **not** the standard Wire Finance endpoint model.
 
-So:
+### Microsoft Entra Hybrid Joined
 
-```text
-Microsoft Entra Registered
-        ↓
-Possible Future BYOD
-        ↓
-Not the Current Corporate Standard
-```
+Microsoft Entra hybrid joined devices belong to both an on-premises Active Directory environment and Microsoft Entra.
 
-#### Microsoft Entra Hybrid Joined
-
-Microsoft Entra hybrid joined devices belong to both worlds:
+Conceptually:
 
 ```text
 On-Premises Active Directory
         +
 Microsoft Entra ID
-```
-
-That model becomes relevant when an organisation already has traditional domain-joined Windows devices and wants those identities represented in Microsoft Entra.
-
-Wire Finance does not need that model yet.
-
-On-premises Active Directory is planned for a later phase of the project.
-
-When that happens, Hybrid Join will be introduced deliberately so we can compare:
-
-```text
-Cloud-Native Device
         ↓
-Microsoft Entra Joined
-```
-
-with:
-
-```text
-Traditional Domain Device
-        ↓
-Active Directory Joined
-        +
 Microsoft Entra Hybrid Joined
 ```
 
-The future hybrid lab is therefore intended for learning and legacy compatibility rather than becoming the default model for newly provisioned Wire Finance endpoints.
+Wire Finance does not need this model during the initial cloud-first rollout.
 
-#### Primary Join Model
+Later, when on-premises Active Directory is introduced, a separate hybrid lab can be used to explore traditional domain-joined devices and compare them with the existing cloud-native fleet.
 
-For the first endpoint deployment, the decision is straightforward.
+The objective is not to convert every existing Wire Finance endpoint to hybrid join.
 
-```text
-Standard Corporate Endpoint
-WF-LT-###
-        ↓
-Microsoft Entra Joined
-```
+Instead, the later environment will allow us to understand why cloud-native and hybrid architectures behave differently.
 
-```text
-Privileged Access Workstation
-WF-PAW-###
-        ↓
-Microsoft Entra Joined
-```
+### Join Decision Matrix
 
-```text
-Deployment / Test Endpoint
-WF-TST-###
-        ↓
-Microsoft Entra Joined
-```
+The current position can be summarised as:
 
-All three use the same core cloud identity model.
-
-What changes later is **how they are provisioned, grouped, secured, and evaluated**.
-
-That distinction becomes particularly important for privileged workstations.
-
-#### Join Decision Matrix
-
-The Wire Finance position can be summarised like this:
-
-| Device | Identity Model | Intune | Autopilot | Status |
+| Device | Identity Model | Intune | Autopilot | Position |
 |---|---|---|---|---|
-| **`WF-LT-###`** | Microsoft Entra joined | Yes | Yes | Standard |
-| **`WF-PAW-###`** | Microsoft Entra joined | Yes | Yes | PAW standard |
-| **`WF-TST-###`** | Microsoft Entra joined | Yes | Yes where applicable | Lab / test |
-| **Personal / BYOD** | Microsoft Entra registered | Possible later | No standard deployment | Out of scope initially |
-| **Existing AD workstation** | Microsoft Entra hybrid joined | Possible | Future / legacy | Future |
-| **`WF-DC-*` / `WF-SRV-*`** | Separate server identity model | Separate | No | Future |
-| **`WF-LEGACY-*`** | Isolated | No trusted corporate enrollment | No | Lab only |
+| **`WF-LT-###`** | Microsoft Entra joined | Yes | Yes | Standard corporate endpoint |
+| **`WF-PAW-###`** | Microsoft Entra joined | Yes | Yes | Privileged endpoint |
+| **`WF-TST-###`** | Microsoft Entra joined | Yes | Where applicable | Test / validation |
+| **Personal / BYOD** | Microsoft Entra registered where applicable | Future decision | No standard deployment | Out of scope initially |
+| **Existing AD workstation** | Microsoft Entra hybrid joined | Future decision | Separate scenario | Future hybrid lab |
+| **Servers / infrastructure** | Separate server identity model | Separate management path | No standard client Autopilot | Future |
+| **Legacy systems** | Isolated according to test purpose | Not part of normal trusted fleet | No | Lab only |
 
-This makes one important point clear:
+This makes another important point clear:
 
-**client device identity and server identity are not the same problem.**
+**client-device identity and server identity are different design problems.**
 
-A domain controller is not simply a large employee laptop.
+A domain controller is not simply another employee endpoint.
 
-A legacy test system is not a trusted corporate endpoint.
+A legacy test system is not a trusted corporate laptop.
 
-And a personal device does not become a corporate device simply because a user signs into Microsoft 365 from it.
+And a personal device does not become corporate-owned simply because somebody signs into Microsoft 365 from it.
 
-#### Autopilot and Microsoft Entra Join
+### Autopilot, Entra Join, and Intune
 
-The normal employee deployment will use a **user-driven Windows Autopilot journey**.
+These three concepts are closely connected, but they perform different jobs.
 
-Conceptually:
+A normal Wire Finance employee provisioning journey looks broadly like:
 
 ```text
-Automatic Intune Enrollment Configured
+Approved Corporate Device
         ↓
-Approved Users Allowed to Join Devices
+Registered for Windows Autopilot
         ↓
-Device Registered with Autopilot
-        ↓
-Device Group Assigned
-        ↓
-Autopilot Profile Assigned
-        ↓
-User Starts Device
+Provisioning Experience Starts
         ↓
 User Authenticates
         ↓
 Device Joins Microsoft Entra
         ↓
-Device Enrolls into Intune
+Device Enrolls into Microsoft Intune
 ```
 
-We will configure those pieces later during the actual Autopilot implementation.
+The detailed Autopilot classification, profiles, group targeting, and provisioning flow are covered later in the Device Provisioning Model.
 
-For now, the important thing is understanding the relationship between them.
-
-Consider Olivia Carter receiving a corporate laptop:
+For now, the important distinction is:
 
 ```text
-WF-LT-001
-      ↓
-Windows Autopilot
-      ↓
-Olivia Signs In
-      ↓
-Microsoft Entra Join
-      ↓
-Intune Enrollment
+Autopilot
+   ↓
+Provisioning
+
+Microsoft Entra
+   ↓
+Device Identity
+
+Microsoft Intune
+   ↓
+Device Management
 ```
 
-Olivia's user identity authenticates during the provisioning process.
+### User Identity and Device Identity Are Separate
 
-But the endpoint receives its own **device identity**.
+Consider Olivia Carter receiving a corporate laptop.
 
 ```text
 Olivia Carter
       ↓
 User Identity
 
-WF-LT-001
+Corporate Laptop
       ↓
 Device Identity
 ```
 
-The person and the endpoint become related.
+During a user-driven provisioning process, Olivia authenticates as herself.
+
+The endpoint then establishes its own identity inside Microsoft Entra.
+
+The person and the device become related.
 
 They do not become the same identity.
 
-#### Join Is Not the Same as Intune Enrollment
+This distinction becomes important later when Wire Finance begins making decisions that consider both:
+
+```text
+Who is the user?
+        +
+What device are they using?
+```
+
+### Join Is Not the Same as Intune Enrollment
 
 This distinction is critical.
 
 **Microsoft Entra Join** answers:
 
-> Which organisation does this device belong to for identity and authentication?
+> Which organisation does this Windows device belong to for identity purposes?
 
 **Microsoft Intune enrollment** answers:
 
-> Which management platform controls and configures this device?
+> Which management service is responsible for configuring and managing the endpoint?
 
 So:
 
@@ -438,7 +374,7 @@ Device Identity
 Device Management
 ```
 
-For Wire Finance, we deliberately combine both:
+Wire Finance deliberately wants both:
 
 ```text
 Microsoft Entra Joined
@@ -448,73 +384,52 @@ Intune Enrolled
 Corporate Managed Endpoint
 ```
 
-But one does not automatically prove the other.
+But the existence of one state does not prove the other.
 
-A device could have a Microsoft Entra identity without being correctly managed.
+A device may have a Microsoft Entra identity without being correctly managed.
 
-That is why both states need to be understood separately.
+That is why both states need to be validated separately.
 
-#### Initial MDM Enrollment Scope
+### Initial Automatic MDM Enrollment
 
-Wire Finance will not enable automatic Intune enrollment for the entire organisation on day one.
+Wire Finance does not immediately apply automatic Intune enrollment to the entire workforce.
 
-The pilot phase is deliberately smaller.
-
-The planned initial model is:
+The first deployment uses a controlled pilot.
 
 ```text
-MDM User Scope
-      =
-Some
-```
-
-targeting:
-
-```text
-SG-PILOT-IDENTITY
-```
-
-So:
-
-```text
-Pilot Users
-      ↓
-SG-PILOT-IDENTITY
-      ↓
 Automatic MDM Enrollment
-      ↓
-Validate
-      ↓
+        ↓
+User Scope = Some
+        ↓
+SG-PILOT-IDENTITY
+        ↓
+Validate Enrollment Journey
+        ↓
 Expand Later
 ```
 
-This lets the initial pilot identities test the enrollment journey without immediately affecting the full 25-person workforce.
+This gives the initial pilot users access to the automatic enrollment journey without immediately exposing the full 25-person workforce to an unvalidated configuration.
 
-Once the process has been validated, the enrollment scope can be expanded to the wider approved corporate population.
+The detailed pilot strategy is covered later in the Device Provisioning Model.
 
-That gives us another example of the Wire Finance rollout principle:
+### Joining a Device Does Not Grant Local Administrator Rights
 
-**test with a controlled population before expanding broadly.**
+Receiving a Wire Finance laptop does not mean an employee should become a permanent Windows administrator.
 
-#### Joining a Device Does Not Make the User an Administrator
-
-Another boundary needs to be explicit.
-
-Receiving or joining a Wire Finance device does **not** grant the employee permanent local administrator rights.
-
-The existing user-access design already established:
+The normal access design already established:
 
 ```text
-Local Administrator Rights:
+Local Administrator Rights
+        =
 None by Default
 ```
 
-So the expected journey is:
+The expected employee journey is therefore:
 
 ```text
-Olivia Carter
+Employee
       ↓
-Receives WF-LT-001
+Corporate Endpoint
       ↓
 Microsoft Entra Join
       ↓
@@ -523,28 +438,13 @@ Intune Enrollment
 Standard Windows User
 ```
 
-not:
+Administrative support and recovery should use controlled administrative mechanisms rather than permanently elevating normal employees.
 
-```text
-Olivia Carter
-      ↓
-Local Administrators Group
-```
+Join status and local privilege are separate decisions.
 
-Administrative recovery and endpoint support will later use controlled privileged mechanisms rather than permanently elevating ordinary users.
+### PAWs Use the Same Join Foundation
 
-The planned model includes areas such as:
-
-- Dedicated administrative identities
-- Intune RBAC
-- Windows LAPS
-- Controlled endpoint-support privileges
-
-This keeps normal productivity and administrative privilege separate.
-
-#### PAWs Use the Same Join Model — But Not the Same Trust Level
-
-Privileged Access Workstations use the same core device identity foundation as standard corporate laptops:
+A Privileged Access Workstation uses the same core cloud identity foundation:
 
 ```text
 Microsoft Entra Joined
@@ -552,111 +452,56 @@ Microsoft Entra Joined
 Intune Managed
 ```
 
-But that does not make the two device types equivalent.
+as a standard corporate endpoint.
+
+That does not make them equivalent.
+
+```text
+Standard Endpoint
+        ↓
+Normal Productivity
+
+Privileged Access Workstation
+        ↓
+Controlled Administration
+```
+
+The difference comes from classification, targeting, security configuration, compliance expectations, and the activities permitted on the device.
+
+There is no separate "privileged join" type.
+
+The same identity platform can support different device-security tiers.
+
+The dedicated PAW page will define that model in more detail.
+
+### A Note About Device Names
+
+The join model does not depend on the Windows hostname.
+
+A device following the Wire Finance naming convention may ultimately be represented as:
 
 ```text
 WF-LT-001
-      ↓
-Standard Corporate Endpoint
 ```
 
-while:
+but the name itself does not determine whether the endpoint is Microsoft Entra joined or Intune managed.
+
+Likewise, a newly provisioned device may temporarily use a Windows-generated hostname while still establishing the correct device identity and management state.
+
+This keeps the earlier naming principle intact:
+
+**the device name describes intended function; it does not create trust.**
+
+### Device Trust Builds Progressively
+
+We can now connect the pieces of the device model.
 
 ```text
-WF-PAW-001
-      ↓
-Privileged Administrative Endpoint
-```
-
-The difference comes from the controls around the device:
-
-```text
-Autopilot Classification
-        +
-Device Group Membership
-        +
-Security Configuration
-        +
-Compliance Policy
-        +
-Conditional Access
-```
-
-not from choosing a different Entra join type.
-
-There is no special:
-
-```text
-Super Privileged Join
-```
-
-Instead, the same identity platform supports different device trust tiers.
-
-That gives us a useful principle:
-
-**same join model does not mean same security posture.**
-
-#### The Future Hybrid Phase
-
-Later in the project, Wire Finance will introduce on-premises Active Directory.
-
-That gives us an opportunity to build a deliberate comparison environment rather than converting the existing cloud-native fleet automatically.
-
-For example:
-
-```text
-Cloud-Native Endpoint
-WF-LT-001
-      ↓
-Microsoft Entra Joined
-```
-
-compared with:
-
-```text
-Legacy / Hybrid Test Endpoint
-WF-TST-HYB-001
-      ↓
-Active Directory Joined
-      ↓
-Microsoft Entra Hybrid Joined
-```
-
-That future lab can help us compare areas such as:
-
-- Authentication
-- Group Policy
-- Intune management
-- Conditional Access
-- Single sign-on
-- Troubleshooting
-- Logging
-- Operational overhead
-
-The goal is not simply to prove that Hybrid Join exists.
-
-It is to understand **why cloud-native and hybrid architectures behave differently**.
-
-Existing cloud-native Wire Finance devices will therefore not automatically be converted into Hybrid Join devices when Active Directory arrives.
-
-#### Device Trust Builds Progressively
-
-We can now connect the pieces from the previous lessons.
-
-Trust does not appear at the moment the device is purchased.
-
-It does not appear when we assign a hostname.
-
-And it does not appear simply because a device object exists in Microsoft Entra.
-
-The trust journey develops progressively:
-
-```text
-Device Purchased
+Device Acquired
       ↓
 Corporate Ownership Established
       ↓
-Autopilot Registered
+Provisioning Intent Established
       ↓
 Microsoft Entra Joined
       ↓
@@ -666,21 +511,21 @@ Security Controls Applied
       ↓
 Compliance Evaluated
       ↓
-Conditional Access Can Use Device State
+Device State Can Influence Access Decisions
 ```
 
-Each stage adds context.
-
-No single stage by itself means:
+No individual stage means:
 
 ```text
 This Device Is Trusted
 ```
 
+on its own.
+
 For example:
 
 ```text
-Corporate Owned
+Corporate-Owned
 ```
 
 does not automatically mean:
@@ -701,15 +546,11 @@ does not automatically mean:
 Secure
 ```
 
-Instead, each stage gives Wire Finance another signal about the endpoint.
+Each stage contributes another signal about the endpoint.
 
-That continues the principle established earlier:
+### Wire Finance Design Decision
 
-**device presence does not equal device trust.**
-
-#### Wire Finance Design Decision
-
-The current device identity model can therefore be summarised as:
+The Device Identity and Join Model can therefore be summarised as:
 
 ```text
 Primary Client Join Type:
@@ -718,55 +559,49 @@ Microsoft Entra Joined
 Primary Device Management:
 Microsoft Intune
 
-Primary Provisioning:
+Primary Provisioning Platform:
 Windows Autopilot
 
-Deployment Mode:
+Initial Autopilot Experience:
 User-Driven
 
 Automatic MDM Enrollment:
-Required
+Required for the managed corporate journey
 
-Initial Enrollment Scope:
+Initial MDM Scope:
 SG-PILOT-IDENTITY
 
-Standard Users:
-No Local Administrator Rights by Default
+Normal Employee Rights:
+Standard User
 
 Microsoft Entra Registered:
-Future BYOD Only
+Possible future BYOD scenario
 
 Microsoft Entra Hybrid Joined:
-Future Legacy / On-Premises Lab Scenario
+Future Active Directory / hybrid lab
 
 Servers:
-Separate Identity / Provisioning Model
+Separate identity and provisioning model
 
-Design Principle:
-Joining, managing, and trusting a device are separate
-security decisions.
+Core Principle:
+Ownership, joining, management, compliance,
+and trust are separate device states.
 ```
 
-That gives us a consistent device identity foundation.
+That gives Wire Finance a consistent device-identity foundation.
 
-But knowing how a device joins the organisation is still only part of the problem.
+But once more devices begin appearing in Microsoft Entra ID and Intune, the organisation needs a way to distinguish different populations.
 
-Once dozens of endpoints begin appearing in Microsoft Entra ID and Intune, we need a way to separate:
+Corporate endpoints need one kind of targeting.
 
-```text
-Corporate Devices
+Privileged devices may need another.
 
-Privileged Devices
+Autopilot devices need provisioning classification.
 
-Pilot Devices
+Pilot devices need controlled deployment.
 
-Autopilot Devices
+Test devices may need deliberate non-compliant scenarios.
 
-Non-Compliant Test Devices
-```
+The next question is therefore:
 
-And ideally, some of that classification should happen automatically.
-
-So the next question is:
-
-**How should Wire Finance organise its device identities into groups so provisioning, testing, management, and security policies reach the right endpoints?**
+**How should Wire Finance organise device identities into groups so that provisioning, management, testing, and security policies reach the correct endpoints?**
