@@ -17,7 +17,7 @@ The number of employees, the departments they work in, where they work from, the
 
 Wire Finance is intentionally small enough for us to understand its environment clearly, while still having enough moving parts to introduce realistic identity and security challenges.
 
-#### Wire Finance at a Glance
+### Wire Finance at a Glance
 
 | Area | Wire Finance |
 |---|---|
@@ -32,50 +32,97 @@ Wire Finance is intentionally small enough for us to understand its environment 
 | **Email Security** | Microsoft Defender for Office 365 |
 | **SIEM / SOAR** | Microsoft Sentinel |
 | **Future Expansion** | On-premises Active Directory and hybrid identity |
-| **SOC Model** | Small internal SOC with one analyst and an IT administrator |
+| **SOC Model** | Small internal security operations capability |
 | **Azure Budget** | Maximum of $150 |
-| **Lab Model** | Virtual devices with a small cloud footprint |
+| **Lab Compute Model** | Most virtual machines run locally, with Azure used only where required |
 
-#### Why Does This Matter?
+### Departments
 
-At first glance, 25 employees might not sound like a particularly complicated environment.
+Wire Finance is divided into five departments:
 
-But consider what already exists inside the company.
+| Department | Employees | Business Function |
+|---|---:|---|
+| **Finance** | 5 | Financial records, reporting, accounting, and payment-related activity |
+| **HR** | 2 | Employee information, recruitment, onboarding, and people operations |
+| **Operations** | 7 | Day-to-day business processes and customer operations |
+| **Sales** | 7 | Customer relationships, account activity, and revenue generation |
+| **IT** | 4 | Technology administration, endpoint deployment, identity, and security operations |
+| **Total** | **25** | |
 
-Finance handles accounting, payments, reporting, and financial records.
+Although every employee works for the same company, their responsibilities are different. Those differences will later influence the access, applications, devices, and security controls they receive.
 
-HR works with employee information, recruitment, and onboarding.
+### People We Will Follow
 
-Operations deals with business processes and customer activity.
+Rather than treat Wire Finance as a collection of anonymous accounts, we will follow several employees throughout the project.
 
-Sales manages customer relationships and account information.
+| Employee | Department | Role |
+|---|---|---|
+| **Jordan Lee** | IT | Head of Security Operations |
+| **Alex Morgan** | IT | IT Administrator |
+| **Taylor Reed** | IT | SOC Analyst |
+| **Casey Ng** | IT | Deployment/Support Engineer |
+| **Maya Patel** | HR | HR Manager |
+| **Olivia Carter** | Finance | Finance Analyst |
+| **Ethan Brooks** | Operations | Operations Specialist |
+| **Noah Williams** | Sales | Sales Representative |
 
-IT is responsible for administration, deployment, and security operations.
+These identities will eventually help us test real scenarios such as employee onboarding, role-based access, privileged administration, endpoint deployment, security monitoring, and incident investigation.
 
-These teams work for the same organisation, but they should not automatically have access to the same information.
+### Technology and Operating Model
 
-A member of the Sales team should not gain access to confidential HR records simply because they are an employee.
+Wire Finance begins as a cloud-first organisation.
 
-Someone in Finance may require access to financial records without necessarily having authority to process payments.
+Microsoft Entra ID provides the initial identity foundation, while Microsoft Intune manages corporate endpoints. Microsoft Defender will provide endpoint and email protection, and Microsoft Sentinel will later bring security telemetry together for monitoring, detection, and response.
 
-An IT administrator may need elevated permissions to manage systems, but those permissions should not be attached to the same account they use for everyday email and web browsing.
+The environment will not remain cloud-only forever.
 
-And with employees working both inside and outside the office, identity becomes one of the key ways Wire Finance determines who is connecting, what they are allowed to access, and under what conditions that access should be trusted.
+As the project develops, Wire Finance will introduce on-premises Active Directory and hybrid identity so that we can explore how modern cloud services interact with traditional enterprise infrastructure.
 
-#### A Small Organisation with Real Security Problems
+The lab also has practical constraints.
+
+Most virtual machines will run locally, while Azure will be used only where cloud infrastructure is genuinely required. This keeps the environment realistic while controlling unnecessary cloud spend.
+
+
+### Why the Company Profile Matters
+
+A 25-person company may sound simple, but even this environment already contains different responsibilities, sensitive information, remote access requirements, administrative roles, and security obligations.
+
+Finance should not automatically have the same access as HR.
+
+A Finance Analyst may need financial information without automatically receiving authority to process payments.
+
+IT staff may require elevated administrative capabilities, but those privileges should be governed separately from their everyday employee access.
+
+Remote workers also introduce another question: knowing who the user is may not be enough. We may also need to understand which device they are using and whether that device meets the organisation's security requirements.
+
+These are not yet access-control decisions.
+
+They are the business conditions that our identity and security architecture must respond to.
+
+### A Small Organisation with Real Security Problems
 
 Wire Finance may be fictional, but the problems we are going to solve are not.
 
-As the organisation grows, people will join, change departments, receive new responsibilities, work remotely, require temporary access, gain administrative privileges, and eventually leave the company.
+People will join the organisation, move between roles, receive new responsibilities, work remotely, require temporary access, gain administrative privileges, and eventually leave.
 
-The technology environment will grow as well.
+Devices will be purchased, provisioned, reassigned, secured, and retired.
 
-What begins with Microsoft Entra ID and cloud services will eventually expand into Active Directory and hybrid identity, giving us the opportunity to explore how modern and traditional identity systems coexist.
+Cloud services will generate logs and alerts.
 
-The challenge is therefore not simply to create user accounts.
+And eventually, something will go wrong.
 
-It is to create an identity and access model that can answer a much more important question:
+Before any of that happens, however, Wire Finance needs an identity model capable of answering one fundamental question:
 
 **Who should have access to what — and why?**
 
-Answering that question is where identity design really begins. In the next lesson, we’ll look at how Wire Finance approaches **Identity and Access Management Design.**
+That is where our Identity and Access Management design begins.
+
+
+
+
+
+
+
+
+
+

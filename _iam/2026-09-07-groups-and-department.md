@@ -3,17 +3,17 @@ layout: lesson
 title: "Organising Access: Groups and Departments"
 series: wire-finance
 parent: iam-design
-order: 4
+order: 3
 description: "Wire Finance has five departments, but access cannot be managed person by person forever. Here we translate the structure of the business into groups that can actually control access."
 ---
 
-Wire Finance now has different identity types, consistent naming conventions, and clear rules separating normal, privileged, and emergency access.
+Wire Finance now has different identity types and consistent naming conventions.
 
 But there is another problem to solve:
 
-**How do we manage access for an organisation without configuring every employee individually?**
+**How do we manage access without configuring every employee individually?**
 
-With only 25 employees, assigning permissions user by user might seem manageable.
+With only 25 employees, assigning permissions user by user might initially seem manageable.
 
 Olivia gets Finance access.
 
@@ -31,21 +31,19 @@ Or a new Finance employee joins.
 
 Or someone moves from Sales to Operations.
 
-Or the company grows.
+Or the organisation grows.
 
-Managing access directly against individual users might work at the beginning, but it becomes increasingly difficult to understand, maintain, and review as the organisation changes.
+Managing access directly against individual users quickly becomes difficult to understand, maintain, and review.
 
-Wire Finance therefore begins organising access around something much more stable:
+Wire Finance therefore organises access around something more predictable:
 
-**the structure of the business itself.**
+**the structure and responsibilities of the business.**
 
 This is where groups become important.
 
----
+### Start With the Organisation
 
-##### Start With the Organisation
-
-Before we create groups, we first need to understand how Wire Finance is structured.
+Wire Finance has five departments:
 
 | Department | Staff | Responsibility |
 |---|---:|---|
@@ -57,25 +55,52 @@ Before we create groups, we first need to understand how Wire Finance is structu
 
 All 25 employees work for Wire Finance.
 
-But being employed by the same organisation does not mean they should all have access to the same information.
+That gives every workforce identity something in common, but it does not mean everyone should receive the same access.
 
-Finance handles financial records.
+To reflect those similarities and differences, Wire Finance uses several group families.
 
-HR deals with employee information.
+### Group Naming Structure
 
-Operations works with business and customer-processing activities.
+The group name tells us what kind of relationship or purpose the group represents.
 
-Sales manages customer relationships and account information.
+| Prefix | Purpose | Example |
+|---|---|---|
+| `SG-BASE-` | Organisation-wide baseline | `SG-BASE-ALL-STAFF` |
+| `SG-DEPT-` | Department membership | `SG-DEPT-FINANCE-USERS` |
+| `SG-ROLE-` | Job-role or functional membership | `SG-ROLE-SOC-ANALYST` |
+| `SG-PILOT-` | Controlled pilot population | `SG-PILOT-IDENTITY` |
+| `SG-EXCEPTION-` | Explicit access outside the normal baseline | `SG-EXCEPTION-PAYMENT-PROCESSING` |
+| `SG-LICENCE-` | Licence assignment | `SG-LICENCE-M365-E5` |
+| `SG-DEVICES-` | Device classification or deployment targeting | `SG-DEVICES-WINDOWS-CORPORATE` |
+| `PAG-` | Privileged administrative assignment | `PAG-INTUNE-ENDPOINT-ADMIN` |
 
-IT supports the technology environment, deployment, and security operations.
+The prefixes are not security controls by themselves.
 
-That structure gives us our first clue about how access should be organised.
+Their purpose is to make the intent of each group understandable when the same objects later appear throughout Microsoft Entra ID, Intune, Defender, and other administrative portals.
 
----
+### Company Baseline
 
-#### Department Groups
+Every normal Wire Finance employee belongs to the workforce before they belong to a particular department or job role.
 
-Wire Finance represents each department with its own security group.
+That relationship is represented by:
+
+`SG-BASE-ALL-STAFF`
+
+Conceptually:
+
+```text
+Wire Finance Employee
+        ↓
+SG-BASE-ALL-STAFF
+        ↓
+Organisation-wide baseline
+```
+
+The specific access provided by that baseline will be defined in the next part of the IAM design.
+
+### Department Groups
+
+Each department has its own security group.
 
 | Department | Security Group |
 |---|---|
@@ -85,68 +110,26 @@ Wire Finance represents each department with its own security group.
 | Sales | `SG-DEPT-SALES-USERS` |
 | IT | `SG-DEPT-IT-USERS` |
 
-Instead of thinking:
-
-> Give Olivia access to these individual Finance resources.
-
-we can begin thinking:
+For Olivia Carter, the relationship looks like this:
 
 ```text
 Olivia Carter
-      ↓
-Finance Department
-      ↓
+department = Finance
+        ↓
 SG-DEPT-FINANCE-USERS
-      ↓
-Finance baseline access
-
+        ↓
+Finance departmental context
 ```
 
-The group becomes the bridge between **where the employee works** and **the access normally required by that department**.
+The group becomes a bridge between **where the employee works** and the access normally associated with that part of the business.
 
-If another Finance employee joins later, we do not need to recreate Olivia's permissions manually.
+### Department Is Not the Same as Role
 
-We can place the new employee into the appropriate group and allow the access model to do the rest.
+Department membership tells us where someone belongs.
 
-##### Groups Have Different Purposes
-
-Department groups are only one part of the design.
-
-Wire Finance also defines groups for roles, devices, pilot deployments, and licensing.
-
-| Group Type | Examples |
-|---|---|
-| **Department** | `SG-DEPT-FINANCE-USERS`, `SG-DEPT-HR-USERS` |
-| **Role-related** | `SG-ROLE-SOC-ANALYST`, `SG-ROLE-ENDPOINT-ADMIN` |
-| **Device** | `SG-DEVICES-WINDOWS-CORPORATE`, `SG-DEVICES-PRIVILEGED` |
-| **Pilot** | `SG-PILOT-IDENTITY`, `SG-PILOT-INTUNE`, `SG-PILOT-DEFENDER` |
-| **Licensing** | `SG-LICENCE-PILOT-USERS`, `SG-LICENCE-SECURITY-USERS` |
-
-Each category answers a different question.
-
-**Department groups** tell us where someone belongs.
-
-**Role groups** help represent what they actually do.
-
-**Device groups** allow systems to be organised according to their purpose or state.
-
-**Pilot groups** give us a controlled way to test new configurations before wider deployment.
-
-**Licensing groups** help organise which users should receive particular services or capabilities.
-
-This means groups are not simply containers for users.
-
-They begin to represent the structure, responsibilities, devices, and deployment decisions that exist across Wire Finance.
-
----
-
-##### Department Is Not the Same as Role
-
-This distinction is important.
+It does not necessarily tell us everything they do.
 
 Taylor Reed belongs to the IT department, but Taylor's job function is SOC Analyst.
-
-Those are two different relationships.
 
 ```text
                     Taylor Reed
@@ -155,140 +138,196 @@ Those are two different relationships.
               │                     │
         IT Department           SOC Analyst
               │                     │
-     SG-DEPT-IT-USERS      SG-ROLE-SOC-ANALYST
+     SG-DEPT-IT-USERS       SG-ROLE-SOC-ANALYST
 ```
 
-Department membership tells us **where Taylor belongs**.
+The department relationship answers:
 
-Role membership tells us **what Taylor does**.
+**Where does Taylor belong?**
 
-Being part of IT may provide access to standard IT departmental resources.
+The role relationship answers:
 
-Being a SOC Analyst may require additional access specifically related to security investigation and response.
+**What does Taylor do?**
 
-The same principle applies elsewhere.
+That distinction matters.
 
-Working in Finance does not automatically mean someone should have payment authority.
+Being part of Finance does not automatically mean someone should have authority to process payments.
 
-And being part of IT does not automatically mean someone should receive privileged administrative access.
+Being part of IT does not automatically make someone an administrator.
 
-Groups give us structure.
+And being a SOC Analyst does not automatically mean Taylor's everyday employee account should hold unrestricted privileged permissions.
 
-But we still need to decide **what access those groups should actually provide**.
+### Role Groups
 
----
-
-#### Device Groups
-
-People are not the only objects that need organisation.
-
-Wire Finance also defines groups for devices.
+Wire Finance therefore maintains role groups alongside department groups.
 
 Examples include:
+
+- `SG-ROLE-FINANCE-ANALYST`
+- `SG-ROLE-HR-MANAGER`
+- `SG-ROLE-OPERATIONS-SPECIALIST`
+- `SG-ROLE-SALES-REPRESENTATIVE`
+- `SG-ROLE-IT-ADMIN`
+- `SG-ROLE-SOC-ANALYST`
+- `SG-ROLE-ENDPOINT-ADMIN`
+- `SG-ROLE-SECURITY-LEADERSHIP`
+
+These groups represent job responsibilities or functional roles.
+
+They allow Wire Finance to separate:
+
+```text
+Where someone works
+        from
+What someone does
+```
+
+That becomes especially important when employees change roles or take on additional responsibilities.
+
+### Dynamic and Assigned Membership
+
+Not every group should be populated in the same way.
+
+For predictable organisational relationships such as company, department, and job role, Wire Finance can use trusted identity attributes to determine membership automatically.
+
+For example:
+
+```text
+department = Finance
+        ↓
+Dynamic membership
+        ↓
+SG-DEPT-FINANCE-USERS
+```
+
+This means a person's directory attributes can drive their organisational group membership instead of an administrator repeatedly adding and removing users by hand.
+
+Other groups require a deliberate decision.
+
+Pilot participation, approved exceptions, licence assignment during the pilot, and privileged administrative access may need explicit membership rather than automatic inclusion.
+
+Wire Finance therefore uses both:
+
+**Dynamic membership**  
+for relationships that can be reliably derived from trusted attributes.
+
+**Assigned membership**  
+for relationships that require deliberate authorisation or controlled targeting.
+
+This distinction becomes increasingly important as the environment grows.
+
+### Pilot and Exception Groups
+
+Some access or configuration should not automatically apply to an entire department or the whole organisation.
+
+For controlled identity testing, Wire Finance uses:
+
+`SG-PILOT-IDENTITY`
+
+This allows selected users to receive new identity-related configurations before wider rollout.
+
+Exceptions are treated separately.
+
+For example:
+
+`SG-EXCEPTION-PAYMENT-PROCESSING`
+
+can represent an explicitly approved capability that should not be granted to every Finance employee.
+
+This preserves an important principle:
+
+```text
+Department membership
+does not automatically equal
+sensitive business authority
+```
+
+### Privileged Access Groups
+
+Administrative access is separated from normal department and role membership.
+
+Wire Finance uses a dedicated privileged-access group family, including:
+
+- `PAG-ENTRA-SECURITY-READER`
+- `PAG-DEFENDER-SECURITY-OPERATOR`
+- `PAG-INTUNE-ENDPOINT-ADMIN`
+
+These groups represent privileged administrative capability rather than ordinary workforce access.
+
+Their existence reinforces an important distinction:
+
+```text
+Job responsibility
+        ≠
+Automatic administrative privilege
+```
+
+We will explore the controls around privileged identities and these assignments later in the IAM design.
+
+### Licensing Groups
+
+Licensing is also managed through a dedicated group.
+
+Wire Finance currently uses:
+
+`SG-LICENCE-M365-E5`
+
+During the pilot, membership is intentionally assigned rather than automatically derived.
+
+This gives Wire Finance explicit control over which users consume Microsoft 365 E5 licences while the environment is being validated.
+
+As the environment matures, that approach can later be reviewed and, where appropriate, moved toward attribute-driven licensing.
+
+### Device Groups
+
+People are not the only directory objects that require organisation.
+
+Wire Finance also uses groups for devices, including:
 
 - `SG-DEVICES-WINDOWS-CORPORATE`
 - `SG-DEVICES-WINDOWS-PILOT`
 - `SG-DEVICES-PRIVILEGED`
 - `SG-DEVICES-NONCOMPLIANT-TEST`
+- `SG-DEVICES-AUTOPILOT-CORPORATE`
 
-This allows devices to be classified according to their purpose or state.
+These groups help classify devices and target management or security configurations.
 
-A standard corporate laptop and a privileged workstation should not necessarily be treated the same way.
+The detailed device-group logic is covered later in the **Device Provisioning Model**.
 
-Likewise, a test or pilot device may need to receive a configuration before that configuration is introduced to the wider organisation.
+### Why Groups Matter
 
-These groups will become particularly useful when Wire Finance begins implementing endpoint management, compliance, and security controls.
+Without structure, Wire Finance would eventually become a directory of individual accounts with one-off permissions attached to them.
 
----
-
-#### Pilot Groups
-
-Some changes are too important to deploy to the entire organisation immediately.
-
-Wire Finance therefore creates dedicated pilot groups such as:
-
-- `SG-PILOT-IDENTITY`
-- `SG-PILOT-INTUNE`
-- `SG-PILOT-DEFENDER`
-- `SG-PILOT-CONDITIONAL-ACCESS`
-
-Imagine we are preparing to introduce a new Conditional Access policy.
-
-Rather than applying an untested configuration to every employee at once, we can begin with:
+Groups give us a way to express relationships instead:
 
 ```text
-New Conditional Access Policy
-            ↓
-SG-PILOT-CONDITIONAL-ACCESS
-            ↓
-       Test and Validate
-            ↓
-      Wider Deployment
+Who works here?
+        ↓
+Company baseline
+
+Where do they work?
+        ↓
+Department
+
+What do they do?
+        ↓
+Role
+
+Do they need something unusual?
+        ↓
+Exception
+
+Are they performing privileged administration?
+        ↓
+Privileged assignment
 ```
 
-This gives Wire Finance a controlled way to introduce changes and observe their impact before wider deployment.
+The groups organise those relationships.
 
----
+They still do not answer the final question:
 
-#### Licensing Groups
+**What access should each of those relationships actually provide?**
 
-Wire Finance also defines groups for organising licences and services.
+That is the next step.
 
-Examples include:
-
-- `SG-LICENCE-PILOT-USERS`
-- `SG-LICENCE-SECURITY-USERS`
-- `SG-LICENCE-ENDPOINT-USERS`
-
-Again, the goal is to move away from managing everything user by user.
-
-Instead of asking:
-
-**Which individual users should I manually assign this service to?**
-
-we can begin asking:
-
-**Which group represents the users who require this service?**
-
-That difference becomes increasingly valuable as the environment grows.
-
----
-
-#### From Groups to Entitlements
-
-At this point, the Wire Finance identity model is beginning to develop several layers.
-
-```text
-Employee
-   │
-   ├── Company access
-   │
-   ├── Department access
-   │      └── SG-DEPT-*
-   │
-   ├── Role-specific access
-   │      └── SG-ROLE-*
-   │
-   ├── Pilot membership
-   │      └── SG-PILOT-*
-   │
-   ├── Device classification
-   │      └── SG-DEVICES-*
-   │
-   └── Licensing
-          └── SG-LICENCE-*
-```
-
-This is much more meaningful than simply having a directory containing 25 unrelated user accounts.
-
-The identity begins to reflect the employee's place within the organisation.
-
-But groups alone still do not answer our original question:
-
-**Who should have access to what — and why?**
-
-We now need to look at the actual people inside Wire Finance, the roles they perform, and the access each role should receive.
-
-That is where our identity structure begins turning into an **access model**.
-
-**Who are the key users inside Wire Finance, and what should their roles actually entitle them to access?**
+Now that Wire Finance has a structure for organising identities, we can begin defining its **access baselines**.

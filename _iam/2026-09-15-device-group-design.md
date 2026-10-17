@@ -11,44 +11,36 @@ We now know how Wire Finance devices are classified.
 
 We know how they are named.
 
-And we know that new corporate Windows endpoints will use Microsoft Entra Join for identity and Microsoft Intune for management.
+And we know that the first corporate Windows endpoints will use Microsoft Entra Join for device identity and Microsoft Intune for management.
 
 But once those devices begin appearing inside the environment, another question appears:
 
 **How do we make sure the right devices receive the right configuration?**
 
-A standard employee laptop should not receive the same controls as a Privileged Access Workstation.
+A standard employee laptop should not necessarily receive the same controls as a Privileged Access Workstation.
 
-A test machine should be able to receive experimental policies without affecting production endpoints.
+A test machine needs somewhere to receive experimental policies without making the production fleet our test environment.
 
 And a device waiting for Windows Autopilot provisioning needs to be identifiable before it has completed the normal management journey.
 
 Wire Finance solves this through **device groups**.
 
-#### What Device Groups Actually Do
+### What Device Groups Actually Do
 
-Wire Finance uses Microsoft Entra **Security groups** to classify devices according to their:
+Wire Finance uses Microsoft Entra security groups to classify and target devices according to different parts of their purpose or state.
 
-- Provisioning state
-- Operational state
-- Security purpose
-- Testing role
-- Deployment stage
+Those classifications can later help determine which devices receive things such as:
 
-These groups create targeting boundaries.
+- Windows Autopilot profiles
+- Microsoft Intune configuration
+- compliance policies
+- endpoint-security controls
+- application deployments
+- staged pilot configurations
+- privileged-device controls
+- controlled test policies
 
-Later, they can help determine which devices receive:
-
-- Autopilot profiles
-- Configuration policies
-- Compliance policies
-- Endpoint security controls
-- Application deployments
-- Pilot configurations
-- Privileged workstation controls
-- Controlled test policies
-
-But there is an important principle behind the design:
+The important principle is:
 
 **one device can legitimately belong to several device groups at the same time.**
 
@@ -56,196 +48,193 @@ That is not duplication.
 
 Each group answers a different question.
 
-#### One Device, Several Questions
+### One Device Can Have Several Classifications
 
-Consider:
+Consider a corporate test endpoint.
 
-`WF-TST-001`
-
-Depending on how it is being used, that single device could belong to several groups:
+That device might simultaneously be:
 
 ```text
-WF-TST-001
-│
-├── SG-DEVICES-AUTOPILOT-CORPORATE
-│      ↓
-│   How should this device be provisioned?
-│
-├── SG-DEVICES-WINDOWS-CORPORATE
-│      ↓
-│   Is this an operational corporate Windows endpoint?
-│
-├── SG-DEVICES-WINDOWS-PILOT
-│      ↓
-│   Should this device receive pilot configurations?
-│
-└── SG-DEVICES-NONCOMPLIANT-TEST
-       ↓
-    Is this device approved for intentional
-    compliance-failure testing?
+Corporate
+    +
+Windows
+    +
+Intune Managed
+    +
+Selected for a Pilot
+    +
+Approved for a Controlled Test
 ```
 
-The memberships overlap because the questions are different.
+Those characteristics describe different things.
 
-A single group should not be expected to describe everything about a device.
+Conceptually:
 
-#### Dynamic and Assigned Membership
+```text
+One Device
+    │
+    ├── How should it be provisioned?
+    │
+    ├── Is it an operational corporate endpoint?
+    │
+    ├── Should it receive pilot configurations?
+    │
+    ├── Does it belong to the privileged tier?
+    │
+    └── Is it approved for controlled failure testing?
+```
 
-Wire Finance uses two membership approaches for device groups.
+A single enormous group should not be expected to answer every one of those questions.
 
-##### Dynamic Device Membership
+Wire Finance instead creates groups with clearly separated purposes.
 
-A **Dynamic Device** group calculates membership from device attributes.
+### Dynamic and Assigned Membership
+
+Not every device group should be populated in the same way.
+
+Wire Finance uses two membership approaches.
+
+#### Dynamic Device Membership
+
+A **Dynamic Device** group calculates membership using device attributes.
 
 Conceptually:
 
 ```text
 Device Attributes
-      ↓
+        ↓
 Dynamic Rule
-      ↓
-Rule Matches?
-   /        \
- Yes        No
-  ↓          ↓
-Member    Not Member
+        ↓
+Does the Device Match?
+       / \
+     Yes  No
+      │    │
+      ▼    ▼
+   Member  Not Member
 ```
 
-This works well where membership can be determined from an authoritative technical signal.
+This works well when the classification can be derived from an authoritative technical signal.
 
 Examples include:
 
-```text
-Autopilot Classification
-Windows Operating System
-Corporate Ownership
-Intune Management
-Enabled Device State
-```
+- Windows operating system
+- company ownership
+- Intune management
+- enabled device state
+- Windows Autopilot classification
 
-If the device attributes satisfy the rule, Microsoft Entra can calculate the membership automatically.
+Dynamic membership reduces the need for administrators to maintain predictable technical classifications manually.
 
-##### Assigned Membership
+#### Assigned Membership
 
-An **Assigned** device group requires an administrator to deliberately choose the device.
+An **Assigned** group requires an administrator to deliberately select the device.
 
-That makes sense when membership represents a decision rather than a property that should be inferred automatically.
+This is appropriate when membership represents a decision rather than something that should be inferred automatically.
 
 Examples include:
 
-```text
-Selected for Pilot
-Approved for Disruptive Testing
-```
+- selecting a device for a controlled pilot
+- approving a device for disruptive compliance testing
 
-So the design follows a familiar principle:
+The design principle is:
 
 ```text
 Can membership be determined
 from an authoritative device signal?
              │
-         Yes │ No
-             │
         ┌────┴────┐
-        ↓         ↓
+        │         │
+       Yes        No
+        │         │
+        ▼         ▼
      Dynamic    Assigned
-      Device
 ```
 
-Automation is used where the classification is predictable.
+Automation is used when the relationship is predictable.
 
-Explicit assignment is used where somebody needs to make a deliberate decision.
+Explicit assignment is used when someone needs to make a deliberate decision.
 
-#### Device Group Architecture
+### Wire Finance Device Group Architecture
 
-At the current design checkpoint, Wire Finance has created five device groups:
+The initial Wire Finance endpoint model contains five device groups.
 
-| Group | Membership | Primary Function | Lifecycle Stage |
-|---|---|---|---|
-| `SG-DEVICES-AUTOPILOT-CORPORATE` | Dynamic Device | Standard corporate Autopilot provisioning | Before / during provisioning |
-| `SG-DEVICES-WINDOWS-CORPORATE` | Dynamic Device | Operational corporate Windows population | Operational / steady state |
-| `SG-DEVICES-WINDOWS-PILOT` | Assigned | Controlled endpoint-policy testing | Pilot / staged rollout |
-| `SG-DEVICES-PRIVILEGED` | Dynamic Device | PAW provisioning and privileged-device targeting | Provisioning + operation |
-| `SG-DEVICES-NONCOMPLIANT-TEST` | Assigned | Controlled compliance and failure testing | Lab / controlled testing |
+| Group | Membership | Primary Purpose |
+|---|---|---|
+| `SG-DEVICES-AUTOPILOT-CORPORATE` | Dynamic Device | Identify devices intended for standard corporate Autopilot provisioning |
+| `SG-DEVICES-WINDOWS-CORPORATE` | Dynamic Device | Identify active corporate Windows devices under Intune management |
+| `SG-DEVICES-WINDOWS-PILOT` | Assigned | Target selected devices for controlled endpoint rollouts |
+| `SG-DEVICES-PRIVILEGED` | Dynamic Device | Identify devices classified for the privileged-device tier |
+| `SG-DEVICES-NONCOMPLIANT-TEST` | Assigned | Identify devices deliberately selected for controlled compliance testing |
 
-All five are:
+All five are Microsoft Entra **Security** groups.
 
-```text
-Group Type:
-Security
+They are used to classify and target devices.
 
-Microsoft Entra Roles Assignable:
-No
-```
+They are not Microsoft Entra role-assignable groups.
 
-Their job is to classify and target devices.
+### Provisioning Intent and Operational State
 
-They are not being used to assign Microsoft Entra administrative roles.
+The most important distinction in the group design is between:
 
----
+**what a device is intended to become**
 
-#### Standard Corporate Autopilot Group
+and:
 
-The first group answers:
+**what the device has become operationally.**
 
-**How should this new device be provisioned?**
+These are not the same thing.
 
-Group:
+#### Provisioning Intent
 
 `SG-DEVICES-AUTOPILOT-CORPORATE`
 
-Membership:
+answers:
 
-`Dynamic Device`
+**How should this device be provisioned?**
 
-Authoritative classification:
+Wire Finance uses the Autopilot classification:
 
-`Autopilot Group Tag = CORPORATE`
+`CORPORATE`
 
-The dynamic rule is:
+A corporate Autopilot device exposes that classification through its physical ID information.
+
+The dynamic group rule is:
 
 ```text
 (device.devicePhysicalIds -any (_ -eq "[OrderID]:CORPORATE"))
 ```
 
-The relationship is:
+Conceptually:
 
 ```text
-Device Registered with Autopilot
+Device Registered With Autopilot
         ↓
 Group Tag = CORPORATE
         ↓
-OrderID Classification
+[OrderID]:CORPORATE
         ↓
 SG-DEVICES-AUTOPILOT-CORPORATE
         ↓
-Standard Wire Finance
-Autopilot Provisioning
+Standard Corporate Provisioning
 ```
 
-This is principally a **provisioning group**.
+At this point, the device may not yet have completed Microsoft Entra Join or Microsoft Intune enrollment.
 
-It identifies devices that should follow the standard corporate Windows provisioning path.
+The group represents **provisioning intent**.
 
-At this stage, the device may not yet have completed Microsoft Entra Join or Intune enrollment.
+The detailed meaning and security implications of the `CORPORATE` Group Tag are covered in the next part of the Device Provisioning Model.
 
-That is why its provisioning classification needs to exist before the normal operational state has been established.
+### Operational Corporate Windows Devices
 
-#### Operational Corporate Windows Group
+Once a device has completed provisioning and management has been established, Wire Finance needs to answer a different question:
 
-Once a device has been provisioned and enrolled, we need to answer a different question:
-
-**Is this now an active Wire Finance managed Windows endpoint?**
+**Is this now an operational corporate Windows endpoint?**
 
 That is the purpose of:
 
 `SG-DEVICES-WINDOWS-CORPORATE`
 
-Membership:
-
-`Dynamic Device`
-
-The implemented rule is:
+Wire Finance uses the following dynamic rule:
 
 ```text
 (device.deviceOSType -eq "Windows")
@@ -254,75 +243,73 @@ The implemented rule is:
 -and (device.accountEnabled -eq true)
 ```
 
-The rule checks four conditions:
+The rule combines four conditions:
 
 ```text
 Windows
-      +
+    +
 Company Owned
-      +
+    +
 Intune Managed
-      +
+    +
 Enabled
-      ↓
+    ↓
 SG-DEVICES-WINDOWS-CORPORATE
 ```
 
-Each condition contributes something different.
+Each condition answers something different.
 
 `device.deviceOSType`
 
-confirms that the endpoint is Windows.
+confirms that the device is running Windows.
 
 `device.deviceOwnership`
 
-confirms that the ownership classification is Company.
+confirms that the device is classified as company-owned.
 
 `device.deviceManagementAppId`
 
-identifies the management relationship used by the Wire Finance Intune model.
+identifies the Microsoft Intune management relationship used by the Wire Finance design.
 
 `device.accountEnabled`
 
 ensures the device object remains enabled.
 
-Together, those signals define the primary **operational corporate Windows population**.
+Together, those signals define the main operational corporate Windows population.
 
-#### Why This Group Is Different From the Autopilot Group
+### Why the Two Corporate Groups Are Different
 
-This distinction is one of the most important parts of the device design.
+It would be easy to look at:
 
-The Autopilot group answers:
+`SG-DEVICES-AUTOPILOT-CORPORATE`
 
-```text
-How should this device be built?
-```
+and:
 
-The corporate Windows group answers:
+`SG-DEVICES-WINDOWS-CORPORATE`
 
-```text
-What is this device now that it is operational?
-```
+and assume one should replace the other.
 
-So:
+They answer different questions.
 
 ```text
 SG-DEVICES-AUTOPILOT-CORPORATE
-             ↓
-      PROVISIONING INTENT
+            ↓
+     PROVISIONING INTENT
+
+How should this device be built?
 ```
 
 while:
 
 ```text
 SG-DEVICES-WINDOWS-CORPORATE
-             ↓
-       OPERATIONAL STATE
+            ↓
+      OPERATIONAL STATE
+
+What is this device now?
 ```
 
-The first group is not simply replaced by the second.
-
-A device may remain a member of both because the classifications answer different questions.
+A device may legitimately remain in both.
 
 ```text
 Provisioning Classification
@@ -332,78 +319,47 @@ Operational Classification
 Both Can Be Valid
 ```
 
-What matters is using the appropriate group for the appropriate assignment.
+What matters is that each group is used for assignments appropriate to its purpose.
 
-#### What the Operational Group Can Eventually Receive
+### Controlled Pilot Group
 
-Once a device belongs to the normal managed population, the group can eventually become a broad targeting point for production controls such as:
+Not every new endpoint configuration should immediately target the production population.
 
-```text
-Compliance Policies
-Configuration Profiles
-Windows Update Policies
-Endpoint Security
-Standard Applications
-Microsoft Defender Controls
-```
-
-That makes:
-
-`SG-DEVICES-WINDOWS-CORPORATE`
-
-one of the main steady-state management groups in the endpoint architecture.
-
-#### Controlled Pilot Group
-
-Not every change should immediately target the entire production fleet.
-
-That is why Wire Finance created:
+Wire Finance therefore uses:
 
 `SG-DEVICES-WINDOWS-PILOT`
 
-Membership:
+Membership type:
 
 `Assigned`
 
-Pilot membership is deliberately manual.
+Pilot membership is deliberate because participation represents an IT decision.
 
-Being selected for a pilot is an **IT decision**.
-
-It should not happen simply because a technical device attribute happens to match something.
-
-The journey becomes:
+Conceptually:
 
 ```text
-Normal Corporate Endpoint
+Corporate Endpoint
         ↓
 Selected for Controlled Rollout
         ↓
 SG-DEVICES-WINDOWS-PILOT
+        ↓
+New Configuration
+        ↓
+Observe and Validate
+        ↓
+Wider Deployment
 ```
 
-This provides a smaller device population for testing new configurations.
+This gives Wire Finance a smaller population on which to validate new endpoint changes before targeting:
 
-For example:
+`SG-DEVICES-WINDOWS-CORPORATE`
 
-```text
-New Endpoint Policy
-        ↓
-SG-DEVICES-WINDOWS-PILOT
-        ↓
-Validate Behaviour
-        ↓
-Identify Problems
-        ↓
-Correct Issues
-        ↓
-SG-DEVICES-WINDOWS-CORPORATE
-```
+The detailed pilot strategy is covered later in the **Pilot and Test Model**.
 
-The pilot group gives Wire Finance somewhere to test before production becomes the test environment.
+### User Pilots and Device Pilots Are Different
 
-#### User Pilot and Device Pilot Are Different
-
-Earlier, we defined:
+Earlier in the identity design, Wire Finance created:
 
 `SG-PILOT-IDENTITY`
 
@@ -411,9 +367,9 @@ That is a **user group**.
 
 It answers:
 
-**Which users participate in the initial identity and enrollment pilot?**
+**Which users are participating in a controlled identity or enrollment pilot?**
 
-Now we also have:
+The device model uses:
 
 `SG-DEVICES-WINDOWS-PILOT`
 
@@ -423,11 +379,11 @@ It answers:
 
 **Which devices should receive pilot endpoint configurations?**
 
-So:
+Conceptually:
 
 ```text
 SG-PILOT-IDENTITY
-      ↓
+        ↓
 WHO participates?
 ```
 
@@ -435,37 +391,37 @@ while:
 
 ```text
 SG-DEVICES-WINDOWS-PILOT
-      ↓
+        ↓
 WHICH DEVICES receive pilot policies?
 ```
 
-The two populations may be related during testing, but they are not interchangeable.
+The populations may be related during testing, but they are not interchangeable.
 
-This becomes especially important when Intune begins targeting settings independently to users and devices.
+This distinction becomes important because Microsoft Intune can target configurations to users and devices independently.
 
-#### Privileged Device Group
+### Privileged Device Group
 
-Privileged Access Workstations require their own classification.
+Privileged Access Workstations need their own classification.
 
-Wire Finance created:
+Wire Finance uses:
 
 `SG-DEVICES-PRIVILEGED`
 
-Membership:
+Membership type:
 
 `Dynamic Device`
 
-Authoritative Autopilot classification:
+The provisioning classification is:
 
 `PAW`
 
-The implemented rule is:
+The group rule is:
 
 ```text
 (device.devicePhysicalIds -any (_ -contains "[OrderID]:PAW"))
 ```
 
-The classification path becomes:
+Conceptually:
 
 ```text
 Device Classified as PAW
@@ -474,58 +430,56 @@ Autopilot Group Tag = PAW
         ↓
 SG-DEVICES-PRIVILEGED
         ↓
-PAW Provisioning
-        ↓
-Security Hardening
-        ↓
-Stricter Compliance
-        ↓
-Privileged Access Controls
+Privileged Device Path
 ```
 
-This gives Wire Finance a dedicated device population for privileged endpoints.
+This gives Wire Finance a dedicated population for endpoints intended to receive privileged-device controls.
 
-#### A PAW Can Still Be a Corporate Windows Device
+The detailed PAW provisioning and security model is covered later.
 
-This is another example where overlapping membership is correct.
+### A PAW Can Also Be an Operational Corporate Device
 
-After provisioning, a PAW may satisfy the operational corporate Windows rule as well.
+Overlapping membership is expected here too.
 
-So:
+After provisioning, a PAW may also satisfy the rule for:
+
+`SG-DEVICES-WINDOWS-CORPORATE`
+
+So a device may be:
 
 ```text
 WF-PAW-001
-│
-├── SG-DEVICES-WINDOWS-CORPORATE
-│      ↓
-│   Operational corporate Windows device
-│
-└── SG-DEVICES-PRIVILEGED
-       ↓
-    Privileged security tier
+    │
+    ├── SG-DEVICES-WINDOWS-CORPORATE
+    │       ↓
+    │   Operational corporate Windows endpoint
+    │
+    └── SG-DEVICES-PRIVILEGED
+            ↓
+        Privileged device classification
 ```
 
-Those memberships do not conflict.
+The memberships do not conflict.
 
-One describes the device's **general management state**.
+One describes its broad operational state.
 
-The other describes its **security tier**.
+The other describes its privileged security purpose.
 
-That gives us another useful principle:
+This reinforces another useful principle:
 
-**same operational platform does not mean same security requirements.**
+**same operating platform does not mean same security requirements.**
 
-#### Noncompliance Test Group
+### Controlled Noncompliance Test Group
 
-The final group exists for deliberate security testing.
+Wire Finance also needs a way to deliberately test what happens when a device fails a compliance requirement.
+
+That is the purpose of:
 
 `SG-DEVICES-NONCOMPLIANT-TEST`
 
-Membership:
+Membership type:
 
 `Assigned`
-
-It is deliberately assigned because intentionally breaking compliance should always be a conscious test decision.
 
 The group does **not** mean:
 
@@ -533,72 +487,40 @@ The group does **not** mean:
 Put every noncompliant device here
 ```
 
-There is an important difference:
+There is an important distinction:
 
 ```text
-Device Is Noncompliant
+Device Becomes Noncompliant
         ≠
-Device Is an Approved
-Noncompliance Test Device
+Device Is Approved for
+Intentional Noncompliance Testing
 ```
 
-A production device may become noncompliant because something has gone wrong.
+A production device that becomes noncompliant represents an operational or security problem.
 
-That is a security condition that needs investigation or remediation.
-
-A test device is intentionally placed into:
+A device placed into:
 
 `SG-DEVICES-NONCOMPLIANT-TEST`
 
-because we want to observe what happens when a controlled failure occurs.
+has been deliberately selected for a controlled test.
 
-The test workflow becomes:
+Assigned membership is therefore appropriate because intentionally introducing failure should require a conscious decision.
 
-```text
-Test Scenario Approved
-        ↓
-Dedicated Test Device Selected
-        ↓
-SG-DEVICES-NONCOMPLIANT-TEST
-        ↓
-Controlled Failure Introduced
-        ↓
-Intune Behaviour Observed
-        ↓
-Conditional Access Behaviour Observed
-        ↓
-SOC / Security Visibility Observed
-        ↓
-Configuration Restored
-        ↓
-Device Removed From Test Group
-```
+The detailed test workflow belongs in the **Pilot and Test Model**.
 
-`WF-TST-001`
+### Matching Groups to Their Jobs
 
-is the obvious first candidate for this type of exercise.
-
-This protects ordinary production endpoints from receiving disruptive test configurations.
-
----
-
-#### Provisioning Groups and Operational Groups
-
-We can now separate the major responsibilities clearly.
+The group architecture can now be summarised clearly.
 
 | Requirement | Preferred Group |
 |---|---|
-| **Standard Autopilot deployment profile** | `SG-DEVICES-AUTOPILOT-CORPORATE` |
-| **Standard production compliance** | `SG-DEVICES-WINDOWS-CORPORATE` |
-| **Standard endpoint configuration** | `SG-DEVICES-WINDOWS-CORPORATE` |
-| **Controlled new-policy rollout** | `SG-DEVICES-WINDOWS-PILOT` |
-| **PAW provisioning / hardening** | `SG-DEVICES-PRIVILEGED` |
-| **PAW compliance** | `SG-DEVICES-PRIVILEGED` |
-| **Failure and compliance testing** | `SG-DEVICES-NONCOMPLIANT-TEST` |
+| **Standard Autopilot provisioning** | `SG-DEVICES-AUTOPILOT-CORPORATE` |
+| **Normal corporate Windows management** | `SG-DEVICES-WINDOWS-CORPORATE` |
+| **Controlled endpoint rollout** | `SG-DEVICES-WINDOWS-PILOT` |
+| **Privileged-device classification** | `SG-DEVICES-PRIVILEGED` |
+| **Controlled compliance testing** | `SG-DEVICES-NONCOMPLIANT-TEST` |
 
-This prevents us from building one enormous device group that tries to control every stage of the endpoint lifecycle.
-
-Instead:
+Conceptually:
 
 ```text
 Provisioning
@@ -613,7 +535,7 @@ Controlled Rollout
       ↓
 Pilot Group
 
-Privileged Security Tier
+Privileged Device
       ↓
 Privileged Group
 
@@ -622,97 +544,15 @@ Controlled Failure Testing
 Test Group
 ```
 
-Each group has a clear responsibility.
+Each group has one primary responsibility.
 
-#### Device Group Lifecycle
+That is preferable to building one enormous device group that attempts to describe every stage and purpose of a device.
 
-The individual groups make more sense when we look at them as part of one device journey.
+### Overlapping Membership Is Expected
 
-A new corporate device does not immediately appear in every group.
+A device may accumulate several valid classifications as it moves through its lifecycle.
 
-Its classifications develop as the device moves from **provisioning** into **normal operation**, and additional groups can then identify special purposes such as pilot deployment, privileged administration, or controlled testing.
-
-![Wire Finance Device Group Lifecycle]({{ '/assets/images/device-management/device_group_lifecycle.png' | relative_url }})
-
-The journey begins before the device is fully operational.
-
-```text
-New Device
-      ↓
-Autopilot Classification
-      ↓
-Provisioning Group
-      ↓
-Microsoft Entra Join + Intune Enrollment
-      ↓
-Operational Corporate Group
-```
-
-For a standard corporate endpoint, the relationship is:
-
-```text
-CORPORATE Group Tag
-        ↓
-SG-DEVICES-AUTOPILOT-CORPORATE
-        ↓
-Standard Autopilot Provisioning
-        ↓
-Microsoft Entra Join
-        ↓
-Intune Enrollment
-        ↓
-SG-DEVICES-WINDOWS-CORPORATE
-```
-
-At that point, the device has moved from **provisioning intent** into its normal **operational state**.
-
-But the journey does not necessarily stop there.
-
-An operational device may also receive another classification depending on what Wire Finance intends to do with it.
-
-```text
-Operational Corporate Device
-        │
-        ├── Pilot
-        │     ↓
-        │   SG-DEVICES-WINDOWS-PILOT
-        │
-        ├── Privileged
-        │     ↓
-        │   SG-DEVICES-PRIVILEGED
-        │
-        └── Controlled Test
-              ↓
-            SG-DEVICES-NONCOMPLIANT-TEST
-```
-
-This is why overlapping device-group membership is expected.
-
-The groups are not competing to decide what the device **is**.
-
-They are describing different aspects of the device.
-
-| Classification | Question Being Answered |
-|---|---|
-| **Autopilot Corporate** | How should this device be provisioned? |
-| **Windows Corporate** | Is this an active managed corporate Windows endpoint? |
-| **Windows Pilot** | Should this device receive pilot configurations? |
-| **Privileged** | Does this device belong to the privileged security tier? |
-| **Noncompliant Test** | Is this device approved for controlled failure testing? |
-
-For example, a Privileged Access Workstation can legitimately be:
-
-```text
-SG-DEVICES-PRIVILEGED
-        +
-SG-DEVICES-WINDOWS-CORPORATE
-```
-
-The first membership identifies its **security tier**.
-
-The second identifies its **operational management state**.
-
-Likewise, a test endpoint could temporarily belong to:
+For example, a normal test endpoint might eventually be:
 
 ```text
 SG-DEVICES-WINDOWS-CORPORATE
@@ -722,68 +562,61 @@ SG-DEVICES-WINDOWS-PILOT
 SG-DEVICES-NONCOMPLIANT-TEST
 ```
 
-without any contradiction.
+There is no contradiction.
 
-Each membership answers a separate operational or security question.
+Each membership answers a separate question.
 
-That is the core idea behind the Wire Finance device-group architecture:
+| Classification | Question Being Answered |
+|---|---|
+| **Autopilot Corporate** | How should this device be provisioned? |
+| **Windows Corporate** | Is this an active managed corporate Windows endpoint? |
+| **Windows Pilot** | Should this device receive pilot configurations? |
+| **Privileged** | Does this device belong to the privileged-device class? |
+| **Noncompliant Test** | Is this device approved for controlled failure testing? |
+
+The core design principle is therefore:
 
 **classify devices by purpose and state instead of trying to make one group describe everything.**
 
-#### Group Membership Does Not Equal Trust
+### Group Membership Is Not Device Trust
 
-Device groups make targeting easier.
+Groups make targeting easier.
 
-They do not eliminate the trust model we established earlier.
+They do not replace the trust model.
 
-For example:
+For example, membership in:
 
-```text
-Member of
-SG-DEVICES-WINDOWS-CORPORATE
-```
+`SG-DEVICES-WINDOWS-CORPORATE`
 
-is useful evidence about the device's operational state.
+tells us useful things about the device's operating and management state.
 
-But Wire Finance still evaluates trust progressively.
+But it should not be interpreted as:
 
 ```text
-Approved Ownership
-      ↓
-Device Identity
-      ↓
-Management
-      ↓
-Security Controls
-      ↓
-Compliance
-      ↓
-Access Decisions
+Member of Corporate Group
+        =
+Automatically Trusted Forever
 ```
 
-A group helps us organise and target devices.
+Device trust will eventually depend on multiple signals, including management, security configuration, compliance, and risk.
+
+A group helps Wire Finance organise devices and target controls.
 
 It should not become a shortcut for assuming that every security requirement has been satisfied.
 
-The same principle still applies:
+### Current Device Group Record
 
-**device presence does not equal device trust.**
+The Wire Finance device-group design is therefore:
 
----
+| Group | Type | Membership | Classification Source |
+|---|---|---|---|
+| `SG-DEVICES-AUTOPILOT-CORPORATE` | Security | Dynamic Device | Autopilot `CORPORATE` classification |
+| `SG-DEVICES-WINDOWS-CORPORATE` | Security | Dynamic Device | Windows + Company ownership + Intune management + enabled state |
+| `SG-DEVICES-WINDOWS-PILOT` | Security | Assigned | Explicit IT selection |
+| `SG-DEVICES-PRIVILEGED` | Security | Dynamic Device | Autopilot `PAW` classification |
+| `SG-DEVICES-NONCOMPLIANT-TEST` | Security | Assigned | Explicit IT / Security selection |
 
-#### Current Device Group Record
-
-The current Wire Finance device group implementation is:
-
-| Group | Type | Membership | Classification Source | Status |
-|---|---|---|---|---|
-| `SG-DEVICES-AUTOPILOT-CORPORATE` | Security | Dynamic Device | Autopilot `CORPORATE` Group Tag | Created |
-| `SG-DEVICES-WINDOWS-CORPORATE` | Security | Dynamic Device | Windows + Company ownership + Intune management + enabled state | Created |
-| `SG-DEVICES-WINDOWS-PILOT` | Security | Assigned | Explicit IT selection | Created |
-| `SG-DEVICES-PRIVILEGED` | Security | Dynamic Device | Autopilot `PAW` classification | Created |
-| `SG-DEVICES-NONCOMPLIANT-TEST` | Security | Assigned | Explicit IT / Security selection | Created |
-
-That gives us:
+That gives Wire Finance:
 
 ```text
 3 Dynamic Device Groups
@@ -793,74 +626,37 @@ That gives us:
 5 Device Security Groups
 ```
 
-The membership model reflects the kind of decision each group represents.
+The membership model reflects the nature of each decision.
 
 ```text
-Authoritative Technical Classification
-              ↓
-         Dynamic Device
+Authoritative Technical Signal
+            ↓
+      Dynamic Device
 
-
-Deliberate Human Selection
-              ↓
-            Assigned
+Deliberate Human Decision
+            ↓
+          Assigned
 ```
 
-#### A Note About the Autopilot Model
+### The Groups Are Ready — Now We Need to Understand the Classification
 
-For this Wire Finance build, we are designing around the **Windows Autopilot deployment-profile model**.
-
-The current design uses Autopilot Group Tags to classify devices before provisioning:
+Two of the device groups depend on values that deserve closer attention:
 
 ```text
 CORPORATE
 PAW
 ```
 
-Those classifications can then drive dynamic device-group membership.
+Those values are Windows Autopilot **Group Tags**.
 
-Microsoft also has a separate workflow called **Windows Autopilot device preparation**.
+They help determine which provisioning path a device should enter.
 
-That is not the model being implemented here.
+That also makes their assignment security-relevant.
 
-For Wire Finance, the current decision remains:
+A normal device incorrectly classified as `PAW` could enter the wrong provisioning path.
 
-```text
-Windows Autopilot
-User-Driven Microsoft Entra Join
-        +
-Dynamic Group Tag Classification
-```
+A privileged device incorrectly classified as `CORPORATE` could miss controls intended for the privileged tier.
 
-Keeping that distinction clear prevents us from accidentally mixing configuration steps from two related but different provisioning approaches.
+So the next question becomes:
 
-#### The Groups Are Ready — Now We Need to Understand the Tags
-
-The device groups now give us structure.
-
-We know which group represents:
-
-```text
-Provisioning Intent
-Operational State
-Pilot Deployment
-Privileged Security Tier
-Controlled Failure Testing
-```
-
-But two of those groups depend on something we have not yet explored properly:
-
-```text
-CORPORATE
-PAW
-```
-
-Those values are not just convenient labels.
-
-They influence which provisioning path a device can enter.
-
-And that makes classification itself a security-sensitive decision.
-
-So the next question is:
-
-**What exactly is an Autopilot Group Tag, who should be allowed to assign one, and what happens if a normal device is accidentally classified as a PAW — or a PAW as a normal corporate endpoint?**
+**What exactly is an Autopilot Group Tag, who should be allowed to assign one, and how does Wire Finance use it to separate corporate and privileged provisioning?**
