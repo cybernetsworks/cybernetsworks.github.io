@@ -9,43 +9,43 @@ children_heading: "Explore the Device Lifecycle"
 description: "Follow a Wire Finance device through its complete managed lifecycle, from acquisition and provisioning to reassignment, security response, retirement, and final disposal."
 ---
 
-Up to this point, most of our device design has answered one question:
+Up to this point, most of the Wire Finance device design has answered one question:
 
-**How does Wire Finance get a device into service?**
+**How do we get a device safely into service?**
 
 We have defined how devices are:
 
-- Owned
-- Named
-- Classified
-- Joined
-- Provisioned
-- Managed
-- Secured
-- Tested
-- Evaluated for compliance
+- owned
+- named
+- classified
+- joined
+- provisioned
+- managed
+- secured
+- tested
+- evaluated for compliance
 
 But provisioning is only the beginning.
 
-A device may spend several years inside the organisation.
+A corporate device may remain inside the organisation for years.
 
-During that time it may be updated, repaired, reassigned, placed into a pilot, investigated after a security event, repurposed, retired, or eventually disposed of.
+During that time it may be updated, repaired, reassigned, placed into a pilot, investigated after a security event, rebuilt, retired, or eventually disposed of.
 
-So the final part of the device model asks:
+The final part of the device model therefore asks:
 
 **What happens to a device from the moment Wire Finance acquires it until the physical asset permanently leaves the organisation?**
 
-The core principle is:
+The principle is simple:
 
 **a managed device has a lifecycle, not just an enrollment event.**
 
-#### The Complete Device Journey
+### The Complete Device Journey
 
 The Wire Finance device lifecycle is shown below.
 
-![Wire Finance Device Lifecycle Overview]({{ '/assets/images/device-management/device_lifecycle_overview.png' | relative_url }})
+![Wire Finance Device Lifecycle Overview]({{ '/assets/images/active-directory/device_lifecycle_overview.png' | relative_url }})
 
-The lifecycle can be understood as three broad phases:
+At a high level, the journey can be understood in three phases:
 
 ```text
 ENTER SERVICE
@@ -79,9 +79,9 @@ Decommission
 Dispose
 ```
 
-But the journey is not always a straight line.
+The journey is not always a straight line.
 
-A device might move:
+A device may move through paths such as:
 
 ```text
 In Service
@@ -98,10 +98,12 @@ In Service
     ↓
 Reassignment
     ↓
+Provision / Validate
+    ↓
 In Service
 ```
 
-or:
+A security event may take the device down a different path:
 
 ```text
 In Service
@@ -109,38 +111,22 @@ In Service
 Security Hold
     ↓
 Investigate
-   /         \
-Recover      Retire
+   /           \
+Recover       Retire
+   ↓
+Return to
+Service
 ```
 
-Lifecycle management therefore means controlling both the **normal path** and the **exceptions**.
+Lifecycle management therefore means controlling both the **normal journey** and the situations where a device leaves that normal path.
 
-#### Lifecycle Stages
-
-| Stage | Purpose | Primary System / Owner |
-|---|---|---|
-| **Acquisition** | Establish ownership, purpose, and accountability | Wire Finance Asset Register / IT |
-| **Registration** | Introduce the device to the approved provisioning service | Windows Autopilot / Endpoint Management |
-| **Provisioning** | Build the approved Windows configuration and establish cloud identity and management | Autopilot + Entra ID + Intune |
-| **Validation** | Confirm management, security, applications, and compliance readiness | Intune + Defender + IT / Security |
-| **Operation** | Normal business or approved privileged use | Intune + Defender + Entra ID |
-| **Maintenance** | Apply updates, repairs, remediation, and approved configuration changes | Endpoint Management / IT |
-| **Reassignment** | Prepare the device for another approved user or business purpose | Intune + Asset Register |
-| **Security Hold** | Control a lost, stolen, high-risk, or suspected compromised device | Security + Defender + Intune + Entra ID |
-| **Retirement** | Approve removal from active organisational service | IT + Business Owner |
-| **Decommission / Disposal** | Remove remaining technical associations and complete the physical lifecycle | IT + Asset Management + Security |
-
-Each stage answers a different lifecycle question.
-
-Together, they create the complete journey.
-
-#### One Device, Several Records
+### One Device, Several Records
 
 Consider:
 
 `WF-LT-001`
 
-That single physical device may have records in:
+That one physical device may eventually be represented across several systems:
 
 ```text
 WF-LT-001
@@ -154,66 +140,113 @@ WF-LT-001
 
 Those records are not duplicates.
 
-They represent different responsibilities.
+Each answers a different question.
 
-| Record | Question It Answers |
+| Record | What It Tells Us |
 |---|---|
-| **Asset Register** | What physical asset do we own, who has it, and what is its purpose? |
-| **Windows Autopilot** | What provisioning relationship does the hardware have? |
-| **Microsoft Entra ID** | What is the organisational device identity? |
-| **Microsoft Intune** | Is the endpoint managed, configured, and compliant? |
-| **Microsoft Defender for Endpoint** | What is its current security and risk state? |
+| **Asset Register** | What physical asset does Wire Finance own, who has it, and what is its current business state? |
+| **Windows Autopilot** | What provisioning relationship and intent has been assigned to the hardware? |
+| **Microsoft Entra ID** | What is the device's organisational identity? |
+| **Microsoft Intune** | Is the device managed, configured, and compliant? |
+| **Microsoft Defender for Endpoint** | What security activity and risk are associated with the endpoint? |
 
-Lifecycle management keeps these different views aligned.
+The lifecycle process keeps these different views aligned.
 
-#### Lifecycle Statuses
+A device may be physically returned but still have cloud records.
 
-Wire Finance also records the current business state of the physical asset.
+It may be removed from service while still existing in the asset register.
 
-| Status | Meaning |
-|---|---|
-| `Received` | Device has physically arrived and been recorded |
-| `Provisioning` | Device is being registered, configured, and validated |
-| `In Service` | Device is approved for normal operational use |
-| `Pilot/Test` | Device is temporarily allocated to controlled rollout or lab activity |
-| `Repair` | Device is under technical or hardware repair |
-| `Reassignment` | Device is being prepared for another user or purpose |
-| `Security Hold` | Device is lost, stolen, high-risk, or under security investigation |
-| `Retirement Pending` | Device has been approved to leave service but cleanup is incomplete |
-| `Retired` | Device is no longer operational within Wire Finance |
-| `Disposed` | The physical lifecycle has been completed |
+It may be reassigned to another employee while remaining the same physical asset.
 
-A Microsoft Entra device object cannot tell us all of this.
+That is why no single Microsoft portal represents the entire device lifecycle.
 
-That is why the Asset Register remains part of the design.
+### Business State and Technical State Are Different
 
-#### Lifecycle Ownership
+Wire Finance also separates the **business state of the physical asset** from its technical state inside Microsoft platforms.
 
-Responsibility also moves as the device moves.
+For example:
 
-| Lifecycle Activity | Primary Owner |
-|---|---|
-| **Purchase / receipt / asset registration** | IT / Asset Management |
-| **Autopilot registration and provisioning** | Endpoint Management |
-| **Security and compliance validation** | IT / Security |
-| **User assignment and reassignment** | IT / Endpoint Management |
-| **Daily endpoint management** | Endpoint Management |
-| **Security monitoring and incident response** | SOC / Security |
-| **Repair** | IT / approved vendor |
-| **Retirement approval** | IT + Business Owner |
-| **Cloud and provisioning cleanup** | IT / Identity / Endpoint Management |
-| **Physical disposal** | IT / Asset Management |
+```text
+Asset Register
+      ↓
+In Service
+Repair
+Reassignment
+Security Hold
+Retirement Pending
+Disposed
+```
 
-No single portal or team owns the entire device story.
+while Microsoft platforms may independently tell us things such as:
+
+```text
+Entra Joined
+Intune Managed
+Compliant
+Non-Compliant
+Defender Onboarded
+At Risk
+```
+
+Those states are related, but they are not interchangeable.
+
+A device marked `Security Hold` in the asset register may still be enrolled in Intune because Security needs to investigate it.
+
+A device marked `Retirement Pending` may still have Entra, Intune, Defender, or Autopilot records that need to be cleaned up before the lifecycle is complete.
+
+This is why the Asset Register remains part of the Wire Finance device model.
+
+### Lifecycle Responsibility Changes Too
+
+Responsibility follows the device through its lifecycle.
+
+At different points, the device may involve:
+
+- IT for acquisition, provisioning, assignment, repair, and retirement
+- Security for privileged-device decisions and incident response
+- Microsoft Intune for management and compliance
+- Microsoft Defender for Endpoint for security monitoring and risk
+- the business for user assignment, handover, and retirement decisions
+- the Asset Register for the authoritative physical-asset record
+
+No single portal — and no single technical control — owns the entire device story.
 
 The lifecycle works because those responsibilities remain coordinated.
 
-#### From Lifecycle Map to Lifecycle Decisions
+### From Provisioning to Lifecycle Management
 
-The diagram gives us the complete journey.
+Wire Finance can now describe the complete device journey:
 
-Now we can examine what each stage actually means.
+```text
+Acquire
+   ↓
+Record
+   ↓
+Classify
+   ↓
+Provision
+   ↓
+Secure
+   ↓
+Validate
+   ↓
+Operate
+   ↓
+Maintain / Reassign / Investigate
+   ↓
+Retire
+   ↓
+Decommission
+   ↓
+Dispose
+```
 
-We will begin before Microsoft Entra ID, Intune, and Autopilot are involved at all.
+The important point is that provisioning creates the beginning of a managed device.
 
-**What makes a newly received laptop an accountable Wire Finance business asset before technical provisioning even begins?**
+It does not create the end state.
+
+The organisation must continue to know:
+
+**what the device is, who is responsible for it, whether it is safe to use, and what should happen to it next.**
+
+The sections that follow break this lifecycle into the individual decisions required to keep a Wire Finance device accountable from acquisition through final disposal.

@@ -7,17 +7,21 @@ order: 8
 description: "Pilot devices prove that a change works safely. Test devices deliberately exercise controlled failure paths. Wire Finance separates the two so new configurations can be validated without turning production endpoints into experiments."
 ---
 
-We now know how Wire Finance provisions two very different types of endpoint.
+Wire Finance now has provisioning models for two very different endpoint types.
 
-A standard corporate laptop is built for everyday employee productivity.
+A standard corporate laptop is designed for everyday employee productivity.
 
-A Privileged Access Workstation is built for sensitive administrative activity.
+A Privileged Access Workstation is designed for controlled administrative activity.
 
-But before policies, applications, security controls, or compliance requirements reach the wider organisation, we need somewhere to prove that they behave as expected.
+But before new applications, policies, security controls, or compliance requirements reach the wider organisation, we need somewhere to prove that they behave as expected.
 
-That introduces two more device roles:
+That introduces two additional device roles:
 
-**pilot devices** and **test devices**.
+**pilot devices**
+
+and:
+
+**test devices**
 
 They may sound similar.
 
@@ -25,103 +29,109 @@ They are not.
 
 A pilot device asks:
 
-**Does this change work safely under normal operating conditions?**
+**Can we safely introduce this change into production?**
 
-A test device may ask:
+A test device asks:
 
-**What happens when we deliberately make something fail?**
+**Does the control behave correctly when we deliberately exercise a failure path?**
 
-That distinction is the foundation of the Wire Finance testing model.
+That distinction forms the foundation of the Wire Finance endpoint testing model.
 
-#### Pilot and Test Are Different Jobs
+### Pilot and Test Are Different Jobs
 
-Wire Finance separates controlled rollout from controlled failure testing.
+Wire Finance separates **controlled rollout** from **controlled failure testing**.
 
-![Wire Finance Pilot vs Test Device Model]({{ '/assets/images/device-management/pilot_vs_test_device_model.png' | relative_url }})
+![Wire Finance Pilot vs Test Device Model]({{ '/assets/images/active-directory/pilot_vs_test_device_model.png' | relative_url }})
 
-The difference can be summarised simply:
+A pilot follows this general path:
+
+```text
+Candidate Change
+      ↓
+Pilot Device
+      ↓
+Normal Operation
+      ↓
+Observe and Validate
+      ↓
+Approve, Refine, or Reject
+      ↓
+Production Rollout
+```
+
+A test device follows a different path:
+
+```text
+Known-Good Device
+      ↓
+Approved Test Scenario
+      ↓
+Controlled Failure Condition
+      ↓
+Observe Expected Behaviour
+      ↓
+Remediate
+      ↓
+Return to Known-Good State
+```
+
+Both approaches make change safer.
+
+But they answer different questions.
 
 ```text
 PILOT
-   ↓
-Introduce a Candidate Change
-   ↓
-Operate Normally
-   ↓
-Prove It Works Safely
-   ↓
-Decide Whether to Roll Out
+=
+Can we safely deploy this?
 ```
 
 while:
 
 ```text
 TEST
-   ↓
-Start From a Known-Good State
-   ↓
-Introduce an Approved Failure Condition
-   ↓
-Observe Enforcement and Detection
-   ↓
-Remediate
-   ↓
-Return to Known-Good State
+=
+Does the control behave correctly
+when something goes wrong?
 ```
 
-Both models support safer change.
+### Pilot vs Noncompliance Test
 
-But they answer different questions.
-
-#### Pilot vs Noncompliance Test
+Wire Finance uses two dedicated groups.
 
 | Area | Pilot Device | Noncompliance Test Device |
 |---|---|---|
-| **Primary group** | `SG-DEVICES-WINDOWS-PILOT` | `SG-DEVICES-NONCOMPLIANT-TEST` |
-| **Membership** | Assigned | Assigned |
-| **Purpose** | Validate a new configuration under normal working conditions before broad rollout | Deliberately validate failure, enforcement, detection, and remediation behaviour |
-| **Typical device** | Selected managed corporate endpoint or dedicated pilot endpoint | Dedicated lab/test endpoint such as `WF-TST-001` |
-| **Normal business use** | May be permitted where the change is sufficiently controlled | Not recommended during disruptive failure testing |
-| **Autopilot classification** | Usually `CORPORATE` base build | Usually `CORPORATE` base build |
-| **Expected outcome** | Change works safely and can be promoted | Failure occurs as expected, controls respond, and the device is restored |
-| **Exit action** | Retain or remove from pilot group after rollout decision | Restore known-good state, verify compliance, and remove from test group |
+| **Primary Group** | `SG-DEVICES-WINDOWS-PILOT` | `SG-DEVICES-NONCOMPLIANT-TEST` |
+| **Membership Type** | Assigned | Assigned |
+| **Purpose** | Validate candidate changes under normal working conditions | Validate controlled failure, enforcement, detection, and recovery behaviour |
+| **Typical Device** | Selected managed corporate endpoint or dedicated pilot endpoint | Dedicated test endpoint such as `WF-TST-001` |
+| **Normal Business Use** | May continue where the change is considered safe enough | Avoided during disruptive testing |
+| **Base Provisioning** | Normally `CORPORATE` | Normally `CORPORATE` |
+| **Expected Outcome** | Candidate change behaves safely enough for wider deployment | Failure occurs as expected and the device can be restored |
+| **Exit Action** | Retain or remove from pilot after rollout decision | Restore, validate, and remove from test group |
 
-There is a useful way to remember this:
+The difference is not whether the device is corporate-owned.
 
-```text
-Pilot
-=
-"Can we safely deploy this?"
-```
+Both can begin from the normal corporate device model.
 
-while:
+The difference is **what Wire Finance is temporarily asking the device to do**.
 
-```text
-Test
-=
-"Does the control behave correctly when something goes wrong?"
-```
-
----
-
-#### Why Both Groups Use Assigned Membership
+### Why Both Groups Use Assigned Membership
 
 Both groups use:
 
 ```text
-Membership Type:
+Membership Type
+=
 Assigned
 ```
 
 This is deliberate.
 
-A device should not enter a pilot because some unrelated attribute happened to match a dynamic rule.
+A device should not enter a pilot population merely because an unrelated attribute happened to match a dynamic rule.
 
-And a production endpoint should certainly not enter a disruptive testing population automatically because it became noncompliant.
+More importantly, a production endpoint should never enter a disruptive testing population automatically because it unexpectedly became noncompliant.
 
 Membership represents an **explicit operational decision**.
-
-So:
 
 ```text
 Selected for Controlled Rollout
@@ -137,48 +147,48 @@ Approved for Controlled Failure Testing
 SG-DEVICES-NONCOMPLIANT-TEST
 ```
 
-This follows the principle we established earlier:
+This follows a principle already used elsewhere in the Wire Finance architecture:
 
 **where membership represents a deliberate decision, use deliberate assignment.**
 
-#### The Pilot Device Model
+### The Pilot Device Model
 
 Pilot devices are used for **staged rollout**.
 
-They receive a candidate configuration before the wider corporate population so IT can observe what happens under normal conditions.
+They receive a candidate configuration before the wider corporate population so IT can observe how that change behaves under realistic conditions.
 
 A pilot device normally remains:
 
 ```text
 Corporate Owned
-        +
+      +
 Microsoft Entra Joined
-        +
+      +
 Intune Managed
-        +
+      +
 Security Controlled
-        +
+      +
 Used Normally
 ```
 
-The difference is that it receives something **earlier**.
+The difference is that it receives selected changes **earlier**.
 
-That might eventually include:
+Those changes may eventually include:
 
-- An Intune configuration profile
-- A new application
-- A Windows setting
-- An update configuration
-- An endpoint-security policy
-- A compliance-policy change
-- A remediation
-- Another managed endpoint change
+- an Intune configuration profile
+- an application
+- a Windows configuration
+- an update policy
+- an endpoint-security setting
+- a compliance-policy change
+- a remediation
+- another managed endpoint change
 
 The purpose is not to break the machine.
 
-The purpose is to learn whether the proposed change behaves properly before exposing a larger population to it.
+The purpose is to discover whether the change behaves correctly before exposing a wider population to it.
 
-#### What Are We Validating During a Pilot?
+### What Are We Validating During a Pilot?
 
 A successful pilot means more than:
 
@@ -186,55 +196,46 @@ A successful pilot means more than:
 The Policy Applied
 ```
 
-Wire Finance should consider questions such as:
+Wire Finance also needs to understand whether the endpoint remains usable.
 
-```text
-Did the configuration apply correctly?
+Questions might include:
 
-Does the device remain usable?
+- Did the configuration apply correctly?
+- Does the device remain usable?
+- Did an important business function stop working?
+- Are required applications still compatible?
+- Did management continue to function?
+- Did the change create unexpected user impact?
+- Did the intended security behaviour occur?
+- Was anything unexpected observed?
 
-Did anything important stop working?
-
-Are business applications still compatible?
-
-Did security controls behave as expected?
-
-Is Intune still reporting the device correctly?
-
-Did the change create unexpected user impact?
-
-Is the device still manageable?
-
-Did monitoring reveal anything unexpected?
-```
-
-A technically successful deployment can still be a poor production change.
+A configuration can deploy successfully and still be a poor production change.
 
 For example:
 
 ```text
-Policy Applied Successfully
+Configuration Applied Successfully
         +
-Critical Business Application Breaks
+Critical Business Function Breaks
         =
 Pilot Failed
 ```
 
-The purpose of the pilot is to discover that **before** the wider organisation discovers it for us.
+The purpose of the pilot is to discover that **before** the wider organisation does.
 
-#### Pilot Rollout Flow
+### Pilot Rollout Flow
 
-A typical pilot follows this process:
+A typical Wire Finance pilot follows this sequence:
 
 | Stage | Pilot Action |
 |---|---|
-| **1. Change prepared** | IT creates or modifies the intended configuration and defines what success should look like |
+| **1. Change prepared** | IT defines the candidate configuration and expected result |
 | **2. Pilot scope selected** | Approved devices are added to `SG-DEVICES-WINDOWS-PILOT` |
-| **3. Candidate configuration assigned** | The change targets the pilot group instead of the wider corporate population |
-| **4. Normal operation validated** | IT reviews usability, compatibility, security impact, management health, and expected behaviour |
-| **5. Results reviewed** | Problems are corrected or the change is approved |
-| **6. Production rollout** | The validated change targets the intended production population, normally `SG-DEVICES-WINDOWS-CORPORATE` |
-| **7. Pilot membership reviewed** | The device is retained as a standing pilot only where that remains useful |
+| **3. Candidate change assigned** | The configuration targets the pilot population |
+| **4. Normal operation observed** | Usability, compatibility, management health, and expected behaviour are reviewed |
+| **5. Results evaluated** | Problems are corrected, the change is rejected, or it is approved |
+| **6. Production rollout** | The validated change targets the intended production population |
+| **7. Pilot membership reviewed** | Devices remain in the standing pilot only where that continues to serve a purpose |
 
 Conceptually:
 
@@ -245,17 +246,17 @@ Pilot
    ↓
 Observe
    ↓
-Fix if Necessary
+Refine if Necessary
    ↓
 Approve
    ↓
 Production
 ```
 
-The pilot population acts as a controlled buffer between:
+The pilot population creates a controlled buffer between:
 
 ```text
-New Idea
+New Change
 ```
 
 and:
@@ -264,7 +265,7 @@ and:
 Production Fleet
 ```
 
-#### A Pilot Device Can Still Be a Normal Corporate Device
+### Pilot Membership Is an Overlay
 
 Pilot membership does not replace the device's normal operational classification.
 
@@ -275,112 +276,124 @@ WF-LT-001
 │
 ├── SG-DEVICES-WINDOWS-CORPORATE
 │      ↓
-│   Operational corporate endpoint
+│   Normal Corporate Endpoint
 │
 └── SG-DEVICES-WINDOWS-PILOT
        ↓
-    Receives selected changes first
+    Receives Selected Changes First
 ```
 
 There is no contradiction.
 
-The first group answers:
+The corporate group answers:
 
 ```text
 What is this device operationally?
 ```
 
-The second answers:
+The pilot group answers:
 
 ```text
-Should this device receive candidate changes before production?
+Should this device receive
+candidate changes before production?
 ```
 
-That is another example of intentional group overlap.
+One device can therefore belong to both groups because the memberships describe different relationships.
 
----
+### The Test Device Model
 
-#### The Noncompliance Test Device Model
-
-Testing failure is a different activity.
+Controlled failure testing serves a different purpose.
 
 Wire Finance uses:
 
 `SG-DEVICES-NONCOMPLIANT-TEST`
 
-for devices explicitly approved for controlled compliance, enforcement, and security-response testing.
+for devices explicitly approved for controlled compliance, enforcement, or security-response testing.
 
-The initial preferred endpoint is:
+The preferred dedicated endpoint is:
 
 `WF-TST-001`
 
-The goal is not to use ordinary employee devices as disposable experiments.
+The goal is not to use normal employee endpoints as disposable experiments.
 
-Instead, we begin from a known managed state and introduce a carefully controlled failure condition so we can observe what the environment does.
+Instead, Wire Finance begins from a known managed state and deliberately introduces an approved test condition.
+
+```text
+Known-Good Corporate State
+        ↓
+Approved Test
+        ↓
+Controlled Failure Condition
+        ↓
+Observe
+        ↓
+Remediate
+        ↓
+Validate Recovery
+        ↓
+Known-Good State
+```
 
 The principle is:
 
 **a test device deliberately exercises the failure path.**
 
-#### Why `WF-TST-001` Still Uses the `CORPORATE` Base Build
+### Why the Test Device Still Uses the Corporate Base Build
 
-We do not currently need an Autopilot Group Tag called:
+Wire Finance does not currently need an Autopilot Group Tag called:
 
 ```text
 TEST
 ```
 
-`WF-TST-001` can begin with:
+`WF-TST-001` can begin with the normal:
 
 ```text
-Autopilot Classification:
+Autopilot Classification
+=
 CORPORATE
 ```
 
-and receive the normal corporate foundation.
+and receive the standard corporate provisioning foundation.
 
-It can then be explicitly assigned to:
+When a controlled test is required, it can then be explicitly added to:
 
-```text
-SG-DEVICES-NONCOMPLIANT-TEST
-```
+`SG-DEVICES-NONCOMPLIANT-TEST`
 
-when a test is required.
-
-That gives us:
+The resulting model is:
 
 ```text
 CORPORATE Base Build
         ↓
-Managed Corporate State
+Known Managed State
         ↓
-Approved Test Assignment
+Explicit Test Assignment
         ↓
 Controlled Test Scenario
 ```
 
-This is useful because many tests are intended to answer:
+This is useful because many tests ask:
 
-**What happens when a normally managed corporate endpoint stops satisfying one of our requirements?**
+**What happens when a normally managed corporate endpoint stops meeting one of our requirements?**
 
-Starting from a known corporate baseline gives us something meaningful to compare against.
+Starting from a known corporate state gives Wire Finance a meaningful baseline for comparison.
 
-#### Test Status Is an Operational Overlay
+### Test Status Is an Operational Overlay
 
-This distinction is important.
+The word:
 
 ```text
 TEST
 ```
 
-does not currently represent a completely different provisioning architecture.
+does not currently describe a fundamentally different provisioning architecture.
 
-It represents **what we are temporarily doing with the device**.
+It describes what Wire Finance is temporarily doing with the device.
 
 So:
 
 ```text
-Autopilot Classification
+Provisioning Classification
         ↓
 CORPORATE
 ```
@@ -393,56 +406,79 @@ Operational Purpose
 Controlled Test
 ```
 
-We use a device group for the temporary operational purpose rather than creating another provisioning class unnecessarily.
+Wire Finance uses a device group for that temporary operational purpose instead of creating another permanent provisioning class.
 
-#### Controlled Test Flow
+### Why There Is No PILOT or TEST Autopilot Tag
 
-A noncompliance test follows a controlled lifecycle.
+Autopilot Group Tags are reserved for materially different **base provisioning paths**.
 
-| Stage | Test Action |
-|---|---|
-| **1. Baseline recorded** | Confirm the endpoint begins in a known managed state and record expected behaviour |
-| **2. Test approved** | IT/Security confirms the objective, scope, expected result, and impact |
-| **3. Device selected** | A dedicated lab endpoint is added to `SG-DEVICES-NONCOMPLIANT-TEST` |
-| **4. Failure condition introduced** | An approved test configuration causes a selected requirement to fail |
-| **5. Enforcement observed** | Intune, Conditional Access, Defender/security telemetry, and relevant operational impact are reviewed |
-| **6. Remediation validated** | The required configuration is restored and the recovery process is observed |
-| **7. Known-good state confirmed** | Management, security, and compliance health are verified |
-| **8. Test membership removed** | The device leaves the test group unless another approved scenario follows |
-
-The lifecycle is therefore:
+The current Wire Finance classifications are:
 
 ```text
-Known-Good State
-        ↓
-Approved Test
-        ↓
-Controlled Failure
-        ↓
-Observe
-        ↓
-Remediate
-        ↓
-Validate Recovery
-        ↓
-Known-Good State
+CORPORATE
+PAW
 ```
 
-The beginning and end matter just as much as the failure in the middle.
+Those represent different intended provisioning models.
 
-#### Failure Must Be Intentional
-
-There is a major difference between:
+Pilot and test roles do not.
 
 ```text
-Device unexpectedly becomes noncompliant
+PILOT
+        ↓
+Receive Candidate Changes First
 ```
 
 and:
 
 ```text
-Device deliberately placed into
-an approved noncompliance test
+TEST
+        ↓
+Approved for Controlled Test Activity
+```
+
+Neither means:
+
+```text
+Build a Fundamentally Different
+Windows Device From Scratch
+```
+
+Wire Finance therefore does not currently create additional `PILOT` or `TEST` Group Tags.
+
+This keeps the Autopilot model simple and prevents temporary operational activities from becoming permanent provisioning classes.
+
+### Controlled Test Flow
+
+A controlled noncompliance test follows a defined lifecycle.
+
+| Stage | Test Action |
+|---|---|
+| **1. Known-good state confirmed** | Verify that the endpoint begins in its expected managed state |
+| **2. Test objective defined** | Record what is being tested and what success should look like |
+| **3. Test approved** | IT or Security approves the scope and expected impact |
+| **4. Device assigned** | The dedicated endpoint is added to `SG-DEVICES-NONCOMPLIANT-TEST` |
+| **5. Controlled condition introduced** | An approved configuration causes the selected requirement to fail |
+| **6. Behaviour observed** | Relevant management and security behaviour is reviewed |
+| **7. Device remediated** | The approved failure condition is removed or corrected |
+| **8. Recovery validated** | The endpoint is confirmed to have returned to the expected state |
+| **9. Test membership removed** | The device leaves the test group unless another approved test follows |
+
+The beginning and the end are just as important as the failure in the middle.
+
+### Failure Must Be Intentional
+
+There is an important difference between:
+
+```text
+Device Unexpectedly Becomes Noncompliant
+```
+
+and:
+
+```text
+Device Deliberately Placed Into
+an Approved Test Scenario
 ```
 
 Those are not the same event.
@@ -450,7 +486,7 @@ Those are not the same event.
 An unexpected production failure is:
 
 ```text
-Operational / Security Issue
+Operational or Security Issue
         ↓
 Investigate
         ↓
@@ -473,112 +509,57 @@ This means:
 
 **a noncompliant device does not automatically become a test device.**
 
-That distinction prevents real incidents from being confused with lab activity.
+That distinction prevents genuine operational problems from being mistaken for authorised lab activity.
 
----
+### Test Success Can Include Failure
 
-#### What Can the Test Device Validate?
+Pilot and test success also mean different things.
 
-The exact policies will be built later.
-
-At this stage, Wire Finance records the types of behaviour the lab should eventually be capable of validating.
-
-| Scenario | What Wire Finance Validates |
-|---|---|
-| **Compliance requirement intentionally unmet** | Intune identifies the expected noncompliant state and reports the reason correctly |
-| **Conditional Access compliant-device requirement** | Access behaviour reflects device compliance when the policy is later implemented |
-| **Security configuration drift** | Management or security tooling detects or remediates an approved configuration deviation |
-| **Recovery after remediation** | The endpoint returns to its expected compliant and managed state after the test condition is removed |
-
-The important word is:
-
-**reversible**.
-
-The purpose of the lab is to learn how controls behave without unnecessarily damaging endpoints or exposing production users to disruptive experiments.
-
-#### We Are Testing the Entire Control Chain
-
-Suppose a future compliance test intentionally causes `WF-TST-001` to fail one approved requirement.
-
-The interesting question is not merely:
+For a pilot, success generally means:
 
 ```text
-Did Intune say Noncompliant?
-```
-
-We may eventually want to observe the wider chain:
-
-```text
-Device State Changes
-        ↓
-Intune Detects State
-        ↓
-Compliance Evaluated
-        ↓
-Conditional Access Consumes Signal
-        ↓
-Access Behaviour Changes
-        ↓
-Security / Management Telemetry Generated
-        ↓
-Administrator Investigates
-        ↓
-Device Remediated
-        ↓
-Compliance Restored
-```
-
-That is much more valuable than proving a checkbox changes from green to red.
-
-It allows the lab to validate whether multiple security controls work together as intended.
-
-#### Pilot Success and Test Success Mean Different Things
-
-This is another subtle but important distinction.
-
-For a pilot, success normally means:
-
-```text
-Nothing Important Broke
-        +
 Desired Change Worked
+        +
+Nothing Important Broke
 ```
 
-For a noncompliance test, success may deliberately include:
+For a controlled test, success may deliberately include:
 
 ```text
-Requirement Failed
+Expected Requirement Failed
         +
-Device Became Noncompliant
+Expected Control Responded
         +
-Enforcement Occurred
+Evidence Was Produced
         +
-Monitoring Detected It
+Remediation Worked
         +
-Remediation Restored Trust
+Device Returned to Known-Good State
 ```
 
-So a failure condition during the test can actually be part of a **successful test result**.
+The failure condition itself may therefore be part of a **successful test**.
 
-What matters is whether the environment responded as designed.
+What matters is whether the environment behaved as designed and whether Wire Finance could safely recover it.
 
-#### One Device Can Belong to Several Groups
+The detailed compliance, risk, Conditional Access, and Defender behaviours are covered in the next part of the Device Provisioning Model.
 
-`WF-TST-001` gives us a useful example of the device-group architecture working as intended.
+### One Device Can Belong to Several Groups
 
-It might belong to:
+`WF-TST-001` gives us a useful example of intentional group overlap.
 
-| Group | What That Membership Means |
+Depending on what Wire Finance is doing with it, the device might belong to:
+
+| Group | What the Membership Represents |
 |---|---|
-| `SG-DEVICES-AUTOPILOT-CORPORATE` | The device receives the standard corporate Autopilot provisioning path |
-| `SG-DEVICES-WINDOWS-CORPORATE` | It is an active company-owned Windows endpoint managed by Intune |
-| `SG-DEVICES-WINDOWS-PILOT` | It receives selected candidate configurations before wider rollout |
-| `SG-DEVICES-NONCOMPLIANT-TEST` | It is explicitly approved for controlled failure testing |
+| `SG-DEVICES-AUTOPILOT-CORPORATE` | Standard corporate provisioning intent |
+| `SG-DEVICES-WINDOWS-CORPORATE` | Current managed corporate operational state |
+| `SG-DEVICES-WINDOWS-PILOT` | Receives selected candidate configurations first |
+| `SG-DEVICES-NONCOMPLIANT-TEST` | Explicitly approved for a controlled test scenario |
 
 Those memberships describe different dimensions of the same device.
 
 ```text
-Provisioning
+Provisioning Intent
         +
 Operational State
         +
@@ -587,76 +568,24 @@ Pilot Role
 Testing Role
 ```
 
-There is no requirement for the machine to belong to only one device group.
+There is no requirement for one device to belong to only one device group.
 
-#### Why There Is No `PILOT` or `TEST` Autopilot Tag
+What matters is that every membership has a clear reason.
 
-We already decided that Autopilot classification should represent materially different **base provisioning paths**.
+### Production Devices Are Not Lab Equipment
 
-Current values are:
+Wire Finance needs a firm boundary around disruptive testing.
 
-```text
-CORPORATE
-PAW
-```
-
-Pilot and test roles do not currently need separate base builds.
-
-They are operational overlays.
-
-So:
-
-```text
-PILOT
-```
-
-means:
-
-```text
-Receive Candidate Changes First
-```
-
-and:
-
-```text
-TEST
-```
-
-means:
-
-```text
-Approved for Controlled Test Activity
-```
-
-Neither means:
-
-```text
-Build a Fundamentally Different
-Windows Endpoint From Scratch
-```
-
-Therefore no additional Group Tags are required at this stage.
-
-This keeps the Autopilot design simple and prevents temporary activities from becoming permanent provisioning classes.
-
----
-
-#### Production Devices Are Not Lab Equipment
-
-Wire Finance needs a hard boundary around disruptive testing.
-
-Production devices should not be casually added to:
+Normal production devices should not be casually added to:
 
 `SG-DEVICES-NONCOMPLIANT-TEST`
 
-If an existing production endpoint is going to become a dedicated lab device, that change should be deliberate.
-
-Conceptually:
+If an existing production endpoint is going to become a dedicated lab device, the change should be deliberate.
 
 ```text
 Production Endpoint
         ↓
-Lab Use Required
+Lab Requirement Identified
         ↓
 Purpose Reviewed
         ↓
@@ -665,33 +594,35 @@ Device Deliberately Reclassified
 Approved Test Activity
 ```
 
-The objective is to protect normal employee endpoints from experimental conditions that could interfere with business activity.
+This protects normal employee endpoints from experimental conditions that could interfere with business activity.
 
-#### Privileged Workstations Stay Out of Ordinary Tests
+### Privileged Workstations Stay Out of Ordinary Tests
 
 `WF-PAW-###` devices have a different security purpose.
 
-They should not be dropped into ordinary pilot or failure-testing exercises.
+They should not be casually placed into ordinary pilot or failure-testing exercises.
 
-A PAW test would require its **own explicitly approved privileged-device scenario**.
-
-That prevents an endpoint trusted for sensitive administration from quietly becoming general-purpose lab equipment.
+A PAW-related test would require its **own explicitly approved privileged-device scenario**.
 
 The boundary is:
 
 ```text
 PAW
-      ↓
+   ↓
 Privileged Administration
+```
 
+versus:
+
+```text
 Test Endpoint
       ↓
-Controlled Security Validation
+Controlled Validation
 ```
 
 A device should not casually drift between those purposes.
 
-#### Every Test Needs an Exit Plan
+### Every Test Needs an Exit Plan
 
 Before introducing a controlled failure, Wire Finance should know:
 
@@ -704,27 +635,29 @@ Which device is involved?
 
 What could be affected?
 
-What evidence will we collect?
+What evidence do we need?
 
-How will we restore the device?
+How will the device be restored?
 
-How will we confirm recovery?
+How will recovery be validated?
 
 When does the test end?
 ```
 
-A test without a recovery plan is not controlled testing.
+A controlled test without a recovery plan is not really controlled.
 
-It is just uncertainty with a laptop attached to it.
+The purpose is to learn from failure behaviour without losing control of the endpoint used to create it.
 
-#### Membership Must Be Removed When the Purpose Ends
+### Special-Purpose Membership Has a Lifecycle
 
-Because both groups use assigned membership, membership also needs lifecycle management.
+Because both pilot and test groups use Assigned membership, those memberships also need to be managed deliberately.
 
 For a pilot:
 
 ```text
 Selected
+   ↓
+Pilot
    ↓
 Validated
    ↓
@@ -747,102 +680,93 @@ Validated
 Remove
 ```
 
-Devices should not quietly remain in special-purpose groups forever.
+Devices should not quietly remain in special-purpose groups after that purpose has ended.
 
-Otherwise today's temporary experiment becomes next year's mystery policy assignment.
+Otherwise, today's temporary experiment becomes tomorrow's unexplained policy assignment.
 
----
+### Wire Finance Pilot and Test Decision
 
-#### Wire Finance Pilot and Test Device Decision
-
-The current model can now be recorded as:
+The current design can therefore be recorded as:
 
 ```text
-Pilot Group:
+PILOT
+
+Group:
 SG-DEVICES-WINDOWS-PILOT
 
-Pilot Membership:
+Membership:
 Assigned
 
-Pilot Purpose:
-Safe staged rollout and validation
+Purpose:
+Controlled staged rollout and validation
 before wider deployment
 
+Base Provisioning:
+Normally CORPORATE
 
-Test Group:
+Exit:
+Retain only as part of the approved
+pilot population, otherwise remove
+```
+
+and:
+
+```text
+TEST
+
+Group:
 SG-DEVICES-NONCOMPLIANT-TEST
 
-Test Membership:
+Membership:
 Assigned
 
 Primary Test Endpoint:
 WF-TST-001
 
 Base Provisioning:
-CORPORATE Autopilot build unless
-a future design requires otherwise
+CORPORATE
 
-Test Purpose:
-Controlled validation of compliance,
-enforcement, security monitoring,
-and remediation
+Purpose:
+Controlled validation of failure,
+enforcement, monitoring, remediation,
+and recovery
 
-Production Device Protection:
-No automatic test membership.
-Disruptive testing is restricted
-to approved lab devices.
+Production Protection:
+No automatic test membership
 
-Lifecycle:
-Explicit Add
-      ↓
-Validate / Test
-      ↓
-Restore / Review
-      ↓
-Remove
+Exit:
+Restore known-good state,
+validate recovery,
+then remove test membership
 ```
 
 The governing principle is:
 
-**pilot devices prove that a change works safely; noncompliance test devices deliberately exercise a failure path. Neither role replaces the device's corporate identity, ownership, management, or provisioning model.**
+**pilot devices prove that a change works safely; test devices deliberately exercise an approved failure path. Neither role replaces the device's corporate ownership, identity, management state, or provisioning model.**
 
-#### We Can Build and Test the Device — Now What Makes It Secure?
+### From Testing to Device Security
 
-At this point, the endpoint architecture has become much clearer.
+At this point, Wire Finance can:
 
-We know how to build:
+- provision standard corporate devices
+- provision privileged workstations
+- stage changes through pilot devices
+- exercise controlled failure paths through test devices
 
-```text
-Standard Corporate Devices
-Privileged Workstations
-Pilot Devices
-Test Devices
-```
+But those activities depend on something we have deliberately not defined in detail yet:
 
-We also know how to separate:
+**what does a secure and compliant Wire Finance endpoint actually look like?**
 
-```text
-Provisioning Intent
-Operational State
-Pilot Participation
-Privileged Trust
-Controlled Testing
-```
+We have already referenced concepts such as:
 
-But several words have appeared repeatedly throughout the design:
+- BitLocker
+- Microsoft Defender
+- firewall controls
+- security baselines
+- compliance
+- device risk
+- Conditional Access
 
-```text
-Defender
-BitLocker
-Firewall
-Compliance
-Device Risk
-Security Baseline
-Conditional Access
-```
+The next step is to bring those concepts together into a coherent security model.
 
-So far, we have deliberately treated many of those as future controls rather than pretending they already exist.
-
-Now we need to define what those controls actually mean as a system.
-
-**What security conditions should a Wire Finance device satisfy before it can be considered compliant — and eventually trusted during an access decision?**
+**What security conditions should a Wire Finance device satisfy before it can be considered compliant — and eventually trusted as part of an access decision?**
