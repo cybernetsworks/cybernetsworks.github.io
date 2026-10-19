@@ -9,104 +9,120 @@ description: "A managed device is not automatically a trusted device. See how In
 
 We now know how Wire Finance devices are:
 
-- Owned
-- Named
-- Classified
-- Joined
-- Enrolled
-- Provisioned
-- Piloted
-- Tested
+- owned
+- named
+- classified
+- joined
+- enrolled
+- provisioned
+- piloted
+- tested
 
-But none of those stages independently answers the most important security question:
+But none of those stages independently answers one of the most important security questions:
 
 **Is this device secure enough to trust right now?**
 
-A laptop may be company-owned.
+A laptop may be corporate-owned.
 
 It may be Microsoft Entra joined.
 
-It may be enrolled into Intune.
+It may be enrolled into Microsoft Intune.
 
-It may even have been provisioned successfully through Windows Autopilot.
+It may even have completed Windows Autopilot successfully.
 
 And it can still drift away from the security state Wire Finance expects.
 
-That is why device security needs more than provisioning.
+A security control may be disabled.
 
-Wire Finance separates three ideas:
+The operating system may become outdated.
+
+Malware may be detected.
+
+The device may become risky.
+
+Or the endpoint may simply stop checking in.
+
+Provisioning therefore establishes the device.
+
+Security and compliance determine whether that device continues to meet the organisation's expectations.
+
+### Three Different Questions
+
+Wire Finance separates three concepts that are easy to blur together.
 
 ```text
 Security Configuration
         ↓
 What state should the device have?
 
-
 Compliance Evaluation
         ↓
-Does the device currently meet that state?
-
+Does the device currently meet
+the approved requirements?
 
 Access Enforcement
         ↓
-What should the device be allowed to access?
+Should that device state affect
+access to company resources?
 ```
 
-Those responsibilities work together, but they are not interchangeable.
+They are related.
 
-#### The Wire Finance Security and Compliance Model
+They are not the same thing.
 
-Wire Finance uses:
+The core principle is:
 
-- **Microsoft Intune** to configure and manage the desired endpoint security state
-- **Microsoft Defender for Endpoint** to provide threat telemetry, detections, and device-risk signals
-- **Microsoft Intune compliance** to evaluate whether a device currently meets the approved standard
-- **Microsoft Entra Conditional Access** to eventually use those signals when deciding whether access should be allowed or restricted
+**security configuration establishes the desired state, compliance evaluates the current state, and access controls can use that result when deciding whether access should be permitted.**
 
-The relationship looks like this:
+### The Wire Finance Security and Compliance Model
+
+Wire Finance uses several Microsoft platforms for different parts of this process.
+
+| Platform / Capability | Role in the Model |
+|---|---|
+| **Microsoft Intune** | Configures and manages the desired endpoint state |
+| **Microsoft Defender for Endpoint** | Provides threat telemetry, detections, investigation capability, and device-risk signals |
+| **Microsoft Intune Compliance** | Evaluates whether the endpoint currently meets defined security requirements |
+| **Microsoft Entra Conditional Access** | Can later use device compliance and other signals when making access decisions |
 
 ![Wire Finance Device Security and Compliance Model]({{ '/assets/images/active-directory/device_security_compliance_model.png' | relative_url }})
 
-The architecture can be understood as five connected decisions:
+Conceptually:
 
 ```text
-1. Configure the Device
-        ↓
-2. Observe Threat and Risk
-        ↓
-3. Evaluate Compliance
-        ↓
-4. Enforce Access Policy
-        ↓
-5. Allow or Restrict Access
+Configure
+    ↓
+Observe
+    ↓
+Evaluate
+    ↓
+Make Signal Available
+    ↓
+Enforce Access Policy
 ```
 
-The governing principle is:
+No single product owns the entire trust decision.
 
-**security configuration establishes the desired state; compliance evaluates whether the device currently meets it; Conditional Access determines what access is permitted based on that state.**
+Each one contributes a different part of the story.
 
----
-
-#### Security Configuration Is Not Compliance
-
-This distinction is easy to blur.
+### Security Configuration Is Not Compliance
 
 Suppose Wire Finance wants BitLocker enabled.
 
-If we create a policy that says:
+A security policy that says:
 
 ```text
 Enable BitLocker
 ```
 
-that is **security configuration**.
+is trying to establish the required state.
 
-We are telling the device what state we want.
+That is **configuration**.
 
-If we later evaluate:
+A compliance policy that asks:
 
 ```text
-Is BitLocker Present?
+Is BitLocker enabled?
 
 YES
  ↓
@@ -117,189 +133,198 @@ NO
 Requirement Failed
 ```
 
-that is **compliance**.
+is evaluating the state.
 
-One tries to establish the required state.
+That is **compliance**.
 
-The other checks whether the required state actually exists.
+And a later Conditional Access policy that says:
 
-| Control | Purpose | Wire Finance Example |
-|---|---|---|
-| **Configuration policy** | Sets the intended device state | Configure Windows settings and management behaviour |
-| **Endpoint security policy** | Configures a security technology | Defender Antivirus, BitLocker, Firewall, ASR, account protection |
-| **Security baseline** | Applies a coordinated set of security settings | Windows / Defender baseline tuned for Wire Finance |
-| **Compliance policy** | Evaluates whether the endpoint meets the required state | Check encryption, firewall, antivirus, OS, and device risk |
-| **Conditional Access** | Uses identity and device signals to enforce access | Require a compliant device for selected resources |
+```text
+Require a compliant device
+```
 
-So:
+uses the result when making an access decision.
+
+That is **access enforcement**.
+
+The distinction can be summarised as:
+
+| Control | Purpose |
+|---|---|
+| **Configuration policy** | Establish the intended device configuration |
+| **Endpoint security policy** | Configure a particular security technology |
+| **Security baseline** | Apply a coordinated set of recommended security settings |
+| **Compliance policy** | Evaluate whether required conditions currently exist |
+| **Conditional Access** | Use approved identity and device signals when controlling access |
+
+Or more simply:
 
 ```text
 CONFIGURATION
 "Make the device secure."
-```
 
-is different from:
-
-```text
 COMPLIANCE
-"Prove the device still meets the requirement."
-```
+"Check whether it still meets the requirement."
 
-and both are different from:
-
-```text
 CONDITIONAL ACCESS
-"Decide what access is permitted."
+"Decide whether that state should affect access."
 ```
 
----
+### Device Trust Is Built in Layers
 
-#### Device Trust Is Built in Layers
+Wire Finance does not treat trust as a single checkbox.
 
-Wire Finance treats endpoint trust as a progression rather than a single checkbox.
+A corporate endpoint moves through several security layers.
 
-| Layer | Primary Platform | Question Answered |
+| Layer | Primary Platform | Question |
 |---|---|---|
-| **1. Device identity** | Microsoft Entra ID | What device is this and which tenant identity does it belong to? |
-| **2. Device management** | Microsoft Intune | Is the endpoint under approved management? |
-| **3. Platform hardening** | Microsoft Intune | Has the desired secure configuration been applied? |
-| **4. Threat protection** | Microsoft Defender for Endpoint | What threats, detections, and device-risk signals exist? |
-| **5. Compliance evaluation** | Microsoft Intune | Does the device currently meet Wire Finance requirements? |
-| **6. Access enforcement** | Microsoft Entra Conditional Access | Should access be allowed, restricted, or blocked? |
+| **Device identity** | Microsoft Entra ID | What organisational device is this? |
+| **Device management** | Microsoft Intune | Is the device under approved management? |
+| **Platform hardening** | Microsoft Intune | Has the expected security configuration been applied? |
+| **Threat protection** | Microsoft Defender for Endpoint | What threats or device-risk signals currently exist? |
+| **Compliance evaluation** | Microsoft Intune | Does the endpoint currently satisfy our requirements? |
+| **Access enforcement** | Microsoft Entra Conditional Access | Should the device state influence access? |
 
-The progression becomes:
+Conceptually:
 
 ```text
 Device Identity
       ↓
-Device Management
+Management
       ↓
-Platform Hardening
+Security Configuration
       ↓
 Threat Protection
       ↓
-Compliance Evaluation
+Compliance
       ↓
 Access Enforcement
 ```
 
-No single layer replaces the others.
+No layer replaces another.
 
-#### Layer 1 — Device Identity
+For example:
 
-For normal Wire Finance corporate clients, the device is:
+```text
+Known Device
+      ≠
+Secure Device
+```
+
+and:
+
+```text
+Managed Device
+      ≠
+Compliant Device
+```
+
+and:
+
+```text
+Compliant Device
+      ≠
+Automatically Authorised for Everything
+```
+
+Each signal answers a different question.
+
+### Layer 1 — Device Identity
+
+Normal Wire Finance corporate Windows endpoints are designed to become:
 
 ```text
 Microsoft Entra Joined
 ```
 
-This establishes the organisational device identity.
+This establishes an organisational identity for the device.
 
-It answers:
+It helps answer:
 
 **What device is this?**
 
-But identity alone does not answer:
+But device identity alone does not tell us:
 
-```text
-Is it encrypted?
+- whether BitLocker is enabled
+- whether the firewall is healthy
+- whether antivirus protection is active
+- whether malware has been detected
+- whether the operating system is supported
+- whether the endpoint is compliant
 
-Is the firewall active?
+The device may be known without being sufficiently trusted.
 
-Is Defender healthy?
+### Layer 2 — Device Management
 
-Is the device compromised?
-
-Is the operating system supported?
-
-Is the device compliant?
-```
-
-So:
-
-```text
-Known Device
-      ≠
-Trusted Device
-```
-
-#### Layer 2 — Device Management
-
-The corporate endpoint is also:
+Corporate endpoints are also designed to become:
 
 ```text
 Microsoft Intune Managed
 ```
 
-Intune provides the management channel through which Wire Finance can configure and monitor the endpoint.
+Intune gives Wire Finance the management channel needed to deploy settings, applications, security policies, compliance policies, and other endpoint controls.
 
 Together:
 
 ```text
-Microsoft Entra Identity
+Microsoft Entra Device Identity
         +
 Microsoft Intune Management
         ↓
-Managed Endpoint Foundation
+Managed Corporate Endpoint Foundation
 ```
 
-That foundation is essential.
+That foundation is important.
 
-But management still does not mean that every required security condition is currently satisfied.
+But management still does not prove that every required security condition is currently satisfied.
 
-#### Layer 3 — Platform Hardening
+### Layer 3 — Platform Hardening
 
-The next layer establishes the desired secure device state.
+The next layer establishes the expected secure state of the Windows endpoint.
 
-Wire Finance plans to configure controls such as:
+Wire Finance expects its corporate-device security model to cover areas such as:
 
 - BitLocker drive encryption
 - Secure Boot
+- Trusted Platform Module
 - Microsoft Defender Antivirus
 - Windows Firewall
+- Attack Surface Reduction
 - Windows Hello for Business
-- Attack Surface Reduction controls
-- Operating-system security settings
-- Endpoint security baselines
-- Account-protection settings
+- operating-system security settings
+- account protection
 - Windows LAPS
-- Windows Update requirements
+- endpoint detection and response
+- Windows security baselines
+- supported Windows versions and updates
 
-The exact policy values will be created and tested later during the Intune implementation phase.
+The exact settings will be configured and tested during the Intune implementation phase.
 
-At this stage, the important thing is defining the **control families** the endpoint architecture expects.
+At the design stage, the important thing is identifying the **control families** the endpoint architecture expects.
 
-#### Modular Security Policies
+### Modular Security Policies
 
-Wire Finance will avoid building one enormous endpoint policy containing every security setting.
+Wire Finance will avoid creating one enormous endpoint policy containing every security control.
 
-Instead, the implementation will remain modular.
+Instead, the security configuration will remain modular.
 
-Proposed security-policy objects include:
+Planned policy objects include:
 
-```text
-WF-SEC-WIN-ANTIVIRUS
-WF-SEC-WIN-FIREWALL
-WF-SEC-WIN-BITLOCKER
-WF-SEC-WIN-ASR
-WF-SEC-WIN-ACCOUNT-PROTECTION
-WF-SEC-WIN-EDR
-WF-SEC-WIN-BASELINE
-```
-
-Their intended purposes are:
-
-| Proposed Object | Purpose |
+| Planned Policy | Purpose |
 |---|---|
 | `WF-SEC-WIN-ANTIVIRUS` | Microsoft Defender Antivirus configuration |
 | `WF-SEC-WIN-FIREWALL` | Windows Firewall configuration |
 | `WF-SEC-WIN-BITLOCKER` | Drive-encryption configuration |
 | `WF-SEC-WIN-ASR` | Attack Surface Reduction configuration |
-| `WF-SEC-WIN-ACCOUNT-PROTECTION` | Account protection and Windows LAPS-related controls |
-| `WF-SEC-WIN-EDR` | Endpoint detection and response / Defender onboarding |
+| `WF-SEC-WIN-ACCOUNT-PROTECTION` | Account protection and local-account controls |
+| `WF-SEC-WIN-EDR` | Microsoft Defender for Endpoint onboarding and EDR configuration |
 | `WF-SEC-WIN-BASELINE` | Wire Finance Windows security-baseline configuration |
 
-Keeping the design modular gives us something very useful later:
+These names describe the planned implementation structure.
+
+They do not mean the policies have already been deployed.
+
+The modular approach gives Wire Finance a much easier troubleshooting model:
 
 ```text
 Problem Detected
@@ -308,24 +333,18 @@ Identify Control Family
       ↓
 Identify Relevant Policy
       ↓
-Troubleshoot Smaller Scope
+Investigate Smaller Scope
 ```
 
-That is much easier than debugging one giant security policy containing hundreds of unrelated settings.
+That is considerably easier than debugging one policy containing hundreds of unrelated settings.
 
----
+### Layer 4 — Microsoft Defender for Endpoint
 
-#### Layer 4 — Microsoft Defender for Endpoint
+Configuration tells us what the device should look like.
 
-Corporate endpoints will eventually be onboarded to:
+Microsoft Defender for Endpoint tells us much more about what is **happening on the device**.
 
-```text
-Microsoft Defender for Endpoint
-```
-
-through the endpoint-management design.
-
-Defender gives Wire Finance security information that goes beyond configuration.
+Corporate endpoints will eventually be onboarded to Defender for Endpoint.
 
 Conceptually:
 
@@ -348,116 +367,109 @@ Response
 This creates an important division of responsibility.
 
 ```text
-Intune
+Microsoft Intune
       ↓
-Configure and Manage Device State
+Configure and Manage
+the Endpoint
 ```
 
 while:
 
 ```text
-Defender for Endpoint
+Microsoft Defender for Endpoint
       ↓
-Observe Security Activity and Risk
+Observe Security Activity
+and Device Risk
 ```
 
-The two systems can then contribute different signals to the security decision.
+The two platforms contribute different evidence.
 
-#### Defender Device Risk
+### Device Risk Can Change
 
-A device can begin in a healthy state and later become risky.
+A device may begin its life in a healthy state and later become risky.
 
 For example:
 
 ```text
-Device Initially Healthy
-        ↓
+Device Healthy
+      ↓
 Suspicious Activity Detected
-        ↓
-Defender Risk Increases
+      ↓
+Defender Device Risk Increases
 ```
 
-That should matter even if:
+That matters even if:
 
 ```text
 Ownership = Corporate
-
 Entra Join = Correct
-
 Intune Enrollment = Correct
 ```
 
-The device's original provisioning has not changed.
+Nothing about the device's original provisioning has changed.
 
 Its **security condition has**.
 
-The intended signal chain is:
+Where Defender for Endpoint and Intune are integrated, device risk can become part of the compliance evaluation.
+
+Conceptually:
 
 ```text
-Defender Detection / Risk Increase
+Defender Detection
         ↓
 Device Risk Signal
         ↓
-Intune Compliance Re-Evaluates
+Intune Compliance Evaluation
         ↓
-Approved Risk Threshold Exceeded?
+Risk Above Approved Threshold?
         ↓
-Device Becomes Noncompliant
-        ↓
-Conditional Access Can Restrict Access
+Device Can Become Noncompliant
 ```
 
-This is where endpoint detection starts influencing access control.
-
-The organisation does not have to assume:
+This lets Wire Finance move away from the assumption:
 
 ```text
-"It was secure when we built it,
+"It was secure when we deployed it,
 so it must still be secure."
 ```
 
-Trust can be re-evaluated as the device state changes.
+Device trust needs to respond when the device state changes.
 
----
+### Layer 5 — Compliance Evaluation
 
-#### Layer 5 — Compliance Evaluation
+Wire Finance now needs to answer:
 
-Now Wire Finance asks:
+**Does this device currently meet our approved security standard?**
 
-**Does this device currently meet our acceptable security standard?**
+The planned standard corporate Windows compliance policy is:
 
-The proposed standard corporate compliance policy is:
+`WF-COMP-WIN-CORPORATE`
 
-```text
-WF-COMP-WIN-CORPORATE
-```
+The intended production population is:
 
-targeted primarily to:
+`SG-DEVICES-WINDOWS-CORPORATE`
 
-```text
-SG-DEVICES-WINDOWS-CORPORATE
-```
+The design expects the compliance model to evaluate areas such as:
 
-The initial design evaluates categories such as:
-
-| Compliance Area | Wire Finance Design Requirement |
+| Compliance Area | Wire Finance Requirement |
 |---|---|
-| **Management state** | Corporate endpoint must remain under approved Intune management |
 | **BitLocker** | Required |
-| **Secure Boot** | Required where supported by the approved hardware profile |
-| **TPM** | Required for supported corporate devices |
-| **Firewall** | Required and healthy |
+| **Secure Boot** | Required on supported corporate hardware |
+| **TPM** | Required for approved corporate endpoints |
+| **Code integrity** | Required where supported by the compliance profile |
+| **Firewall** | Required |
 | **Antivirus / antimalware** | Required and healthy |
-| **Code integrity** | Required where supported by the Windows compliance profile |
-| **Operating system** | Supported version; minimum build defined during implementation |
-| **Defender device risk** | Must remain within the approved risk threshold |
-| **Device activity** | Endpoint must continue checking in and being evaluated |
+| **Operating system** | Supported Windows version and approved minimum build |
+| **Defender device risk** | At or below the approved risk threshold |
+| **Device activity** | Device must continue reporting within the approved compliance-validity period |
 
-This policy does not configure all of those technologies.
+The compliance policy does not configure all of those technologies.
 
-It evaluates whether the required state exists.
+It evaluates whether the required conditions are present.
 
-#### Compliance Is a Current-State Decision
+### Compliance Represents Current State
+
+Compliance should not be treated as a certificate permanently awarded when the device is deployed.
 
 A device can move between states.
 
@@ -465,215 +477,199 @@ A device can move between states.
 Device Evaluated
       │
       ├── Requirements Satisfied
-      │        ↓
-      │     COMPLIANT
+      │          ↓
+      │      COMPLIANT
       │
       └── Requirement Failed
-               ↓
-          NONCOMPLIANT
+                 ↓
+            NONCOMPLIANT
 ```
 
-For the Wire Finance design, the important business interpretation is:
+For Wire Finance:
 
 ```text
 COMPLIANT
       ↓
-Currently Meets Approved Requirements
+Currently Meets
+Approved Requirements
 ```
 
-versus:
+while:
 
 ```text
 NONCOMPLIANT
       ↓
-Remediation or Access Restriction Required
+Something Requires
+Investigation or Remediation
 ```
 
-Compliance therefore represents a **current evaluation**, not a permanent badge issued when the laptop was deployed.
+Compliance is therefore a **current evaluation**, not permanent trust.
 
----
+### Privileged Devices Need a Higher Standard
 
-#### Privileged Devices Need Their Own Compliance Standard
+A Privileged Access Workstation exists at a higher trust tier than a normal employee endpoint.
 
-A Privileged Access Workstation operates at a higher trust tier than an everyday corporate laptop.
+Wire Finance therefore intends to define a separate privileged-device compliance policy:
 
-So Wire Finance will not rely solely on:
-
-```text
-WF-COMP-WIN-CORPORATE
-```
-
-for PAWs.
-
-The proposed privileged-device compliance policy is:
-
-```text
-WF-COMP-WIN-PAW
-```
+`WF-COMP-WIN-PAW`
 
 targeted to:
 
-```text
-SG-DEVICES-PRIVILEGED
-```
+`SG-DEVICES-PRIVILEGED`
 
 The reason is simple:
 
 ```text
-Normal Corporate Security Requirement
-              ≠
-Privileged Device Security Requirement
+Standard Corporate Requirement
+            ≠
+Privileged Device Requirement
 ```
 
-A PAW may require tighter expectations around:
+A PAW may require stricter expectations around:
 
-```text
-BitLocker
-Secure Boot
-TPM
-Defender Health
-Firewall
-Code Integrity
-Operating-System State
-Defender Device Risk
-Dedicated PAW Hardening
-```
+- encryption
+- Secure Boot
+- TPM
+- Defender health
+- firewall state
+- operating-system state
+- code integrity
+- device risk
+- dedicated PAW hardening
 
-The PAW policy can therefore enforce a stricter definition of acceptable device state.
+The detailed values will be decided and tested during implementation.
 
-#### Compliance Still Does Not Grant Privilege
+### Compliance Does Not Grant Privilege
 
-Even a fully compliant PAW does not automatically authorize administration.
-
-The privileged-access chain still needs multiple controls to align.
+Even a perfectly compliant PAW does not make somebody an administrator.
 
 For example:
 
 ```text
-Approved adm-* Identity
-        +
-Strong Authentication
-        +
-WF-PAW-001
-        +
-PAW Compliant
-        +
-PIM Activation
-        +
-Correct PAG-* Authorization
-        ↓
-Sensitive Administration
-```
-
-So:
-
-```text
 Compliant PAW
       ≠
-Automatically Authorized Administrator
+Administrative Authorisation
 ```
 
-Compliance contributes a device-trust signal.
+The PAW contributes a **device-trust signal**.
 
-Authorization remains a separate decision.
+Administrative authority still depends on the approved privileged identity and access model defined earlier in the journey.
 
----
+In other words:
 
-#### What Happens When Compliance Fails?
+```text
+Secure Device
+      +
+Approved Privileged Identity
+      +
+Approved Administrative Permission
+      ↓
+Controlled Privileged Activity
+```
+
+The device is only one part of that chain.
+
+### What Happens When Compliance Fails?
 
 Compliance failure should trigger a controlled response rather than an improvised one.
 
-The Wire Finance model is:
+The basic model is:
 
 | Stage | Expected Action |
 |---|---|
-| **1. Failure detected** | Intune identifies the failed compliance requirement |
-| **2. Device marked noncompliant** | The current device state becomes available to access-control decisions |
-| **3. Remediation** | IT or the user remediates the issue where appropriate and safe |
-| **4. Re-evaluation** | Intune checks the endpoint again after the required state is restored |
-| **5. Access outcome** | Compliant devices can regain normal access; persistent noncompliance can remain restricted when Conditional Access is enforced |
+| **Failure detected** | Intune identifies that a compliance requirement is not satisfied |
+| **Device state changes** | Endpoint is evaluated as noncompliant according to the policy |
+| **Investigation / remediation** | IT or Security determines why the requirement failed |
+| **Re-evaluation** | Endpoint is evaluated again after the condition is corrected |
+| **Access consequence** | Conditional Access may later restrict access while unacceptable noncompliance remains |
 
 Conceptually:
 
 ```text
 Compliance Failure
         ↓
-Device Marked Noncompliant
+Device Noncompliant
         ↓
-Remediation
+Investigate
         ↓
-Re-Evaluation
+Remediate
+        ↓
+Re-Evaluate
         ↓
 Requirement Satisfied?
        /             \
      Yes              No
       ↓                ↓
-Compliant          Remains
-Restored           Noncompliant
-                       ↓
-                 Access Restrictions
-                 May Apply
+ Compliant        Remains
+ Restored         Noncompliant
 ```
 
 Not every failure needs the same response.
 
-A lower-risk configuration issue may justify a remediation period.
+A low-risk issue may justify a controlled remediation period.
 
-A high-risk security condition — especially on a privileged device — may require a much faster response.
+A serious security condition may require much faster containment.
 
 The principle is:
 
-**response should be proportionate to the security risk, not merely to the existence of a red compliance status.**
+**the response should be proportionate to the security risk, not simply to the colour of a compliance indicator.**
 
-#### An Unexpected Failure Is Not a Lab Test
+### Real Failure Is Different From Test Failure
 
-This also connects directly to the previous lesson.
+Wire Finance already has:
 
-If a production endpoint unexpectedly becomes noncompliant:
+`SG-DEVICES-NONCOMPLIANT-TEST`
+
+That group exists so the organisation can deliberately exercise failure scenarios.
+
+An unexpected production failure is different.
 
 ```text
-Unexpected Failure
-      ↓
+Production Device
+Unexpectedly Fails Requirement
+        ↓
 Operational / Security Issue
-      ↓
-Investigate
-      ↓
-Remediate
+        ↓
+Investigate and Remediate
 ```
 
-It does **not** automatically become:
+It should not automatically become a test device.
+
+Likewise:
 
 ```text
 SG-DEVICES-NONCOMPLIANT-TEST
+        ↓
+Approved Failure Scenario
+        ↓
+Observe Expected Behaviour
+        ↓
+Restore Known-Good State
 ```
 
-That group exists for approved intentional testing.
+Controlled testing and real security failure remain separate concepts.
 
-Real failure and controlled failure remain separate concepts.
+### What About a Device With No Compliance Policy?
 
----
+There is another condition Wire Finance needs to plan for.
 
-#### What About Devices With No Compliance Policy?
-
-There is another condition we need to design for.
-
-Imagine:
+Imagine a device that is:
 
 ```text
-Corporate Device Exists
-        +
-Entra Joined
-        +
+Corporate
+      +
+Microsoft Entra Joined
+      +
 Intune Enrolled
 ```
 
 but no applicable compliance policy evaluates it.
 
-Should we assume:
+Should the absence of an evaluation mean:
 
 ```text
 No Policy
-   =
+    =
 Trusted
 ```
 
@@ -681,7 +677,7 @@ For the eventual Wire Finance production model:
 
 **no.**
 
-The target state is:
+The target is for devices without an applicable compliance policy to be treated as:
 
 ```text
 No Applicable Compliance Policy
@@ -689,56 +685,43 @@ No Applicable Compliance Policy
 NOT COMPLIANT
 ```
 
-because an unevaluated corporate endpoint should not quietly inherit trusted status.
+That avoids allowing an unevaluated endpoint to inherit trusted status.
 
-But this setting should **not** be tightened globally before the compliance architecture has been tested.
+However, this tenant-wide behaviour should **not** be tightened before the compliance architecture is working correctly.
 
-Otherwise:
-
-```text
-Security Improvement
-        ↓
-Enabled Too Early
-        ↓
-Legitimate Devices Fail Evaluation
-        ↓
-Conditional Access Reacts
-        ↓
-Everybody Has A Very Interesting Morning
-```
-
-So the safer sequence is:
+The safer sequence is:
 
 ```text
-Pilot Compliance Policies
+Create Pilot Compliance Policy
         ↓
-Validate Device State
-        ↓
-Validate Remediation
-        ↓
-Validate Conditional Access
-        ↓
-Confirm Legitimate Devices
+Validate Legitimate Devices
 Can Become Compliant
         ↓
-Then Tighten Tenant Behaviour
+Validate Failure and Remediation
+        ↓
+Validate Access-Control Impact
+        ↓
+Then Tighten
+No-Policy Behaviour
 ```
 
----
+The principle is:
 
-#### Layer 6 — Conditional Access
+**prove the compliance model before making the absence of compliance a blocking condition.**
 
-Compliance becomes much more powerful when it influences access.
+### Layer 6 — Conditional Access
 
-Later, Microsoft Entra Conditional Access can use a requirement such as:
+Compliance becomes much more valuable when the result can influence access.
+
+Later in the project, Microsoft Entra Conditional Access can use a grant requirement such as:
 
 ```text
-Require Device to Be Marked as Compliant
+Require device to be marked as compliant
 ```
 
-for selected corporate resources.
+for selected resources and populations.
 
-That creates the chain:
+That creates the signal chain:
 
 ```text
 Device Security State
@@ -752,113 +735,100 @@ Conditional Access
 Access Decision
 ```
 
-The possible outcome is no longer merely a report saying:
+A noncompliant device can therefore become more than a dashboard warning.
+
+Its state can eventually influence whether organisational resources are accessible.
+
+The detailed Conditional Access policies belong in the Entra implementation stage.
+
+This page only establishes the dependency:
+
+**Conditional Access should consume a compliance signal that has already been tested and proven.**
+
+### Build the Signal Before Enforcing the Signal
+
+The deployment order matters.
+
+Wire Finance will follow:
 
 ```text
-Noncompliant
-```
-
-It can eventually become:
-
-```text
-Compliant
-      ↓
-Access Allowed
-```
-
-or:
-
-```text
-Noncompliant / Unacceptable Risk
-      ↓
-Access Restricted or Blocked
-```
-
-#### Compliance Must Work Before Conditional Access Enforces It
-
-The deployment order matters enormously.
-
-Wire Finance will use:
-
-```text
-1. Configure Security
+1. Configure Security Controls
         ↓
 2. Configure Compliance
         ↓
-3. Confirm Devices Can Become Compliant
+3. Confirm Legitimate Devices
+   Can Become Compliant
         ↓
-4. Monitor Results
+4. Test Failure and Remediation
         ↓
-5. Conditional Access in Report-Only
+5. Monitor Results
         ↓
-6. Validate Impact
+6. Introduce Conditional Access
+   in Report-Only
         ↓
-7. Enforce Approved Policy
+7. Validate Impact
+        ↓
+8. Enforce the Approved Policy
 ```
 
 Not:
 
 ```text
-Conditional Access Block First
+Block Access First
         ↓
 Figure Out Compliance Later
 ```
 
-That sequence would make the access-control layer depend on a device-state model that has not yet been proven.
-
-Instead:
+The principle is:
 
 **build the signal before enforcing the signal.**
 
----
+This also reduces the risk of locking legitimate employees out because the device-state model has not yet been proven.
 
-#### Pilot-First Security Rollout
+### Pilot-First Security Rollout
 
-The groups we created earlier now become part of the security deployment strategy.
+Wire Finance will not deploy new endpoint-security controls directly to every production device.
 
-For new security or compliance configuration:
+The rollout follows the pilot model established earlier.
 
 ```text
-New Policy
-      ↓
+New Security or Compliance Policy
+        ↓
 SG-DEVICES-WINDOWS-PILOT
-      ↓
+        ↓
 Validate Normal Operation
-      ↓
+        ↓
+Test Failure and Recovery
+        ↓
 Review Impact
-      ↓
+        ↓
 Approve
-      ↓
+        ↓
 SG-DEVICES-WINDOWS-CORPORATE
 ```
 
-The relevant populations are:
+The main populations are:
 
 | Population | Purpose |
 |---|---|
 | `SG-DEVICES-WINDOWS-PILOT` | Receives candidate security and compliance changes first |
-| `SG-DEVICES-WINDOWS-CORPORATE` | Receives validated production configuration |
+| `SG-DEVICES-WINDOWS-CORPORATE` | Receives validated standard configuration |
 | `SG-DEVICES-NONCOMPLIANT-TEST` | Exercises approved failure scenarios |
-| `SG-DEVICES-PRIVILEGED` | Receives dedicated PAW hardening and stricter compliance requirements |
+| `SG-DEVICES-PRIVILEGED` | Receives PAW-specific hardening and stricter compliance requirements |
 
-This is why the device-group design came before the security policies.
+This is why the device-group design came before the security controls.
 
-The groups provide the rollout boundaries.
+The groups provide the deployment boundaries.
 
-#### Failure Testing Completes the Picture
+### Test the Failure Path Too
 
-Pilot testing answers:
+A successful pilot should not prove only that the healthy path works.
 
-```text
-Does the Policy Work
-Under Normal Conditions?
-```
-
-The noncompliance test group lets us ask:
+It should also answer:
 
 ```text
-What Happens When
-The Requirement Fails?
+What happens when
+a requirement fails?
 ```
 
 For example:
@@ -866,26 +836,25 @@ For example:
 ```text
 SG-DEVICES-NONCOMPLIANT-TEST
         ↓
-Approved Compliance Requirement Fails
+Approved Requirement Fails
         ↓
-Observe Intune
+Observe Intune Compliance
+        ↓
+Observe Security Telemetry
         ↓
 Observe Conditional Access
-        ↓
-Observe Defender / Security Telemetry
+when later enabled
         ↓
 Remediate
         ↓
 Restore Known-Good State
 ```
 
-A security architecture is stronger when we validate not only the healthy path but also the failure and recovery paths.
+A security design is stronger when both the success path and the failure/recovery path are understood.
 
----
+### Standard Corporate Security Chain
 
-#### Standard Corporate Security Chain
-
-For a normal Wire Finance laptop:
+The intended trust path for a standard corporate endpoint is:
 
 ```text
 SG-DEVICES-WINDOWS-CORPORATE
@@ -903,11 +872,11 @@ Microsoft Entra Conditional Access
 Access Outcome
 ```
 
-This represents the normal corporate trust path.
+This represents the normal corporate-device security model.
 
-#### Privileged Security Chain
+### Privileged Device Security Chain
 
-For a PAW:
+A privileged device follows a stricter path.
 
 ```text
 SG-DEVICES-PRIVILEGED
@@ -920,22 +889,20 @@ WF-COMP-WIN-PAW
         ↓
 Stricter Compliance State
         ↓
-Privileged Conditional Access
+Privileged Access Controls
         ↓
-Privileged Access Outcome
+Administrative Access Outcome
 ```
 
-The technologies may be similar.
+The Microsoft technologies may be similar.
 
-The security requirements are not.
+The required trust level is not.
 
----
+### Who Owns Each Security Signal?
 
-#### Who Owns Each Security Signal?
+No single platform owns the entire endpoint-security story.
 
-No single Microsoft platform owns the entire endpoint-security story.
-
-| Security Information | Authoritative Platform |
+| Security Information | Authoritative Source |
 |---|---|
 | **Physical ownership and assignment** | Wire Finance Asset Register |
 | **Device identity** | Microsoft Entra ID |
@@ -943,11 +910,9 @@ No single Microsoft platform owns the entire endpoint-security story.
 | **Security configuration** | Microsoft Intune |
 | **Compliance state** | Microsoft Intune |
 | **Threat detections and device risk** | Microsoft Defender for Endpoint |
-| **Access decision** | Microsoft Entra Conditional Access |
+| **Access enforcement** | Microsoft Entra Conditional Access |
 
-This separation matters during troubleshooting and investigations.
-
-For example:
+That distinction becomes useful during troubleshooting.
 
 ```text
 "What device is this?"
@@ -974,37 +939,35 @@ Microsoft Defender for Endpoint
 ```
 
 ```text
-"Should it get access?"
+"Should this state affect access?"
         ↓
 Microsoft Entra Conditional Access
 ```
 
-Different systems contribute different evidence.
+Different systems provide different evidence.
 
 The trust decision is created by combining those signals.
 
----
+### Wire Finance Security and Compliance Design
 
-#### Wire Finance Device Security and Compliance Decision
-
-The current design can now be recorded as:
+The device-security design can now be summarised as:
 
 ```text
-Standard Security Population:
+Standard Device Population:
 SG-DEVICES-WINDOWS-CORPORATE
 
 Standard Compliance Policy:
 WF-COMP-WIN-CORPORATE
 
 
-Privileged Security Population:
+Privileged Device Population:
 SG-DEVICES-PRIVILEGED
 
 Privileged Compliance Policy:
 WF-COMP-WIN-PAW
 
 
-Security Management:
+Security Configuration:
 Microsoft Intune
 
 Threat Detection / Device Risk:
@@ -1014,19 +977,7 @@ Access Enforcement:
 Microsoft Entra Conditional Access
 
 
-Core Compliance Areas:
-BitLocker
-Secure Boot
-TPM
-Firewall
-Antivirus / Antimalware
-Code Integrity
-Supported Windows Version
-Defender Device Risk
-Device Management / Activity
-
-
-Security Policy Objects:
+Planned Security Policy Families:
 WF-SEC-WIN-ANTIVIRUS
 WF-SEC-WIN-FIREWALL
 WF-SEC-WIN-BITLOCKER
@@ -1036,7 +987,7 @@ WF-SEC-WIN-EDR
 WF-SEC-WIN-BASELINE
 
 
-Rollout Model:
+Rollout:
 Pilot
   ↓
 Validate
@@ -1050,24 +1001,32 @@ SG-DEVICES-NONCOMPLIANT-TEST
 
 The core principle remains:
 
-**security configuration establishes the desired state. Compliance evaluates whether the endpoint currently meets it. Conditional Access uses the approved state when deciding what access should be permitted.**
+**security configuration establishes the desired state. Compliance evaluates whether the device currently meets that state. Defender contributes threat and risk information. Conditional Access can then use the approved signals when determining access.**
 
-#### Security Is Not the End of the Device Story
+### Security Is Not the End of the Device Story
 
-We now have a model for deciding whether a device is:
+Wire Finance now has a model for determining whether a device is:
 
 ```text
 Known
+  ↓
 Managed
+  ↓
 Configured
+  ↓
 Protected
+  ↓
+Evaluated
+  ↓
 Compliant
-Allowed to Access Resources
+  ↓
+Able to Contribute
+to Access Decisions
 ```
 
-But devices do not stay in the same state forever.
+But devices do not remain in one state forever.
 
-They are issued.
+They are assigned.
 
 Reassigned.
 
@@ -1075,15 +1034,15 @@ Repaired.
 
 Lost.
 
+Recovered.
+
+Rebuilt.
+
 Replaced.
 
 Retired.
 
-Sometimes wiped.
-
-Sometimes recovered.
-
-And sometimes removed from the environment entirely.
+And eventually removed from service.
 
 Security therefore cannot stop at:
 
@@ -1091,6 +1050,10 @@ Security therefore cannot stop at:
 Device Is Compliant Today
 ```
 
-We also need to know what happens to that device **throughout its life**.
+We also need to understand what happens to the endpoint **throughout its life**.
 
-**How should Wire Finance control a device from acquisition and assignment all the way through reassignment, recovery, retirement, and disposal?**
+The final part of the Device Provisioning Model therefore asks:
+
+**How should Wire Finance control a device from acquisition and assignment through reassignment, recovery, retirement, and disposal?**
+
+That takes us into the **Device Lifecycle**.

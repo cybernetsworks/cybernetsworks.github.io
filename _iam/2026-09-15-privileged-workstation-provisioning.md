@@ -7,11 +7,11 @@ order: 7
 description: "Privileged administration needs more than a separate admin account. Follow how Wire Finance provisions, hardens, validates, and governs a dedicated Privileged Access Workstation."
 ---
 
-The standard corporate provisioning journey gives Wire Finance a repeatable way to turn a new Windows laptop into a managed, secured, and compliant employee endpoint.
+The standard corporate provisioning journey gives Wire Finance a repeatable way to turn a Windows laptop into a managed employee endpoint.
 
 But privileged administration raises the security bar.
 
-A workstation used to administer identities, endpoints, security tools, or other sensitive systems should not simply be:
+A device used to administer identities, endpoints, security services, or other sensitive systems should not simply be:
 
 ```text
 Normal Laptop
@@ -19,68 +19,88 @@ Normal Laptop
 Extra Permissions
 ```
 
-Wire Finance uses a separate **Privileged Access Workstation**, or PAW, for approved administrative activity.
+Wire Finance therefore uses a separate **Privileged Access Workstation**, or **PAW**, for approved administrative activity.
 
-The principle is:
+The principle is simple:
 
-**a Privileged Access Workstation is not just another company laptop with extra permissions. It is a separately classified, hardened device dedicated to administrative activity.**
+**a Privileged Access Workstation is not just another company laptop with extra permissions. It is a separately classified and hardened device dedicated to administrative activity.**
 
-#### Our Privileged Example
+### Our Privileged Example
 
-We will follow Jordan Lee through the PAW model.
+We will use Jordan Lee to illustrate the PAW model.
 
 ```text
-Employee:
+Employee
 Jordan Lee
 
-Normal Identity:
+Normal Identity
 jordan.lee@wirefinance.com
 
-Privileged Identity:
+Privileged Identity
 adm-jordan.lee@wirefinance.com
 
-Privileged Device:
+Privileged Device
 WF-PAW-001
 
-Autopilot Classification:
+Autopilot Classification
 PAW
 
-Provisioning Group:
+Provisioning Group
 SG-DEVICES-PRIVILEGED
 ```
 
 Jordan still has a normal employee identity and standard corporate endpoint for everyday work.
 
-The PAW exists for something else entirely:
+The privileged workstation exists for something else:
 
 ```text
 Approved Administrative Activity
 ```
 
+This creates separation at both the identity and device layers.
+
+```text
+jordan.lee
+      ↓
+Standard Corporate Endpoint
+      ↓
+Normal Business Activity
+```
+
+while:
+
+```text
+adm-jordan.lee
+      ↓
+WF-PAW-001
+      ↓
+Approved Administrative Activity
+```
+
 That distinction is fundamental to the Wire Finance privileged-access model.
 
-#### PAW Design Standard
+### PAW Design Standard
 
 The initial PAW design is:
 
 | Decision | Wire Finance PAW Standard |
 |---|---|
 | **Ownership** | Corporate |
-| **Device type** | Privileged Access Workstation |
+| **Device class** | Privileged Access Workstation |
 | **Naming** | `WF-PAW-###` |
 | **Autopilot Group Tag** | `PAW` |
-| **Provisioning group** | `SG-DEVICES-PRIVILEGED` |
-| **Join type** | Microsoft Entra Joined |
+| **Provisioning Group** | `SG-DEVICES-PRIVILEGED` |
+| **Join Type** | Microsoft Entra joined |
 | **Management** | Microsoft Intune |
 | **Provisioning** | Windows Autopilot |
-| **User account type** | Standard local rights |
-| **Primary identity** | Approved `adm-*` identity |
-| **Normal productivity** | Not permitted |
-| **Security baseline** | Dedicated hardened PAW baseline |
-| **Compliance** | Dedicated privileged-device compliance |
-| **Conditional Access** | Required for selected privileged operations later |
+| **Local User Rights** | Standard / least privilege |
+| **Administrative Identity** | Approved `adm-*` identity |
+| **Routine Productivity Use** | Not permitted |
+| **Security Configuration** | Dedicated hardened PAW baseline |
+| **Compliance** | Dedicated privileged-device requirements |
+| **Administrative Access** | Separately authorised |
 
-There is one important detail here.
+There is an important point here.
 
 A PAW still uses:
 
@@ -90,24 +110,24 @@ Microsoft Entra Join
 Microsoft Intune
 ```
 
-just like a normal corporate laptop.
+just like a normal Wire Finance corporate endpoint.
 
 The stronger security posture does **not** come from inventing a special join type.
 
-It comes from the complete device design around it:
+It comes from the controls surrounding the device.
 
 ```text
 Different Classification
         +
-Different Provisioning Profile
+Dedicated Provisioning
         +
 Stricter Security Controls
         +
-Dedicated Compliance
+Stricter Compliance
         +
 Restricted Usage
         +
-Privileged Identity
+Approved Privileged Identity
 ```
 
 So:
@@ -118,11 +138,9 @@ Same Cloud Identity Platform
 Same Security Tier
 ```
 
----
+### A PAW Starts With a Privileged Requirement
 
-#### A PAW Starts With a Privileged Requirement
-
-A normal employee laptop may be issued because somebody joins the organisation and needs a productivity device.
+A normal employee laptop may be issued because somebody joins Wire Finance and needs a productivity device.
 
 A PAW should not be issued simply because:
 
@@ -147,9 +165,7 @@ Separate adm-jordan.lee Identity
 Dedicated PAW Required
 ```
 
-The PAW exists because the **privileged-access model requires it**.
-
-That gives us a clean chain:
+The chain is therefore:
 
 ```text
 Business Responsibility
@@ -161,129 +177,151 @@ Approved Privileged Identity
 Approved Privileged Device
 ```
 
-This prevents privileged workstations from becoming ordinary equipment handed out because someone happens to have a technical job title.
+This prevents privileged workstations from becoming normal equipment handed out simply because somebody has a technical job title.
 
-#### The Privileged Workstation Journey
+### The Privileged Workstation Journey
 
-The PAW journey begins before the device is provisioned.
+The PAW journey begins before Windows is provisioned.
 
-Wire Finance first establishes that a genuine privileged-administration requirement exists.
+Wire Finance must first establish that a genuine privileged-administration requirement exists.
 
-Only then is the device approved, classified, provisioned, hardened, and validated for administrative use.
+Only then is the device approved, classified, provisioned, hardened, and validated.
 
 ![Wire Finance Privileged Workstation Provisioning Journey]({{ '/assets/images/active-directory/privileged_workstation_provisioning_journey.png' | relative_url }})
 
-The journey can be understood in four broad phases:
+At a high level:
 
 ```text
-Approval
-   ↓
-Provisioning
-   ↓
-Hardening
-   ↓
-Privileged Trust Validation
+Privileged Requirement Approved
+        ↓
+PAW Asset Recorded
+        ↓
+Autopilot Classification = PAW
+        ↓
+SG-DEVICES-PRIVILEGED
+        ↓
+Dedicated PAW Provisioning
+        ↓
+Microsoft Entra Join
+        ↓
+Microsoft Intune Enrollment
+        ↓
+PAW Security Controls Applied
+        ↓
+Compliance Validated
+        ↓
+Approved for Privileged Use
 ```
 
-A PAW therefore does not become suitable for administrative work simply because it has been purchased, named, or joined to Microsoft Entra ID.
+The device is not considered suitable for administration merely because it has been purchased, named, or joined to Microsoft Entra ID.
 
-It must successfully move through the entire security journey before Wire Finance approves it for privileged use.
+It needs to complete the entire privileged-device journey.
 
-It resembles the standard corporate journey, but the security purpose and acceptance criteria are much stricter.
+### Stage 1 — Record the Privileged Asset
 
-#### Stage 1 — Record the Privileged Asset
+A PAW begins as an authorised Wire Finance asset.
 
-The PAW receives an asset record just like every other Wire Finance device.
+For `WF-PAW-001`, the asset record should identify information such as:
 
-But additional security-sensitive information needs to be captured.
-
-For `WF-PAW-001`:
-
-| Field | Value |
+| Field | Example |
 |---|---|
-| **Device name** | `WF-PAW-001` |
+| **Device Name** | `WF-PAW-001` |
 | **Ownership** | Corporate |
-| **Device class** | Privileged Access Workstation |
-| **Assigned administrator** | Jordan Lee |
-| **Privileged identity** | `adm-jordan.lee` |
-| **Autopilot classification** | `PAW` |
-| **Lifecycle status** | Provisioning |
-| **Security tier** | Privileged |
+| **Device Class** | Privileged Access Workstation |
+| **Assigned Administrator** | Jordan Lee |
+| **Approved Privileged Identity** | `adm-jordan.lee` |
+| **Autopilot Classification** | `PAW` |
+| **Lifecycle Status** | Provisioning |
+| **Security Purpose** | Privileged administration |
 
-The important field is:
+The important field is the classification:
 
 ```text
 Device Class = PAW
 ```
 
-That is not merely an inventory description.
+That classification is security-sensitive.
 
-It is a **security-sensitive business classification**.
+It determines the provisioning and security journey the device is expected to follow.
 
-It influences how the device must be provisioned, configured, managed, and eventually retired.
+### Stage 2 — Register the PAW With Windows Autopilot
 
-#### Stage 2 — Register the PAW with Windows Autopilot
-
-`WF-PAW-001` is registered with Windows Autopilot.
-
-It receives:
+The privileged device is registered with Windows Autopilot using:
 
 ```text
-Group Tag:
+Group Tag
 PAW
 ```
 
-That classification is represented through:
+The tag is represented in the device's Autopilot metadata as:
 
 ```text
 [OrderID]:PAW
 ```
 
-and drives the existing dynamic rule:
+Wire Finance uses that value to classify privileged devices dynamically.
+
+The intended rule is:
 
 ```text
 (device.devicePhysicalIds -any (_ -contains "[OrderID]:PAW"))
 ```
 
-The result is:
+which targets:
 
 ```text
-WF-PAW-001
-      ↓
-PAW Classification
-      ↓
 SG-DEVICES-PRIVILEGED
 ```
 
-This separates the device from the standard corporate provisioning population before the main build begins.
-
-#### Stage 3 — Use a Dedicated PAW Deployment Profile
-
-Wire Finance should not apply:
+The resulting relationship is:
 
 ```text
-WF-AP-CORPORATE-USER-DRIVEN
+Autopilot Device
+        ↓
+Group Tag = PAW
+        ↓
+[OrderID]:PAW
+        ↓
+SG-DEVICES-PRIVILEGED
 ```
 
-to its privileged workstations.
+This happens before the device receives its full privileged build.
 
-Instead, the PAW requires its own deployment profile.
+The Group Tag therefore represents **provisioning intent**.
 
-A planned name is:
+It tells Wire Finance:
+
+**this device is intended to become a privileged workstation.**
+
+It does not prove that the device is already trusted.
+
+### Stage 3 — Apply Dedicated PAW Provisioning
+
+The standard corporate build and privileged build should not be treated as interchangeable.
+
+Conceptually:
 
 ```text
-WF-AP-PAW-USER-DRIVEN
+Standard Corporate Endpoint
+        ↓
+Corporate User-Driven Profile
 ```
 
-The distinction is deliberate:
+while:
 
 ```text
-Standard Employee Build
-        ≠
-Privileged Administrative Build
+Privileged Access Workstation
+        ↓
+Dedicated PAW Profile
 ```
 
-even though both may use:
+The planned PAW Autopilot profile follows the Wire Finance profile naming convention:
+
+```text
+WF_AP_PAW_USER_DRIVEN
+```
+
+Both builds may still use:
 
 ```text
 Windows Autopilot
@@ -291,11 +329,23 @@ Microsoft Entra Join
 Microsoft Intune
 ```
 
-The provisioning technology can remain the same while the resulting security posture is materially different.
+The difference is what the resulting device is expected to become.
 
-#### Stage 4 — Microsoft Entra Join and Intune Enrollment
+```text
+Same Provisioning Technologies
+        +
+Different Targeting
+        +
+Different Configuration
+        +
+Different Security Requirements
+        =
+Different Trust Tier
+```
 
-The PAW becomes:
+### Stage 4 — Establish Device Identity and Management
+
+The privileged workstation becomes:
 
 ```text
 Microsoft Entra Joined
@@ -303,9 +353,9 @@ Microsoft Entra Joined
 Microsoft Intune Managed
 ```
 
-That is the same identity and management foundation used by normal employee laptops.
+That provides the same core cloud identity and management foundation used for normal corporate endpoints.
 
-So the difference is not:
+The distinction is not:
 
 ```text
 WF-LT-001
@@ -320,11 +370,11 @@ Instead:
 ```text
 WF-LT-001
       ↓
-Entra Joined
+Microsoft Entra Joined
       ↓
 Intune Managed
       ↓
-Standard Corporate Trust Tier
+Standard Corporate Endpoint
 ```
 
 while:
@@ -332,75 +382,57 @@ while:
 ```text
 WF-PAW-001
       ↓
-Entra Joined
+Microsoft Entra Joined
       ↓
 Intune Managed
       ↓
-Privileged Trust Tier
+Privileged Workstation
 ```
 
-The trust tier comes from the full control set applied to the device.
+The privileged trust level comes from the complete control set applied after classification and enrollment.
 
----
+### Stage 5 — Apply the Hardened PAW Configuration
 
-#### Stage 5 — Apply the Hardened PAW Configuration
+This is where the PAW begins to differ significantly from the standard employee endpoint.
 
-This is where the PAW begins to separate significantly from the standard corporate endpoint.
-
-Planned PAW controls may eventually include:
+The planned security model may include stronger requirements around:
 
 - BitLocker
 - Microsoft Defender for Endpoint
 - Windows Firewall
-- Stronger attack-surface-reduction policies
-- Windows Hello for Business
-- Windows LAPS
-- Strict application controls
-- Restricted browser use
-- Restricted productivity applications
-- Limited software installation
-- Stricter update requirements
-- Dedicated compliance requirements
-- Tighter Conditional Access controls
+- attack-surface reduction
+- authentication
+- application control
+- software installation
+- browser use
+- productivity applications
+- updates
+- local privilege
+- compliance
+- Conditional Access
 
-The exact settings will be created later during Microsoft Intune implementation.
+The detailed settings will be defined and implemented later during the endpoint-security and compliance stages.
 
-At this point, we are defining the design requirement rather than pretending those policies already exist.
-
-The principle is:
+At this point, we are defining the design requirement:
 
 **PAWs receive a stricter security configuration than standard Wire Finance endpoints.**
 
-#### A PAW Is Not a Productivity Device
+We should not pretend that a control is active merely because it exists in the design.
 
-This is one of the most important rules in the entire design.
+### A PAW Is Not a Productivity Device
 
-Earlier, we separated:
+One of the strongest rules in the PAW design is separation of purpose.
 
-```text
-Normal Identity
-        ≠
-Privileged Identity
-```
+The privileged workstation is not intended for routine activities such as:
 
-The same principle now extends to the endpoint.
+- everyday email
+- normal Teams conversations
+- general web browsing
+- personal websites
+- ordinary productivity work
+- unrestricted software installation
 
-Jordan should not use:
-
-```text
-WF-PAW-001
-```
-
-for routine activities such as:
-
-- Everyday email
-- Normal Teams conversations
-- General web browsing
-- Personal websites
-- Routine Office productivity
-- Ordinary business activity
-
-Instead:
+The normal path remains:
 
 ```text
 jordan.lee
@@ -410,7 +442,7 @@ Standard Corporate Endpoint
 Normal Productivity
 ```
 
-while:
+Privileged activity follows:
 
 ```text
 adm-jordan.lee
@@ -420,7 +452,23 @@ WF-PAW-001
 Privileged Administration
 ```
 
-We now have separation at **both layers**:
+Wire Finance therefore separates:
+
+```text
+Normal Identity
+        ≠
+Privileged Identity
+```
+
+and:
+
+```text
+Normal Device
+        ≠
+Privileged Device
+```
+
+Together:
 
 ```text
 Identity Separation
@@ -428,91 +476,21 @@ Identity Separation
 Device Separation
 ```
 
-That is much stronger than separating the account while allowing both identities to operate from the same everyday workstation.
+This is stronger than separating the accounts while allowing both identities to operate from the same everyday workstation.
 
-#### The Privileged Access Chain
+### The PAW Does Not Grant Privilege
 
-The PAW does **not** grant administrative privilege by itself.
+Possessing a privileged workstation does not automatically make someone an administrator.
 
-This distinction matters.
-
-A user possessing `WF-PAW-001` should not automatically gain an administrative role.
-
-Device trust and authorization remain separate controls.
-
-The intended Wire Finance access chain is:
-
-```text
-Jordan Lee
-│
-├── jordan.lee
-│      ↓
-│   Standard Corporate Endpoint
-│      ↓
-│   Normal Employee Activity
-│
-└── adm-jordan.lee
-       ↓
-   WF-PAW-001
-       ↓
-   Strong Authentication
-       ↓
-   PIM Activation
-       ↓
-   PAG-*
-       ↓
-   Administrative Role
-       ↓
-   Privileged Service
-```
-
-This is significantly stronger than:
-
-```text
-Normal Laptop
-      +
-Normal User Identity
-      +
-Permanent Administrator Role
-```
-
-which is precisely the architecture Wire Finance is trying to avoid.
-
-#### Device Trust and Authorization Are Different
-
-The PAW proves something about the **device**.
-
-The `adm-*` identity proves something about the **person's administrative identity**.
-
-PIM governs when an eligible privilege becomes active.
-
-The `PAG-*` model connects approved administrators to the relevant administrative authorization.
-
-So:
-
-```text
-Approved Privileged Identity
-        +
-Approved Privileged Device
-        +
-Strong Authentication
-        +
-Active Authorized Role
-        ↓
-Privileged Administration
-```
-
-One control should not replace all the others.
-
-For example:
+This distinction is essential.
 
 ```text
 Compliant PAW
       ≠
-Administrator Automatically Authorized
+Administrative Permission
 ```
 
-and:
+Likewise:
 
 ```text
 Privileged Identity
@@ -520,57 +498,41 @@ Privileged Identity
 Any Device Is Acceptable
 ```
 
-The controls become stronger when they reinforce each other.
+Device trust and administrative authorisation remain separate controls.
 
-#### Dedicated PAW Compliance
-
-A standard corporate laptop and a PAW should not necessarily have identical compliance requirements.
-
-The PAW will eventually receive its own compliance policy.
-
-Conceptually:
+The intended model is:
 
 ```text
-WF-PAW-001
-      ↓
-Privileged Device Compliance Policy
-      ↓
-Required Security Controls Present?
-      ↓
-Compliant / Noncompliant
-```
-
-The requirements can be stricter because the device is intended to perform more sensitive actions.
-
-Later, Conditional Access can potentially require a combination such as:
-
-```text
-Approved adm-* Identity
+Approved Privileged Identity
         +
-Strong Authentication
+Approved Privileged Device
         +
-Compliant Privileged Workstation
+Required Authentication
         +
-PIM Activation
+Approved Administrative Authorisation
         ↓
-Sensitive Administrative Access
+Privileged Administration
 ```
 
-That is where the identity, device, authentication, and privilege designs begin to lock together.
+Later, controls such as Privileged Identity Management, privileged-access groups, Conditional Access, and stronger authentication can reinforce this chain.
 
-#### A Device Name Still Does Not Create a PAW
+Those controls belong to the implementation stage.
 
-We established earlier that:
+The design principle is what matters here:
+
+**no single control should establish privileged trust by itself.**
+
+### Naming and Classification Still Do Not Equal Trust
+
+A device named:
 
 ```text
 WF-PAW-001
 ```
 
-is a naming convention.
+has a label describing its intended purpose.
 
-It describes the intended function.
-
-It does not prove the machine received the hardened PAW build.
+That name does not prove that it received the hardened PAW configuration.
 
 Likewise:
 
@@ -578,11 +540,11 @@ Likewise:
 Group Tag = PAW
 ```
 
-describes provisioning intent.
+expresses provisioning intent.
 
-It does not independently establish trust.
+It does not independently establish privileged trust.
 
-The completed privileged trust chain requires:
+The completed state requires more:
 
 ```text
 Approved PAW Classification
@@ -593,26 +555,18 @@ Microsoft Entra Join
         +
 Intune Management
         +
-Hardened Configuration
+PAW Security Controls
         +
-Compliance
+Required Compliance
         +
 Approved Privileged Identity
 ```
 
 Only the complete state matters.
 
----
+### What If a PAW Is Misclassified?
 
-#### What If the PAW Is Misclassified?
-
-Imagine:
-
-```text
-WF-PAW-001
-```
-
-accidentally receives:
+Suppose a device intended to become a PAW is accidentally classified as:
 
 ```text
 CORPORATE
@@ -624,117 +578,41 @@ instead of:
 PAW
 ```
 
-The device could receive the normal employee build.
+It could receive the normal employee provisioning path.
 
-Changing the Group Tag afterwards would not magically apply every security control that should have existed from the beginning.
+Simply changing the Group Tag later would not prove that every expected PAW control has been applied correctly.
 
-The response is:
+Wire Finance should instead return the device to a known-good privileged state.
 
 ```text
 Misclassification Detected
         ↓
 Stop Privileged Use
         ↓
-Correct Device Classification
+Correct PAW Classification
         ↓
-Correct Autopilot Group Tag
+Verify SG-DEVICES-PRIVILEGED Targeting
         ↓
-Verify SG-DEVICES-PRIVILEGED Membership
+Reset / Reprovision Where Required
         ↓
-Reset / Reprovision
+Apply Correct PAW Configuration
         ↓
-Apply PAW Deployment Profile
+Validate Security State
         ↓
-Verify Hardened Baseline
-        ↓
-Verify Compliance
-        ↓
-Return to Service
-```
-
-Wire Finance does **not** simply change:
-
-```text
-CORPORATE → PAW
-```
-
-and assume the workstation is now hardened.
-
-The machine must be returned to a known-good privileged state.
-
-#### What If the PAW Is Suspected of Compromise?
-
-A privileged workstation deserves a more cautious response than an ordinary support issue.
-
-If its integrity becomes questionable, the security assumption behind privileged administration has also become questionable.
-
-The design response is:
-
-```text
-Compromise Suspected
-        ↓
-Privileged Use Stopped
-        ↓
-Security Investigation
-        ↓
-Device Isolated Where Appropriate
-        ↓
-Reset / Reprovision
-        ↓
-Known-Good PAW Configuration
-        ↓
-Security and Compliance Validation
-        ↓
-Return to Service
+Return to Privileged Use
 ```
 
 The principle is:
 
-**when confidence in the privileged endpoint is lost, rebuild trust rather than casually repairing around it.**
+**correct the trusted state, not merely the label.**
 
-#### Reassigning a PAW
+### PAW Ready-for-Use Gate
 
-A PAW should not simply be handed to another employee.
+A standard corporate endpoint already needs validation before an employee relies on it.
 
-If the device is no longer required for privileged use:
+A privileged workstation requires a higher bar.
 
-```text
-PAW No Longer Required
-        ↓
-Privileged Assignment Removed
-        ↓
-Device Reset / Wiped
-        ↓
-Reprovision
-        ↓
-Correct New Classification Applied
-        ↓
-Validate New State
-        ↓
-Reassign
-```
-
-Likewise:
-
-```text
-Normal Corporate Laptop
-        ↓
-Becomes PAW
-```
-
-should require a controlled reprovisioning process.
-
-A change of security purpose requires a change of trusted state.
-
-It is not merely an asset-record edit.
-
-#### PAW Ready-for-Use Gate
-
-The standard corporate device already has a ready-for-use check.
-
-The privileged workstation needs an even stricter one.
-
-Before `WF-PAW-001` is approved for administrative use:
+Before `WF-PAW-001` is approved for administrative use, Wire Finance should verify:
 
 | Validation | Required |
 |---|---|
@@ -742,18 +620,18 @@ Before `WF-PAW-001` is approved for administrative use:
 | **PAW requirement and approval recorded** | Yes |
 | **Autopilot registration confirmed** | Yes |
 | **Group Tag = `PAW`** | Yes |
-| **`SG-DEVICES-PRIVILEGED` membership confirmed** | Yes |
-| **Microsoft Entra Joined** | Yes |
-| **Intune enrolled** | Yes |
-| **Dedicated PAW security baseline applied** | Yes |
+| **`SG-DEVICES-PRIVILEGED` targeting confirmed** | Yes |
+| **Microsoft Entra joined** | Yes |
+| **Microsoft Intune enrolled** | Yes |
+| **PAW security configuration applied** | Yes |
 | **Encryption confirmed** | Yes |
-| **Microsoft Defender health acceptable** | Yes |
-| **Dedicated compliance state acceptable** | Yes |
+| **Endpoint-security health acceptable** | Yes |
+| **PAW compliance requirements satisfied** | Yes |
 | **Assigned administrator confirmed** | Yes |
 | **Approved `adm-*` identity confirmed** | Yes |
-| **Normal productivity use prohibited** | Yes |
+| **Routine productivity use prohibited** | Yes |
 
-Only after these checks succeed do we reach:
+Only after the required checks succeed do we reach:
 
 ```text
 WF-PAW-001
@@ -774,69 +652,69 @@ APPROVED FOR
 PRIVILEGED ADMINISTRATION
 ```
 
-That is a much higher bar than simply proving the laptop boots and can reach Microsoft 365.
+That is a much higher bar than simply proving that Windows starts and the device can reach Microsoft 365.
 
-#### Wire Finance PAW Provisioning Decision
+### Wire Finance PAW Provisioning Decision
 
-The PAW design can now be recorded as:
+The PAW design can now be summarised as:
 
 ```text
-Device Type:
+Device Type
 Privileged Access Workstation
 
-Naming:
+Naming
 WF-PAW-###
 
-Ownership:
+Ownership
 Corporate
 
-Provisioning:
+Provisioning
 Windows Autopilot
 
-Autopilot Classification:
+Autopilot Classification
 PAW
 
-Provisioning Group:
+Provisioning Group
 SG-DEVICES-PRIVILEGED
 
-Planned Autopilot Profile:
-WF-AP-PAW-USER-DRIVEN
+Planned Autopilot Profile
+WF_AP_PAW_USER_DRIVEN
 
-Join Type:
+Join Type
 Microsoft Entra Joined
 
-Management:
+Management
 Microsoft Intune
 
-Primary Identity:
-Approved adm-* Identity
+Administrative Identity
+Approved adm-* identity
 
-Local Rights:
-Least Privilege
+Local Rights
+Least privilege
 
-Normal Productivity:
-Prohibited
+Routine Productivity
+Not permitted
 
-Security Baseline:
-Dedicated Hardened PAW Baseline
+Security Configuration
+Dedicated hardened PAW baseline
 
-Compliance:
-Dedicated Privileged-Device Compliance
+Compliance
+Dedicated privileged-device requirements
 
-Privileged Access:
-Approved PAW + Strong Authentication + PIM + PAG-*
+Administrative Access
+Separately authorised
 
-Lifecycle:
-Controlled Provisioning, Reassignment and Reprovisioning
+Lifecycle
+Controlled provisioning, reassignment, reprovisioning, and retirement
 ```
 
 The governing principle is:
 
-**a PAW is a dedicated trusted administrative endpoint. Naming or classification alone does not establish privileged trust; the device must be correctly provisioned, managed, secured, compliant, and used with an approved privileged identity.**
+**a PAW is a dedicated trusted administrative endpoint. Naming or classification alone does not establish privileged trust; the device must be correctly provisioned, managed, secured, validated, and used with an approved privileged identity.**
 
-#### Not Every Special Device Is a PAW
+### Not Every Special Device Is a PAW
 
-We now have two provisioning journeys.
+Wire Finance now has two very different endpoint journeys:
 
 ```text
 WF-LT-###
@@ -852,20 +730,22 @@ WF-PAW-###
 Privileged Administration
 ```
 
-But there is another class of device we designed earlier:
+But there is another device class we introduced earlier:
 
 ```text
 WF-TST-###
 ```
 
-Those devices exist for controlled rollout, testing, and deliberate security validation.
+Those devices exist for controlled testing and validation.
 
-And there is an important distinction we need to make next.
+And there is an important distinction.
 
-A **pilot device** is used to prove that a change works safely.
+A **pilot device** is used to prove that a configuration works safely before wider deployment.
 
-A **test device** may deliberately be made to fail so we can observe whether the security controls respond correctly.
+A **test device** may intentionally be placed into unusual or failing states so Wire Finance can observe how controls respond.
 
 Those are very different objectives.
 
-**So how should Wire Finance separate safe staged rollout from deliberate failure testing without putting ordinary production endpoints at risk?**
+The next question is:
+
+**How should Wire Finance separate safe staged rollout from deliberate testing without placing ordinary production endpoints at unnecessary risk?**
