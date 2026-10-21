@@ -3,231 +3,111 @@ layout: lesson
 title: "Group Creation"
 series: wire-finance
 parent: entra-id-implementation
-order: 3
+order: 4
 description: "The access model has been designed. Now we turn company baselines, departments, roles, exceptions, pilots, and privileged-access paths into real Microsoft Entra security groups."
 ---
 
-The Wire Finance tenant has been prepared and its starting state recorded.
+We now have our first eight Wire Finance employees in Microsoft Entra ID.
 
-Now the environment can begin to change.
+Their identities have been created, their organisational attributes are established, and we know which departments and roles they represent.
 
-Earlier in the project, we designed a group structure around the organisation.
+But creating users is only part of the identity implementation.
 
-We created categories for:
+We also need a structured way to determine which identities belong to which access populations.
 
-- Company-wide access
-- Departments
-- Job roles
-- Pilot deployments
-- Exception access
-- Privileged access
+Earlier, we designed an access model built around company-wide, department, role, pilot, exception, and privileged-access groups.
 
-At that point, those groups existed only as part of the IAM design.
+Now we can examine how that design was implemented in Microsoft Entra ID.
 
-Now we can turn that design into real Microsoft Entra security groups.
+**The goal is to make group membership reflect business responsibility rather than depend on administrators remembering every assignment.**
 
-#### Why Build the Groups Before the Users?
+### From Group Design to Group Objects
 
-It might seem more natural to create the employees first.
+The original IAM design established the groups Wire Finance would need.
 
-But Wire Finance already has an access model.
+Implementation gives us something different: actual security groups with membership types, rules, and purposes.
 
-By building the group structure first, future identities have somewhere meaningful to belong as soon as they are created.
+The first group-creation checkpoint contained 19 Microsoft Entra security groups.
 
-Instead of creating a user and then asking:
+As the implementation progressed, I added a dedicated Microsoft 365 E5 licensing group and five device groups to support the endpoint provisioning model.
 
-**What permissions should this person have?**
+The current documented inventory is:
 
-we can eventually ask:
+| Group Category | Number | Membership Model |
+|---|---:|---|
+| Company baseline | 1 | Dynamic User |
+| Department | 5 | Dynamic User |
+| Role | 8 | Dynamic User |
+| Identity pilot | 1 | Assigned |
+| Exception access | 1 | Assigned |
+| Licensing | 1 | Assigned |
+| Privileged access | 3 | Assigned |
+| Device | 5 | Dynamic Device / Assigned |
+| **Total** | **25** | |
 
-**Which approved groups should this identity belong to?**
+This represents the current implemented security-group inventory, not simply a list of groups we might create in the future.
 
-That gives us a much cleaner model.
+But there is an important distinction.
 
-```text
-Identity
-   ↓
-Group Membership
-   ↓
-Entitlement
-   ↓
-Access
-```
+**Not every group should determine its membership in the same way.**
 
-The group identifies **who should receive an entitlement**.
+Some memberships can be derived from trusted information about the identity.
 
-The role, application, policy, licence, or resource connected to that group determines **what the entitlement actually allows**.
+Others exist because somebody has deliberately selected or authorised membership.
 
-That distinction becomes increasingly important as the environment grows.
+### Choosing the Right Membership Model
 
-#### From Group Design to Group Objects
+When creating the Microsoft Entra security groups, the membership model depended on the purpose of each group.
 
-The original IAM design contained a catalogue of groups Wire Finance expected to need.
+For normal company, department, and job-role membership, we use **Dynamic User** groups.
 
-The implementation inventory is different.
+For pilot participation, licensing during the pilot, exceptions, and privileged access, we use **Assigned** groups.
 
-It records what actually exists inside Microsoft Entra ID.
-
-At this checkpoint, **19 Microsoft Entra security groups** have been created.
-
-They include:
+The decision looks like this:
 
 ```text
-Company Baseline
-      +
-Department Groups
-      +
-Role Groups
-      +
-Pilot Groups
-      +
-Exception Groups
-      +
-Privileged Access Groups
+What determines group membership?
+              |
+       +------+------+
+       |             |
+ Trusted User    Explicit Decision
+ Attributes      or Approval
+       |             |
+       v             v
+  Dynamic User     Assigned
+       |             |
+       +------+------+
+              |
+       Group Membership
 ```
 
-But not every group uses the same membership model.
+This distinction is important.
 
-Some can be populated automatically from trusted identity attributes.
+We want routine organisational membership to be as consistent and automated as possible.
 
-Others require an explicit decision or approval.
+But we do not want sensitive access, administrative privilege, or pilot participation to appear automatically just because an employee has a particular job title.
 
-That difference is central to the Wire Finance implementation.
+### Building Dynamic Membership Rules
 
----
+A Dynamic User group evaluates identity attributes against a membership rule.
 
-#### Automating Group Membership
+When the attributes satisfy the rule, Microsoft Entra can add the identity to the group automatically.
 
-One of the most important decisions during group creation was how users would become members.
+When those attributes change, Entra can re-evaluate membership.
 
-Wire Finance could manage every group manually.
+This is useful for the employee lifecycle we designed earlier.
 
-An administrator could create a user, open the Finance group, add the employee, open the Finance Analyst group, add them again, and repeat the process whenever somebody joins, moves, or changes role.
-
-That would work.
-
-But it would also introduce more manual administration and make it easier for group membership to become outdated.
-
-Instead, where membership can be determined from trusted identity information, Wire Finance uses **Dynamic User** groups.
-
-```text
-User Attributes
-      ↓
-Dynamic Membership Rule
-      ↓
-Does the identity match?
-     /        \
-   Yes         No
-    ↓           ↓
-Member      Not a Member
-```
-
-Microsoft Entra evaluates the attributes of an identity against the membership rule.
-
-If the identity satisfies the rule, it can become a member automatically.
-
-If those attributes later change and the identity no longer satisfies the rule, the membership can also be updated automatically.
-
-This gives Wire Finance an important layer of identity lifecycle automation.
-
-#### Building Rules Around Trusted Attributes
-
-The rules are deliberately more specific than checking only a department or job title.
-
-For example, the Finance department group does not simply check:
-
-```text
-department = Finance
-```
-
-It also verifies that the identity:
-
-- Belongs to Wire Finance
-- Is a Member identity
-- Has an enabled account
-
-Conceptually:
-
-```text
-Correct Company
-      +
-Correct Department
-      +
-Member Identity
-      +
-Account Enabled
-      ↓
-Department Membership
-```
-
-Role groups add another condition:
-
-```text
-Correct Company
-      +
-Correct Department
-      +
-Correct Job Title
-      +
-Member Identity
-      +
-Account Enabled
-      ↓
-Role Membership
-```
-
-This prevents one matching attribute from being enough to place an identity into a group.
-
-#### Authoritative Identity Attributes
-
-Dynamic membership makes identity attributes part of the access-control model.
-
-Wire Finance therefore defines authoritative values that should be used consistently.
-
-| Identity / Attribute | Authoritative Value |
-|---|---|
-| **Standard workforce `companyName`** | Wire Finance |
-| **Privileged identity `companyName`** | Wire Finance-Privileged |
-| **Emergency identity `companyName`** | Wire Finance-Emergency |
-| **Departments** | Finance; HR; Operations; Sales; IT |
-| **Finance role title** | Finance Analyst |
-| **HR role title** | HR Manager |
-| **Operations role title** | Operations Specialist |
-| **Sales role title** | Sales Representative |
-| **IT administrator title** | IT Administrator |
-| **SOC role title** | SOC Analyst |
-| **Endpoint role title** | Deployment/Support Engineer |
-| **Security leadership title** | Head of Security Operations |
-
-These values may look like ordinary profile information.
-
-But once an attribute participates in dynamic membership, changing it may affect access.
-
-```text
-Identity Attribute
-        ↓
-Dynamic Membership Rule
-        ↓
-Group Membership
-        ↓
-Entitlement
-        ↓
-Effective Access
-```
-
-That makes attribute accuracy security-sensitive.
+But the rules need to be specific enough to avoid unintended membership.
 
 #### Company-Wide Workforce
 
-The broadest dynamic group is:
+Our company baseline group is:
 
 `SG-BASE-ALL-STAFF`
 
-Membership type:
+Membership type: `Dynamic User`
 
-`Dynamic User`
-
-Rule:
+The implemented rule is:
 
 ```text
 (user.companyName -eq "Wire Finance") -and
@@ -235,41 +115,31 @@ Rule:
 (user.accountEnabled -eq true)
 ```
 
-This represents the standard Wire Finance workforce.
+This selects enabled Member identities belonging to the standard Wire Finance workforce.
 
-It also connects directly to the company baseline defined earlier:
+Notice that the rule does not simply check whether an account exists.
 
-```text
-WF-BASE-001
-      ↓
-SG-BASE-ALL-STAFF
-```
+It also checks the company attribute, user type, and account state.
 
-The baseline describes what standard employees should receive.
+This matters because our privileged and emergency identities use different company values:
 
-The group gives us a population to which those entitlements can eventually be assigned.
+| Identity Type | companyName |
+|---|---|
+| Standard workforce | `Wire Finance` |
+| Privileged administrator | `Wire Finance-Privileged` |
+| Emergency access | `Wire Finance-Emergency` |
 
-The `companyName` check is particularly useful because privileged and emergency identities use different authoritative values:
+This helps keep administrative and emergency identities outside the normal workforce baseline.
 
-```text
-Standard Workforce    → Wire Finance
-Privileged Identities → Wire Finance-Privileged
-Emergency Identities  → Wire Finance-Emergency
-```
+#### Department Membership
 
-Those identity types therefore do not automatically fall into the normal workforce population.
+Next, we created groups representing the five Wire Finance departments.
 
-#### Department Groups
-
-The next layer represents **where an employee works**.
-
-Wire Finance has five departments, and each department has a Dynamic User security group.
-
-##### Finance
-
-Group:
+Take Finance as an example:
 
 `SG-DEPT-FINANCE-USERS`
+
+Membership type: `Dynamic User`
 
 ```text
 (user.companyName -eq "Wire Finance") -and
@@ -278,87 +148,23 @@ Group:
 (user.accountEnabled -eq true)
 ```
 
-##### Human Resources
+The same pattern is used for HR, Operations, Sales, and IT, with the appropriate department value.
 
-Group:
+This means department membership is derived from the employee's organisational information rather than maintained entirely through manual assignments.
 
-`SG-DEPT-HR-USERS`
+#### Role Membership
 
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "HR") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
+Department membership tells us where an employee works.
 
-##### Operations
+It does not necessarily tell us what responsibilities they perform.
 
-Group:
+That is why we also created role-specific groups.
 
-`SG-DEPT-OPERATIONS-USERS`
-
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "Operations") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
-
-##### Sales
-
-Group:
-
-`SG-DEPT-SALES-USERS`
-
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "Sales") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
-
-##### IT
-
-Group:
-
-`SG-DEPT-IT-USERS`
-
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "IT") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
-
-The department attribute can therefore drive department membership automatically.
-
-```text
-Employee
-   ↓
-department
-   ↓
-Dynamic Rule
-   ↓
-Department Group
-   ↓
-Department Entitlements
-```
-
-This is the technical implementation of the department baselines designed earlier.
-
-#### Role Groups
-
-Department membership tells us **where someone works**.
-
-It does not necessarily tell us **what they do**.
-
-That is why Wire Finance also uses role-specific Dynamic User groups.
-
-##### Finance Analyst
-
-Group:
+For example:
 
 `SG-ROLE-FINANCE-ANALYST`
+
+Membership type: `Dynamic User`
 
 ```text
 (user.companyName -eq "Wire Finance") -and
@@ -368,465 +174,260 @@ Group:
 (user.accountEnabled -eq true)
 ```
 
-##### HR Manager
+Here, the rule evaluates both department and job title, alongside the standard workforce conditions.
 
-Group:
+An identity must satisfy the full rule to qualify.
 
-`SG-ROLE-HR-MANAGER`
+This pattern is applied across the eight implemented role groups.
 
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "HR") -and
-(user.jobTitle -eq "HR Manager") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
+### The Workforce Group Inventory
 
-##### Operations Specialist
+Instead of repeating nearly identical membership rules for every group, the tables below show the implemented groups and the attributes that distinguish their memberships.
 
-Group:
+All of these groups use the common workforce conditions established above.
 
-`SG-ROLE-OPERATIONS-SPECIALIST`
+#### Company and Department Groups
 
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "Operations") -and
-(user.jobTitle -eq "Operations Specialist") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
+| Group | Membership | Additional Matching Attribute |
+|---|---|---|
+| `SG-BASE-ALL-STAFF` | Dynamic User | Company baseline |
+| `SG-DEPT-FINANCE-USERS` | Dynamic User | Finance |
+| `SG-DEPT-HR-USERS` | Dynamic User | HR |
+| `SG-DEPT-OPERATIONS-USERS` | Dynamic User | Operations |
+| `SG-DEPT-SALES-USERS` | Dynamic User | Sales |
+| `SG-DEPT-IT-USERS` | Dynamic User | IT |
 
-##### Sales Representative
+#### Role Groups
 
-Group:
+| Group | Department | Matching Job Title |
+|---|---|---|
+| `SG-ROLE-FINANCE-ANALYST` | Finance | Finance Analyst |
+| `SG-ROLE-HR-MANAGER` | HR | HR Manager |
+| `SG-ROLE-OPERATIONS-SPECIALIST` | Operations | Operations Specialist |
+| `SG-ROLE-SALES-REPRESENTATIVE` | Sales | Sales Representative |
+| `SG-ROLE-IT-ADMIN` | IT | IT Administrator |
+| `SG-ROLE-SOC-ANALYST` | IT | SOC Analyst |
+| `SG-ROLE-ENDPOINT-ADMIN` | IT | Deployment/Support Engineer |
+| `SG-ROLE-SECURITY-LEADERSHIP` | IT | Head of Security Operations |
 
-`SG-ROLE-SALES-REPRESENTATIVE`
+These 14 groups form our attribute-driven workforce structure.
 
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "Sales") -and
-(user.jobTitle -eq "Sales Representative") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
+However, a role group such as `SG-ROLE-IT-ADMIN` does not automatically grant Microsoft Entra administrator privileges.
 
-##### IT Administrator
+It represents the employee's business role.
 
-Group:
+Administrative authorisation remains a separate decision.
 
-`SG-ROLE-IT-ADMIN`
+### Validating Dynamic Membership
 
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "IT") -and
-(user.jobTitle -eq "IT Administrator") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
+After implementing the groups and creating the pilot identities, I verified that the dynamic membership rules behaved as expected.
 
-##### SOC Analyst
+Olivia Carter provided a useful example.
 
-Group:
-
-`SG-ROLE-SOC-ANALYST`
+Her identity was configured with:
 
 ```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "IT") -and
-(user.jobTitle -eq "SOC Analyst") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
+Employee:      Olivia Carter
+Employee ID:   WF-EMP-006
+Company:       Wire Finance
+Department:    Finance
+Job Title:     Finance Analyst
+User Type:     Member
+Account:       Enabled
 ```
 
-##### Deployment / Support Engineer
-
-Group:
-
-`SG-ROLE-ENDPOINT-ADMIN`
+Based on those attributes, Microsoft Entra evaluated her into:
 
 ```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "IT") -and
-(user.jobTitle -eq "Deployment/Support Engineer") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
+Olivia Carter
+       |
+       +-- SG-BASE-ALL-STAFF
+       |
+       +-- SG-DEPT-FINANCE-USERS
+       |
+       +-- SG-ROLE-FINANCE-ANALYST
 ```
 
-##### Head of Security Operations
+These memberships were confirmed during validation.
 
-Group:
+The same department and role membership patterns were observed across the other pilot employees.
 
-`SG-ROLE-SECURITY-LEADERSHIP`
+This demonstrates something important.
 
-```text
-(user.companyName -eq "Wire Finance") -and
-(user.department -eq "IT") -and
-(user.jobTitle -eq "Head of Security Operations") -and
-(user.userType -eq "Member") -and
-(user.accountEnabled -eq true)
-```
+**The group rules are not just documentation. They are operating against the identities we created.**
 
-The role groups give us the third layer of the access model.
+It also shows why employee attributes need to be governed carefully.
 
-For example:
+Changing a security-sensitive attribute could change group membership and potentially affect access to resources assigned to those groups.
 
-```text
-Finance Analyst
-      ↓
-SG-BASE-ALL-STAFF
-      +
-SG-DEPT-FINANCE-USERS
-      +
-SG-ROLE-FINANCE-ANALYST
-```
+Dynamic membership helps automate part of the Joiner, Mover, and Leaver processes, but it does not replace proper business approval or access review.
 
-The same model applies throughout the organisation.
+### Groups That Require Explicit Assignment
 
-#### What This Means for a Real Identity
+Not every membership should be automated.
 
-Consider Taylor Reed.
+Some groups represent decisions that cannot safely be inferred from department or job title.
 
-Taylor is the Wire Finance SOC Analyst.
+For Wire Finance, six user/access groups use Assigned membership.
 
-The identity is expected to have attributes such as:
+| Group | Membership | Purpose |
+|---|---|---|
+| `SG-PILOT-IDENTITY` | Assigned | Identity and deployment pilot population |
+| `SG-EXCEPTION-PAYMENT-PROCESSING` | Assigned | Approved payment-processing exceptions |
+| `SG-LICENCE-M365-E5` | Assigned | Microsoft 365 E5 licensing |
+| `PAG-ENTRA-SECURITY-READER` | Assigned | Entra Security Reader access path |
+| `PAG-DEFENDER-SECURITY-OPERATOR` | Assigned | Defender security operations access path |
+| `PAG-INTUNE-ENDPOINT-ADMIN` | Assigned | Intune endpoint administration access path |
 
-```text
-companyName    = Wire Finance
-department     = IT
-jobTitle       = SOC Analyst
-userType       = Member
-accountEnabled = true
-```
+Each group has a specific purpose.
 
-Those attributes satisfy several dynamic rules.
+#### Pilot Membership
 
-```text
-Taylor Reed
-    │
-    ├── companyName = Wire Finance
-    │        ↓
-    │   SG-BASE-ALL-STAFF
-    │
-    ├── department = IT
-    │        ↓
-    │   SG-DEPT-IT-USERS
-    │
-    └── jobTitle = SOC Analyst
-             ↓
-       SG-ROLE-SOC-ANALYST
-```
+`SG-PILOT-IDENTITY` identifies employees included in the initial identity and endpoint implementation pilot.
 
-Instead of an administrator manually maintaining three separate memberships, the identity attributes can drive the expected membership automatically.
+The eight workforce accounts were deliberately assigned to this group.
 
-That gives us a technical implementation of the access model designed earlier:
-
-```text
-Company Baseline
-      +
-Department Baseline
-      +
-Role Baseline
-```
-
-#### Connecting Dynamic Membership to the Mover Process
-
-This automation becomes particularly useful when somebody changes role or department.
-
-Imagine Taylor moves from:
-
-```text
-SOC Analyst
-```
-
-to:
-
-```text
-IT Administrator
-```
-
-If the authoritative `jobTitle` value changes, Microsoft Entra can re-evaluate the relevant dynamic rules.
-
-Conceptually:
-
-```text
-jobTitle = SOC Analyst
-        ↓
-SG-ROLE-SOC-ANALYST
-
-        CHANGES TO
-
-jobTitle = IT Administrator
-        ↓
-SG-ROLE-IT-ADMIN
-```
-
-The same principle applies to department changes.
-
-```text
-department = Sales
-      ↓
-SG-DEPT-SALES-USERS
-
-      CHANGES TO
-
-department = Operations
-      ↓
-SG-DEPT-OPERATIONS-USERS
-```
-
-The old membership does not need to remain simply because somebody forgot to remove it manually.
-
-This does not eliminate the Mover review process.
-
-The Mover process still determines **what should change**.
-
-Dynamic membership gives Microsoft Entra a mechanism to automate part of that change.
-
----
-
-#### Not Every Group Should Be Dynamic
-
-Automation makes sense when membership can be determined from authoritative identity attributes.
-
-But not every access decision works that way.
-
-Some memberships exist because somebody made an explicit decision or granted an approval.
-
-Those groups remain **Assigned**.
-
-The implementation therefore follows a simple rule:
-
-```text
-Can membership be reliably determined
-from authoritative attributes?
-            │
-        Yes │ No
-            │
-        ┌───┴───┐
-        ↓       ↓
-     Dynamic  Assigned
-       User
-```
-
-This distinction prevents automation from replacing decisions that should still require human approval.
-
-#### Pilot Group
-
-The initial identity pilot group is:
-
-`SG-PILOT-IDENTITY`
-
-Membership type:
-
-`Assigned`
-
-Participation in a pilot is deliberate.
-
-A user should not automatically become part of a security or deployment pilot simply because of their department or job title.
-
-```text
-Selected for Pilot
-      ↓
-Assigned Membership
-      ↓
-SG-PILOT-IDENTITY
-```
-
-This gives Wire Finance a controlled population for testing future identity and security changes before wider deployment.
+Pilot participation should be controlled because the group can be used to target configurations and deployment changes before wider rollout.
 
 #### Exception Access
 
-Wire Finance also created:
+`SG-EXCEPTION-PAYMENT-PROCESSING` represents a controlled exception to normal role-based access.
 
-`SG-EXCEPTION-PAYMENT-PROCESSING`
+Membership is Assigned because payment-processing authority should not automatically follow from a Finance department or job title.
 
-Membership type:
+The group provides a place to apply an approved entitlement.
 
-`Assigned`
+It does not itself prove that a payment-processing permission has already been granted to a user.
 
-This matches the exception-access model designed earlier.
+#### Group-Based E5 Licensing
 
-Sensitive payment-processing access should not appear automatically because someone happens to have a particular job title.
+Another important implementation decision was introducing:
 
-Instead:
+`SG-LICENCE-M365-E5`
 
-```text
-Business Requirement
-        ↓
-Approval
-        ↓
-Assigned Membership
-        ↓
-SG-EXCEPTION-PAYMENT-PROCESSING
-```
+This is an Assigned security group used to control Microsoft 365 E5 licensing during the pilot.
 
-The access exists because there is a justified exception, not because a profile attribute matched a rule.
+All eight initial workforce identities were added to the group.
 
-#### Privileged Access Groups
+The Microsoft 365 E5 licence was assigned through group-based licensing, and Olivia Carter's inherited licence assignment was verified.
 
-The final category is privileged access.
-
-Three privileged-access groups have been created:
-
-| Privileged Access Group | Membership | Entra Role Assignable |
-|---|---|---|
-| `PAG-ENTRA-SECURITY-READER` | Assigned | Yes |
-| `PAG-DEFENDER-SECURITY-OPERATOR` | Assigned | No |
-| `PAG-INTUNE-ENDPOINT-ADMIN` | Assigned | No |
-
-Privileged membership is deliberately **Assigned**.
-
-Administrative access should not suddenly appear just because somebody's job title changes.
-
-The naming convention tells us these groups are intended to sit in front of privileged capabilities:
+This gives us two separate decisions:
 
 ```text
-PAG-*
+SG-PILOT-IDENTITY
+       |
+       +-- Who participates in the pilot?
+
+SG-LICENCE-M365-E5
+       |
+       +-- Who receives an E5 licence?
 ```
 
-But there is another important distinction.
+Although the same eight users currently belong to both, the groups are not interchangeable.
 
-**Creating the privileged-access group does not create the privilege itself.**
+Pilot membership controls participation.
+
+Licensing membership controls licence assignment.
+
+Keeping them separate allows the licensing model to evolve without making every future employee dependent on membership of a testing group.
+
+### Privileged Access Groups
+
+The three `PAG-*` groups were created to support the privileged-access architecture defined during IAM design.
+
+One important configuration difference is that:
+
+`PAG-ENTRA-SECURITY-READER`
+
+was created as an Entra role-assignable security group.
+
+The Defender and Intune privileged groups are regular Assigned security groups because their authorisation is managed through their respective platforms.
+
+However, creating a privileged-access group is not the same as implementing the permissions behind it.
 
 For example:
 
-`PAG-INTUNE-ENDPOINT-ADMIN`
+```text
+PAG-INTUNE-ENDPOINT-ADMIN
+          |
+          v
+Intune Role Assignment
+          |
+          v
+WF-Intune-Endpoint-Admin
+          |
+          v
+Approved Endpoint Permissions
+```
 
-identifies who should eventually receive the endpoint-administration entitlement.
+The custom `WF-Intune-Endpoint-Admin` role and its pilot assignment have already been implemented in Microsoft Intune.
 
-It does not define what an Endpoint Administrator can actually do.
+The Defender Unified RBAC role and the Entra Security Reader group-to-role assignment remain separate follow-on activities.
 
-The group answers:
+We will explore these authorisation boundaries in the next implementation page.
 
-**Who receives the entitlement?**
+### Device Groups Added to the Inventory
 
-The platform authorization system answers:
+As the endpoint implementation progressed, five additional security groups were introduced for device management and provisioning.
 
-**What does that entitlement permit?**
+| Device Group | Membership |
+|---|---|
+| `SG-DEVICES-WINDOWS-CORPORATE` | Dynamic Device |
+| `SG-DEVICES-WINDOWS-PILOT` | Assigned |
+| `SG-DEVICES-PRIVILEGED` | Dynamic Device |
+| `SG-DEVICES-NONCOMPLIANT-TEST` | Assigned |
+| `SG-DEVICES-AUTOPILOT-CORPORATE` | Dynamic Device |
 
-That distinction becomes important in the next stage of the implementation.
+These groups support different aspects of our device model.
 
-#### Current Group Inventory
+For example, `SG-DEVICES-AUTOPILOT-CORPORATE` uses Autopilot classification to identify devices intended for the standard corporate provisioning path.
 
-At this checkpoint, the Wire Finance Microsoft Entra group inventory contains 19 security groups:
+`SG-DEVICES-PRIVILEGED` uses the PAW classification.
 
-| Group | Membership | Status |
-|---|---|---|
-| `SG-BASE-ALL-STAFF` | Dynamic User | Created |
-| `SG-DEPT-FINANCE-USERS` | Dynamic User | Created |
-| `SG-DEPT-HR-USERS` | Dynamic User | Created |
-| `SG-DEPT-OPERATIONS-USERS` | Dynamic User | Created |
-| `SG-DEPT-SALES-USERS` | Dynamic User | Created |
-| `SG-DEPT-IT-USERS` | Dynamic User | Created |
-| `SG-ROLE-FINANCE-ANALYST` | Dynamic User | Created |
-| `SG-ROLE-HR-MANAGER` | Dynamic User | Created |
-| `SG-ROLE-OPERATIONS-SPECIALIST` | Dynamic User | Created |
-| `SG-ROLE-SALES-REPRESENTATIVE` | Dynamic User | Created |
-| `SG-ROLE-IT-ADMIN` | Dynamic User | Created |
-| `SG-ROLE-SOC-ANALYST` | Dynamic User | Created |
-| `SG-ROLE-ENDPOINT-ADMIN` | Dynamic User | Created |
-| `SG-ROLE-SECURITY-LEADERSHIP` | Dynamic User | Created |
-| `SG-PILOT-IDENTITY` | Assigned | Created |
-| `SG-EXCEPTION-PAYMENT-PROCESSING` | Assigned | Created |
-| `PAG-ENTRA-SECURITY-READER` | Assigned | Created |
-| `PAG-DEFENDER-SECURITY-OPERATOR` | Assigned | Created |
-| `PAG-INTUNE-ENDPOINT-ADMIN` | Assigned | Created |
+Pilot and noncompliance-test membership remain explicitly assigned for controlled testing.
 
-That gives us:
+The detailed device classification rules and design decisions belong to our earlier Device Provisioning Model.
+
+For this chapter, the important distinction is that **device classification, device management, and device trust are not the same thing**.
+
+A device entering a group does not automatically prove that it is enrolled, compliant, or secure.
+
+### An Unexpected Group During Validation
+
+One useful discovery came from reviewing the pilot users' actual group memberships.
+
+Alongside our deliberately created security groups, a separate Microsoft 365 collaboration group named:
+
+`Wire Finance`
+
+was present in the tenant.
+
+Seven of the eight pilot users appeared as members.
+
+Casey Ng was the exception.
+
+This group was cloud-managed and had an associated tenant email address.
+
+However, its original creation path and purpose had not been confirmed.
+
+Rather than deleting or modifying an unfamiliar group, I left it unchanged for further investigation.
+
+This is an important reminder that not every group found in Microsoft Entra belongs to our formal security-group architecture.
+
+The additional collaboration group is not included in the 25 security groups documented here.
+
+**An unexpected object should be understood before it is changed.**
+
+### The Implemented Group Architecture
+
+At the latest documented checkpoint, Wire Finance has:
 
 ```text
 14 Dynamic User Groups
          +
-5 Assigned Groups
-         =
-19 Security Groups
-```
-
-More importantly, the membership model now reflects the kind of decision each group represents.
-
-```text
-Company / Department / Role
-            ↓
-    Attribute Driven
-            ↓
-       Dynamic User
-
-
-Pilot / Exception / Privileged
-            ↓
-   Decision or Approval Driven
-            ↓
-          Assigned
-```
-
-#### Automation Still Needs Validation
-
-Dynamic membership reduces manual work.
-
-It does not eliminate the need to verify the logic.
-
-A badly written rule can automate the wrong decision just as efficiently as a correct rule automates the right one.
-
-Before these groups are relied on for access, the expected identities should be tested against the rules.
-
-For each pilot user, we should be able to predict:
-
-```text
-Which company group should they enter?
-
-Which department group should they enter?
-
-Which role group should they enter?
-
-Which groups should they NOT enter?
-```
-
-When the users are created, the resulting memberships can then be compared against those expectations.
-
-That gives us a practical test of both the identity attributes and the dynamic rules.
-
-#### The Access Structure Now Exists
-
-The tenant now contains the group architecture needed to support the Wire Finance access model.
-
-We have built:
-
-```text
-Company Baseline Groups
-        +
-Department Groups
-        +
-Role Groups
-        +
-Pilot Groups
-        +
-Exception Groups
-        +
-Privileged Access Groups
-```
-
-Some memberships will be driven automatically by trusted identity information.
-
-Others remain deliberately controlled through explicit assignment.
-
-But the privileged-access groups reveal the next problem.
-
-A group such as:
-
-`PAG-INTUNE-ENDPOINT-ADMIN`
-
-can tell us **who should receive endpoint-administration access**.
-
-It still does not tell Microsoft Intune what that administrator should actually be allowed to do.
-
-And:
-
-`PAG-DEFENDER-SECURITY-OPERATOR`
-
-does not yet define what actions a Security Operator can perform in Microsoft Defender.
-
-The membership structure now exists.
-
-The next challenge is **authorization**.
-
-**Where should those administrative permissions be defined, and how do we make sure each privileged group receives only the permissions its role actually requires?**
+ 6 Assigned User/Access Groups
+         +
+ 3 Dynamic Device Groups
+         +
+ 2 Assigned Device Groups
+         |

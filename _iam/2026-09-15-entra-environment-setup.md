@@ -8,164 +8,150 @@ order: 1
 
 Before we create the first Wire Finance user, group, or administrative role, we need somewhere to build them.
 
-The IAM design tells us what the environment **should** look like.
+Our IAM design tells us what the environment **should** look like.
 
-Now we need the Microsoft environment that will make that design possible.
+Now we need a working Microsoft environment that can support those decisions.
 
-For Wire Finance, the starting point was setting up the Microsoft tenant and obtaining the licensing required for the identity and security capabilities we plan to use.
+For Wire Finance, that begins with establishing an organisational tenant and confirming that the required identity and security capabilities are available.
 
-#### Setting Up the Microsoft Environment
+### Setting Up the Microsoft Environment
 
-I began through Microsoft Partner Center using the Value Added Reseller enrolment path:
+The first requirement was a dedicated Microsoft organisational tenant for Wire Finance.
 
-[Microsoft Partner Center enrolment](https://partner.microsoft.com/en-us/dashboard/account/exp/enrollment/welcome?cloudInstance=Global&accountProgram=valueaddedreseller)
+During the setup process, I used Microsoft Partner Center's Value Added Reseller enrolment route and the Microsoft 365 E5 product page (This gave me access to an extendable one month free trial).
 
-The purpose here was not simply to create another Microsoft account.
+These were the Microsoft entry points involved:
 
-Wire Finance needs its own organisational environment where we can safely build identities, groups, authentication controls, administrative roles, endpoints, and eventually the wider security stack without mixing the project with a personal environment.
+- [Microsoft Partner Center enrolment](https://partner.microsoft.com/en-us/dashboard/account/exp/enrollment/welcome?cloudInstance=Global&accountProgram=valueaddedreseller)
+- [Microsoft 365 E5 product page](https://www.microsoft.com/microsoft-365/business/office-365-enterprise-e5-business-software?activetab=pivot%3aoverviewtab)
 
-Once the enrolment and tenant setup were complete, we had the foundation on which the rest of the project could be built.
+The objective was to establish an independent organisational environment where Wire Finance could manage its identities, groups, administrative roles, endpoints, and security controls.
 
-At this point, however, having a tenant was only part of the requirement.
+This separation matters.
 
-We also needed to make sure the environment had access to the identity and security capabilities required by the Wire Finance design.
+We don't want to mix organisational identities and security configurations with a personal Microsoft environment.
 
-#### Adding the E5 Licence
+With the organisational tenant established, we now had the foundation on which to build the Wire Finance identity infrastructure.
 
-With the tenant available, the next requirement was licensing.
+However, having a tenant was only the first requirement.
 
-For the Wire Finance environment, I obtained a **Microsoft 365 E5 licence** through the Microsoft 365 environment (Microsoft 365 admin center).
+We also needed the licensing capabilities to support the security controls planned in our IAM design.
 
-The exact location of these options inside Microsoft's portals may change over time, so the important part of this stage is not memorising a particular sequence of buttons.
+### Establishing Microsoft 365 E5 Licensing
 
-The important outcome is:
+Wire Finance uses **Microsoft 365 E5**, with 25 licensed seats available for the environment.
 
-```text
-Microsoft Tenant
-        +
-Active Microsoft 365 E5 Licence
-        ↓
-Identity and Security Capabilities Available
-```
-
-After obtaining the licence, I verified that the Microsoft 365 E5 subscription appeared as active in the tenant.
+I verified that the Microsoft 365 E5 subscription was active in the Microsoft 365 admin center.
 
 ![Microsoft 365 E5 subscription]({{ '/assets/images/active-directory/e5-active-subscription.png' | relative_url }})
 
-For the identity side of the project, Microsoft 365 E5 gives us access to Microsoft Entra capabilities that will become important as the environment develops.
+One of the reasons for selecting E5 was its inclusion of **Microsoft Entra ID P2** capabilities.
 
-These include areas such as:
+These support advanced identity security features such as:
 
 - Conditional Access
-- Identity Protection
-- Risk-based access controls
-- Privileged Identity Management
-- Advanced identity security capabilities
+- Microsoft Entra ID Protection
+- Risk-based access decisions
+- Privileged Identity Management (PIM)
 
-We are not configuring those features yet.
+These capabilities are important because our IAM design includes stronger authentication, identity risk management, and controlled administrative access.
 
-At this stage, the goal is simply to make sure the environment can support the controls we intend to introduce later.
+But there is an important distinction:
 
-#### Licensing the Administrative Account
+**Having these capabilities available does not mean they are already configured or protecting the environment.**
 
-During the initial tenant setup, an administrative account was created to manage the environment.
+At this stage, we were establishing the foundation.
 
-I assigned the appropriate licence to this account so that it could work with the licensed capabilities required during the early stages of the lab.
+The actual policies, administrative permissions, and security controls will be implemented and validated as the project progresses.
 
-![Administrative account licence assignment]({{ '/assets/images/active-directory/admin-licence-assignment.png' | relative_url }})
+### The Initial Administrative Account
 
-This account currently provides the administrative access needed to begin configuring the environment.
+During tenant setup, an initial administrative account was used to establish and configure the environment.
 
-That does not mean we intend to rely on broad administrative access permanently.
+This account was also assigned a Microsoft 365 E5 licence during the initial setup stage.
 
-Earlier in the IAM design, we established principles around:
+![Administrative account licence assignment]({{ '/assets/images/active-directory/admin-license-assignment.png' | relative_url }})
 
-- Separate privileged identities
-- Least privilege
-- Controlled administrative access
-- Avoiding unnecessary Global Administrator usage
+This reflects how the environment was initially established. It does not mean every administrator requires an E5 licence simply to perform administrative tasks.
 
-Those controls will become increasingly important as the implementation develops.
+It is also important to distinguish initial setup access from the administrative-access model we intend to operate.
 
-For now, the existing administrative account gives us a controlled starting point from which we can begin building the environment.
+Earlier in our IAM design, we established that privileged access should use:
 
-Later, we will replace broad access with the more deliberate privileged-access model already defined for Wire Finance.
+- Dedicated `adm-*` administrative identities
+- Least-privilege permissions
+- Privileged access groups
+- Controlled and auditable administrative access
 
-#### Why Licensing Comes Before Configuration
+The initial administrator provides the access required to establish the environment.
 
-It would be easy to jump straight into the Microsoft Entra admin centre and start creating users.
+As we progress, the goal is to move towards the deliberate privileged-access model already designed for Wire Finance rather than relying on broad administrative permissions for routine operations.
 
-But licensing affects which capabilities are available inside the environment.
+### Why Licensing Matters Before Configuration
 
-Our IAM design already includes concepts such as:
+Imagine reaching the Conditional Access or Privileged Identity Management stage only to discover that the required capabilities are unavailable.
 
-- Strong authentication
-- Privileged access management
-- Access controls
-- Identity risk
-- Security monitoring
+We would have an identity design that the environment could not fully support.
 
-If the environment cannot support those capabilities, we would eventually reach a point where the implementation no longer matches the design.
+That is why confirming the tenant and its licensing capabilities is an important early step.
 
-So before creating anything, we want to answer a few basic questions:
+For Wire Finance, the foundation looks like this:
 
 ```text
-Do we have a working tenant?
-        ↓
-Do we have the required licence?
-        ↓
-Are the identity capabilities we need available?
-        ↓
-Then we begin implementation
+Microsoft Organisational Tenant
+             +
+      Microsoft 365 E5
+         (25 Seats)
+             ↓
+    Microsoft Entra ID P2
+       Capability Available
+             ↓
+      Ready for Tenant Review
 ```
 
-That gives us a much cleaner starting point.
+This doesn't mean the environment is fully secured.
 
-## A Note About the Microsoft Portals
+It means we have confirmed that the platform can support the identity controls we intend to introduce.
+
+### A Note About Microsoft Portals
 
 Microsoft regularly updates the layout and navigation of its administrative portals.
 
-A menu available in one location today may appear somewhere else later.
+Menus, settings, and available options may change over time.
 
-Because of that, this project will focus less on memorising individual button locations and more on understanding:
+Throughout this project, we'll focus on four things:
 
-- What we are trying to configure
+- What we are configuring
 - Why the configuration is required
-- What the expected result should be
-- How that result connects back to the Wire Finance design
+- What result we expect
+- How we validate that result
 
-Screenshots will still show what the environment looked like while the project was being built, but the important part is understanding the configuration rather than reproducing an exact sequence of clicks.
+Where portal navigation was recorded during implementation, we'll include those paths to help readers follow along.
 
-#### The Environment Is Ready
+Screenshots will provide supporting evidence of the environment at different stages.
 
-At this stage, Wire Finance has the foundation required to begin the identity implementation:
+The aim is not simply to reproduce clicks, but to understand the purpose and outcome of each configuration.
 
-```text
-Microsoft Tenant
-        +
-Microsoft 365 E5
-        ↓
-Wire Finance Identity Environment
-```
+### The Foundation Is Established
 
-We have not created our workforce yet.
+At this point, Wire Finance has:
 
-We have not created the department and role groups.
+- A dedicated Microsoft organisational tenant
+- An active Microsoft 365 E5 subscription
+- 25 E5 licensed seats
+- Confirmed Microsoft Entra ID P2 capability
+- An initial administrative account for environment setup
 
-We have not assigned the administrative roles from our design.
+We have established the foundation, but we haven't yet demonstrated that the tenant's starting configuration is suitable for our design.
 
-We have not configured authentication controls.
+Before building our workforce identities and access structures, we need to understand what already exists inside the environment.
 
-And we have not started building the monitoring capabilities that will eventually feed into security operations.
+What settings are already in place?
 
-That is intentional.
+Which capabilities are available?
 
-The environment exists, but the Wire Finance identity model still needs to be built inside it.
+And what needs to be reviewed before we start making changes?
 
-Up to this point, we have been preparing the ground.
+That brings us to the next stage.
 
-Now we can create the first identities.
-
-And because the IAM design already tells us who those users are, what naming convention they should follow, and what type of access they should eventually receive, we are not starting from a blank page.
-
-**The next question is: how do we turn the Wire Finance workforce we designed earlier into real Microsoft Entra identities?**
+**Next: Tenant Review — establishing a verified baseline before we begin building the Wire Finance identity model.**

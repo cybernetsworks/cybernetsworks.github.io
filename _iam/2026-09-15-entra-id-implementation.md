@@ -13,51 +13,45 @@ description: "The identity design is complete. Now we turn those decisions into 
 
 Up to this point, Wire Finance has mostly existed as a **design**.
 
-We have defined the organisation.
-
-We have decided what types of identities should exist.
-
-We have established naming conventions.
+We have defined the organisation, established identity types and naming conventions, and designed how access should be organised.
 
 We have separated standard, privileged, and emergency access.
 
-We have created department and role structures.
-
-We have defined access baselines.
-
-And we have designed how identities should be handled when people join, move through the organisation, and eventually leave.
+We have also established how identities should be managed when employees join, change responsibilities, and eventually leave.
 
 Now comes the part where those decisions have to survive contact with a real environment.
 
 **It is time to build.**
 
-#### From Design to Implementation
+### From Design to Implementation
 
 A good identity design tells us what the environment **should** look like.
 
 Implementation tells us whether we can actually make it work.
 
-Wire Finance will now begin translating the IAM model into Microsoft Entra ID.
+Wire Finance will now begin translating its IAM model into Microsoft Entra ID.
 
 That means the decisions we made earlier will start becoming real objects and configurations:
 
 ```text
 Identity Design
-      ↓
-Users
-      ↓
-Groups
-      ↓
-Roles
-      ↓
-Authentication
-      ↓
-Access Controls
-      ↓
-Logging and Monitoring
+       ↓
+Environment Setup
+       ↓
+Tenant Review
+       ↓
+Group Creation
+       ↓
+Workforce Identities
+       ↓
+Administrative Access
+       ↓
+Authentication and Access Controls
+       ↓
+Validation, Logging and Monitoring
 ```
 
-The goal is not simply to click through a portal until accounts appear.
+The goal is not simply to click through a portal until accounts and groups appear.
 
 Every implementation decision should trace back to something we have already designed.
 
@@ -65,29 +59,19 @@ If we create a user, we should know what type of identity it represents.
 
 If we create a group, we should know what business purpose that group serves.
 
-If we assign a role, we should understand why the identity needs it.
+If we assign an administrative role, we should understand why that level of access is required.
 
-If we configure authentication, we should know what risk that control is intended to reduce.
+And if we configure an authentication control, we should know what risk it is intended to reduce.
 
-That connection between **design and implementation** is what turns a lab into something much closer to a real environment.
+That connection between **design and implementation** is what turns a collection of lab exercises into something much closer to a real organisational environment.
 
-#### Building the Wire Finance Identity Foundation
+### Building the Wire Finance Identity Foundation
 
 The Entra ID implementation will be built in stages.
 
-We will begin by preparing the environment itself before creating the identities and controls that will live inside it.
+We will begin by establishing the Microsoft environment and reviewing its starting configuration.
 
-From there, we can gradually introduce the components of the Wire Finance identity model.
-
-The implementation will cover areas such as:
-
-- Environment setup
-- User creation
-- Group creation
-- Administrative roles
-- Authentication methods
-- Multi-factor authentication
-- Logging and monitoring
+From there, we will implement the group structure, workforce identities, administrative permissions, and security controls needed to support our identity model.
 
 Each stage will build on the one before it.
 
@@ -109,13 +93,13 @@ Those small decisions are exactly how clean designs become messy environments.
 
 Wire Finance gives us the opportunity to do something different:
 
-**build deliberately from the beginning.**
+**Build deliberately, validate what we configure, and document what actually happens.**
 
-#### The First Step
+### The First Step
 
 Before we create users, groups, roles, or authentication policies, we need somewhere controlled to build them.
 
-That means preparing the Entra ID environment and understanding the foundation we are about to work with.
+That means preparing the Microsoft Entra ID environment and understanding the foundation we are about to work with.
 
 The first implementation question is therefore not:
 
@@ -124,3 +108,5 @@ The first implementation question is therefore not:
 It is:
 
 **What does the Wire Finance environment need before we start creating anything inside it?**
+
+That's where our implementation journey begins.
