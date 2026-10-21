@@ -4,210 +4,295 @@ title: "Tenant Review"
 series: wire-finance
 parent: entra-id-implementation
 order: 2
-description: "Before making changes, we establish the tenant's starting state. Seven simple checks give Wire Finance a clean baseline for everything we build next."
+description: "Before building the Wire Finance identity model, we review the Microsoft tenant, verify its capabilities, and establish a starting baseline."
 ---
 
 The Wire Finance Microsoft environment now exists.
 
-We have a tenant.
+We have an organisational tenant, Microsoft 365 E5 licensing, and the identity capabilities needed to support our design.
 
-We have Microsoft 365 E5 licensing.
+But having a working tenant does not mean we understand everything already configured inside it.
 
-And the identity capabilities we need are available.
+Before creating workforce identities, groups, or administrative roles, we need to answer an important question:
 
-But before creating users, groups, roles, or policies, there is one more thing we should do:
+**What already exists in this environment, and what are we about to change?**
 
-**find out exactly what is already there.**
+That is the purpose of our tenant review.
 
-This gives us a known starting point before we begin changing the environment.
+### Why Review the Tenant First?
 
-#### Why Review the Tenant First?
+A newly established Microsoft tenant is not necessarily empty.
 
-A newly prepared tenant is not necessarily an empty tenant.
+An initial administrator already exists.
 
-Accounts may already exist.
+Security settings may have default configurations.
 
-Administrative roles may already be assigned.
+Groups or other objects may have been created during setup.
 
-Security Defaults may already be enabled.
+And some settings may influence how our users authenticate or access resources.
 
-Groups or devices may have appeared during setup.
+If we begin building without understanding that starting state, we risk confusing existing configurations with the changes we deliberately introduce.
 
-If we start building without checking the existing state, it becomes harder to tell which settings came from Microsoft, which were created during setup, and which were deliberately implemented for Wire Finance.
+So before proceeding, we need a baseline.
 
-So before making further changes, I recorded a small tenant baseline.
+The approach is simple:
 
-The review focuses on just seven things.
+**Inspect first. Record what exists. Make changes only when we understand why they are needed.**
 
-#### The Seven-Point Tenant Review
+For Wire Finance, the review focuses on seven areas.
 
-##### 1. Tenant / Display Name
+### The Seven-Point Tenant Review
 
-First, confirm the organisation displayed in the Microsoft Entra environment.
+#### 1. Tenant Identity
 
-```text
-Tenant / Display Name:
-[Record the tenant name here]
-```
+First, confirm that we are working inside the correct Microsoft Entra tenant.
 
-This sounds basic, but it confirms that we are working inside the correct environment before making any configuration changes.
-
-##### 2. Primary `onmicrosoft.com` Domain
-
-Every Microsoft Entra tenant receives an initial Microsoft domain.
-
-Record the primary:
+Open the [Microsoft Entra admin center](https://entra.microsoft.com/) and navigate to:
 
 ```text
-<tenant>.onmicrosoft.com
+Entra ID
+   ↓
+Overview
+   ↓
+Properties
 ```
 
-For the project, this gives us another way to identify the tenant and provides the default domain that existed before any future custom-domain work.
+Here, we can review the tenant's identifying information, including its tenant ID.
+
+This matters because administrative changes affect the tenant we are currently connected to.
+
+Before creating users or configuring security policies, we need to be certain that we are working in the intended organisational environment.
+
+#### 2. Tenant Domain
+
+Next, review the domains associated with the tenant.
 
 ```text
-Primary onmicrosoft.com domain:
-[Record the domain here]
+Entra ID
+   ↓
+Domain names
 ```
 
-##### 3. Available Licensing
+Microsoft provides an initial `onmicrosoft.com` domain when an organisational tenant is created.
 
-Next, confirm the licences available in the tenant.
+Wire Finance currently uses this Microsoft-provided tenant domain for its lab identities.
 
-For Wire Finance, the environment currently uses:
+Our IAM design uses production-style names such as:
 
 ```text
-Microsoft 365 E5
-25 seats
+olivia.carter@wirefinance.com
 ```
 
-Microsoft Entra ID P2 capabilities have also been confirmed as available in the environment.
+However, `wirefinance.com` is our target naming convention, not a custom domain already configured in the lab.
 
-At this stage, we are not configuring every feature included with the licence.
+For now, the implemented identities use the tenant's `onmicrosoft.com` suffix.
 
-We are simply confirming that the environment can support the identity and security controls we intend to build later.
+**The naming principle remains the same; only the domain suffix differs.**
 
-##### 4. Security Defaults
+Custom-domain integration can be addressed later without changing the identity model we have designed.
 
-Next, check the current state of **Security Defaults**.
+#### 3. Licensing and Identity Capabilities
 
-Record whether it is:
+Now we need to verify that the environment has the licensing required for our planned implementation.
+
+In the Microsoft 365 admin center, the subscription can be reviewed through:
 
 ```text
-Enabled
+Billing
+   ↓
+Your products
 ```
 
-or:
+The verified Wire Finance environment has:
 
-```text
-Disabled
-```
-
-The important thing during this review is not to immediately change the setting.
-
-We first want to know the tenant's existing state.
-
-Later, when we begin implementing authentication and Conditional Access, we can make deliberate decisions about how those controls should operate.
-
-```text
-Security Defaults:
-[Enabled / Disabled]
-```
-
-##### 5. Global Administrators
-
-Next, identify how many identities currently hold the **Global Administrator** role.
-
-```text
-Global Administrators:
-[Record number]
-```
-
-This matters because Global Administrator is one of the most powerful roles in the tenant.
-
-Our IAM design already established that broad administrative access should not be used for routine administration.
-
-For now, however, we are only recording the existing state.
-
-The privileged-access model will be implemented later.
-
-##### 6. Existing Users and Groups
-
-Before creating the Wire Finance identity structure, record how many users and groups already exist.
-
-```text
-Existing users:
-[Record number]
-
-Existing groups:
-[Record number]
-```
-
-This gives us a clean baseline.
-
-If the tenant currently contains only setup or administrative identities, we now know that every workforce identity and access group created from this point forward belongs to the Wire Finance implementation.
-
-That will make later validation much easier.
-
-##### 7. Existing Devices
-
-Finally, check whether any devices are currently registered or joined to the tenant.
-
-```text
-Existing devices:
-[Record number]
-```
-
-Device identity is not being implemented yet.
-
-Intune enrolment, device groups, compliance, and endpoint security will come later.
-
-For now, we simply want to know whether the tenant already contains any device objects before that phase begins.
-
-## Recording the Starting State
-
-The completed review can be summarised in a simple table.
-
-| Check | Starting State |
+| Component | Verified State |
 |---|---|
-| **Tenant / Display Name** | `[Record value]` |
-| **Primary `onmicrosoft.com` domain** | `[Record value]` |
-| **Microsoft 365 licence** | Microsoft 365 E5 |
-| **Licensed seats** | 25 |
-| **Microsoft Entra ID** | P2 available |
-| **Security Defaults** | `[Enabled / Disabled]` |
-| **Global Administrators** | `[Record number]` |
-| **Existing users** | `[Record number]` |
-| **Existing groups** | `[Record number]` |
-| **Existing devices** | `[Record number]` |
+| Microsoft subscription | Microsoft 365 E5 |
+| Licensed seats | 25 |
+| Microsoft Entra ID | P2 capabilities operational |
+| Initial identity model | Cloud-only |
 
-This becomes our **before picture**.
+This is an important checkpoint.
 
-From this point onward, when users, groups, roles, policies, and devices begin appearing in the tenant, we know they are part of the environment we are deliberately building.
+Our design includes advanced identity capabilities such as Conditional Access, Identity Protection, and Privileged Identity Management.
 
-#### Establishing the Baseline Before the Build
+Microsoft Entra ID P2 makes these capabilities available.
 
-The Tenant Review did not create anything.
+However, **licensing availability and security configuration are two different things**.
 
-That was the point.
+We have confirmed the capabilities required for the implementation. The actual controls still need to be configured and validated.
+
+#### 4. Security Defaults
+
+Next, check whether Security Defaults are enabled.
+
+Security Defaults provide Microsoft's baseline identity protections, including multifactor authentication requirements.
+
+The setting can be reviewed through:
+
+```text
+Entra ID
+   ↓
+Overview
+   ↓
+Properties
+   ↓
+Manage security defaults
+```
+
+At this point, the objective is observation, not modification.
+
+We need to know whether Security Defaults are already influencing authentication behaviour before introducing our own Conditional Access policies.
+
+This is especially important because Wire Finance intends to implement more deliberate access controls later.
+
+We should not disable or replace existing protection without understanding what will take its place.
+
+#### 5. Global Administrator Assignments
+
+Next, identify who currently holds the Global Administrator role.
+
+```text
+Entra ID
+   ↓
+Roles & admins
+   ↓
+Global Administrator
+   ↓
+Assignments
+```
+
+Global Administrator is a highly privileged Microsoft Entra directory role.
+
+During initial setup, administrative permissions are needed to establish the environment.
+
+But the presence of an initial administrator should not become an excuse for permanent, unrestricted administration.
+
+Our IAM design already established a separation between standard identities and dedicated privileged identities.
+
+For this review, we are interested in identifying the existing role assignments.
+
+We are not yet implementing the final privileged-access model.
+
+That belongs to a later stage of this chapter.
+
+#### 6. Existing Users and Groups
+
+Before adding our workforce, we also need to inspect the existing directory objects.
+
+For users:
+
+```text
+Entra ID
+   ↓
+Users
+   ↓
+All users
+```
+
+For groups:
+
+```text
+Entra ID
+   ↓
+Groups
+   ↓
+All groups
+```
+
+Here, we look for identities and groups that already exist.
+
+Not every object in a tenant was necessarily created as part of our planned IAM structure.
+
+For example, the initial administrative account belongs to the tenant's setup history, not the standard Wire Finance workforce.
+
+Likewise, an existing group should not automatically be treated as one of our designed security groups.
+
+This distinction will become important when we begin implementing company-wide, department, role, pilot, and privileged-access groups.
+
+**We need to understand the objects already present before assigning new business meaning to them.**
+
+#### 7. Existing Devices
+
+Finally, check the devices associated with the tenant.
+
+```text
+Entra ID
+   ↓
+Devices
+   ↓
+All devices
+```
+
+At this stage of the journey, our focus is still identity implementation.
+
+But we already know that devices will eventually become an important part of how Wire Finance evaluates trust.
+
+Before introducing Microsoft Intune and Windows Autopilot, it is useful to understand whether device identities already exist.
+
+We are not configuring device management here.
+
+We are establishing the starting point against which later enrolment and provisioning can be validated.
+
+### What We Established
+
+The tenant review helps separate the existing Microsoft environment from the configurations we deliberately introduce for Wire Finance.
+
+The verified foundation is:
+
+```text
+Microsoft Organisational Tenant
+             ↓
+Microsoft-Provided Tenant Domain
+             ↓
+Microsoft 365 E5 — 25 Seats
+             ↓
+Microsoft Entra ID P2 Available
+             ↓
+Identity Implementation Foundation
+```
+
+The review also identifies the settings and objects that need to be accounted for before making changes:
+
+- Security Defaults
+- Existing administrative role assignments
+- Existing users and groups
+- Existing device identities
+
+These are baseline observations, not instructions to change everything immediately.
+
+In particular, counts or settings observed after implementation should not be mistaken for the tenant's original starting state.
+
+The purpose is to make sure that future configuration changes can be understood and validated against a known environment.
+
+### From Tenant Review to Workforce Identity Creation
+
+The tenant review itself does not create any new identities, groups, or access policies.
+
+It establishes the context for the changes that follow.
 
 ```text
 Environment Setup
-        ↓
-Tenant Exists
-        ↓
+       ↓
 Tenant Review
-        ↓
-Starting State Known
-        ↓
-Implementation Begins
+       ↓
+Starting Environment Understood
+       ↓
+Workforce Identity Creation
+       ↓
+Access and Group Implementation
 ```
 
-We now know what environment we are working with and what existed before the Wire Finance identity architecture was introduced.
+Now we can move from examining the environment to building the organisation inside it.
 
-The next step is where the tenant begins to change.
+Earlier, we designed a 25-person workforce and established standards for identity types, naming conventions, employee identifiers, and access requirements.
 
-Earlier, we designed company, department, role, exception, pilot, and privileged-access groups.
+For the initial implementation, we selected eight employees to represent the different departments and responsibilities within Wire Finance.
 
-Now we can start turning those designs into actual Microsoft Entra security groups.
+The next task is to turn those designed identities into actual Microsoft Entra user accounts.
 
-**What happens when our access model stops being a diagram and starts becoming real tenant objects?**
+But creating an account is only the beginning.
+
+We also need to establish the attributes that will eventually determine where each employee belongs and what access they should receive.
+
+**Next: User Creation — bringing the first eight Wire Finance employees into Microsoft Entra ID.**
