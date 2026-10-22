@@ -1,182 +1,106 @@
 ---
 layout: lesson
-title: "Multi-Factor Authentication"
+title: "Multifactor Authentication (MFA)"
 series: wire-finance
 parent: entra-id-implementation
 order: 7
-description: "Exploring multi-factor authentication in Wire Finance, from Olivia's first Microsoft Authenticator experience to the planned organisation-wide security controls."
+description: "Explain Wire Finance's MFA approach, distinguish method registration from enforcement, and prepare for Microsoft Authenticator during the first employee-device sign-in."
 ---
 
-Our first eight employees now have Microsoft Entra identities, organisational attributes, and an initial authentication process.
+We've created the Wire Finance security groups, added our eight pilot employees and prepared Olivia Carter's temporary password for her first sign-in.
 
-We have also established how temporary passwords are generated and how employees are required to change them during their first sign-in.
+But if someone steals that password, what stops them from accessing company resources?
 
-But that introduces another security question.
+**Multifactor authentication (MFA) is part of our security design. It isn't yet a fully implemented and validated Wire Finance control at this point in the learning journey.** That's an important distinction: we have the licensing and identities to begin testing, but we're not going to pretend we completed a policy we haven't configured.
 
-**What happens if somebody obtains an employee's password?**
+### 1. What we're trying to achieve
 
-A password proves that somebody knows a credential.
+A password is something the employee **knows**. MFA adds another form of verification, such as an approved authenticator on a device they **have**.
 
-It doesn't necessarily prove that the person signing in is the legitimate employee.
-
-This is where Multi-Factor Authentication (MFA) becomes important.
-
-## Why MFA Matters
-
-Multi-Factor Authentication strengthens identity verification by requiring more than one authentication factor.
-
-These factors generally include:
-
-- Something you know, such as a password.
-- Something you have, such as a registered authenticator or security key.
-- Something you are, such as a biometric characteristic.
-
-By combining independent factors, MFA reduces the likelihood that a stolen password alone will be enough to access an account.
-
-For Wire Finance, this matters because employees will eventually access business applications, financial information, managed endpoints, and administrative systems.
-
-However, **having MFA available, experiencing an MFA challenge, and enforcing an organisation-wide MFA policy are not the same thing.**
-
-That distinction is important to our implementation.
-
-## Our First Microsoft Authenticator Experience
-
-During Olivia Carter's first Windows Autopilot pilot, we encountered an additional authentication requirement.
-
-Olivia was required to use the **Microsoft Authenticator app** as part of her organisational sign-in.
-
-This was a real part of the pilot experience.
-
-However, we had not yet implemented our own organisation-wide Conditional Access policy to enforce MFA.
-
-That raises an interesting question.
-
-**Why was Microsoft Authenticator required when our custom MFA rollout had not yet been configured?**
-
-Microsoft Entra environments can introduce authentication requirements through different mechanisms, including existing tenant protections, authentication registration requirements, and Conditional Access policies.
-
-We therefore need to distinguish the authentication behaviour we observed from the policy configuration responsible for it.
-
-The exact mechanism responsible for Olivia's challenge still needs to be established through the tenant's authentication settings and available sign-in records.
-
-When we reach the Windows Autopilot implementation, we'll document Olivia's actual sign-in experience, including the Microsoft Authenticator step.
-
-For now, the important observation is that additional authentication formed part of our first endpoint onboarding experience.
-
-## MFA Capability vs Policy Enforcement
-
-Wire Finance uses Microsoft 365 E5, which includes Microsoft Entra ID P2 capabilities.
-
-This gives us the licensing foundation for advanced authentication and Conditional Access.
-
-Our current implementation position is:
-
-| Component | Implementation Status |
-|---|---|
-| Microsoft Entra ID P2 | Available and verified |
-| Initial password authentication | Implemented |
-| First-sign-in password change | Configured |
-| Microsoft Authenticator during Olivia's pilot | Observed |
-| Organisation-specific MFA policy | Not yet implemented |
-| Conditional Access enforcement | Pending |
-| Self-Service Password Reset | Deferred |
-| Privileged identity MFA requirements | Pending |
-
-This means we have already encountered MFA-related behaviour during the pilot, but our planned organisation-wide authentication model still requires implementation.
-
-We should not assume that one successful Authenticator interaction proves every employee is protected by the same requirements.
-
-## Preparing for Controlled MFA Deployment
-
-Before introducing our own enforcement policies, we need to review the authentication environment.
-
-This includes:
-
-1. Identifying the tenant's current Security Defaults configuration.
-2. Reviewing available and enabled authentication methods.
-3. Checking authentication-method registration for our pilot identities.
-4. Reviewing existing Conditional Access policies, if any.
-5. Preparing privileged and emergency-access arrangements.
-6. Defining the intended MFA requirements for standard and privileged identities.
-
-We already have a useful pilot population:
-
-`SG-PILOT-IDENTITY`
-
-This group gives us a controlled set of employees for evaluating authentication changes.
-
-However, the final targeting, exclusions, and authentication requirements must be established before enforcement.
-
-## Our Planned MFA Rollout
-
-We intend to introduce MFA through a controlled implementation process.
+Our intended sign-in model is:
 
 ```text
-Review Existing Authentication
-          ↓
-Define Approved Methods
-          ↓
-Prepare Pilot Identities
-          ↓
-Configure Authentication Policies
-          ↓
-Evaluate Conditional Access
-          ↓
-Review Report-Only Results
-          ↓
-Enable Controlled Enforcement
-          ↓
-Validate Actual Sign-Ins
-          ↓
-Expand Approved Coverage
+Employee signs in with work credentials
+                 ↓
+Microsoft Entra evaluates the sign-in
+                 ↓
+MFA is requested when policy requires it
+                 ↓
+Verification succeeds or fails
+                 ↓
+Access decision
 ```
 
-Report-only evaluation will help us understand how policies would affect users before enforcement.
+For Wire Finance, the longer-term goal is to require strong verification for sensitive access, especially privileged administration, and to roll out workforce MFA through controlled testing rather than switching on broad policies without knowing their impact.
 
-However, report-only results cannot prove that MFA was actually enforced.
+### 2. What we've actually configured so far
 
-That requires controlled authentication testing after the approved policy is enabled.
+| Area | Status at this chapter |
+|---|---|
+| Microsoft 365 E5 / Microsoft Entra ID P2 | **Available** in our tenant |
+| `SG-PILOT-IDENTITY` | **Created** for our selected pilot employees |
+| Eight standard users and their licences | **Implemented** |
+| Olivia's temporary password | **Reset successfully**, with change required at first sign-in |
+| Olivia's Microsoft Authenticator setup | **Not yet reached** in the website journey |
+| Wire Finance authentication-method policy | **Not yet configured and verified as a pilot control** |
+| Wire Finance Conditional Access MFA enforcement | **Not implemented or validated** |
+| Self-service password reset (SSPR) | **Deferred** |
 
-When we reach this stage, we'll document the actual configuration, including the selected methods, policy conditions, grant controls, targeting groups, exclusions, and observed results.
+An existing tenant setting may influence authentication prompts, even when we haven't created our own Conditional Access policy. We haven't recorded the exact state of every tenant-wide protection here, so we won't claim those settings are enabled or disabled without checking.
 
-## What Will Count as Successful MFA Implementation?
+### 3. Three things we must not confuse
 
-For Wire Finance, simply enabling a feature in Microsoft Entra will not be enough.
+It's tempting to call MFA *done* as soon as a user opens Microsoft Authenticator. But there are three separate milestones:
 
-We need to confirm that:
+| Milestone | What it proves |
+|---|---|
+| **Method allowed** | The user is permitted to use an authentication method under the applicable tenant settings |
+| **Method registered** | The user has linked that method to their work identity |
+| **MFA required and satisfied** | An actual sign-in was subject to an MFA requirement, and its authentication details show how the requirement was met |
 
-- The intended employees are correctly targeted.
-- The approved authentication methods are available and registered.
-- MFA is required in the expected scenarios.
-- Legitimate employees can complete authentication successfully.
-- Unintended authentication behaviour is investigated.
-- Administrative recovery arrangements remain functional.
-- Sign-in records support the results we observe.
+**Registration alone does not establish enforcement.** And a prompt during sign-in doesn't, by itself, prove which policy caused it.
 
-Relevant screenshots and validation evidence will accompany those configurations when they are implemented.
+Microsoft separates [authentication-method management](https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-methods-manage) from [Conditional Access](https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview), which determines when additional verification or other access requirements apply.
 
-This will allow readers to reproduce the configuration and understand how we determined whether it worked.
+### 4. Why we're not enforcing MFA across the tenant yet
 
-## From Identity Authentication to Device Onboarding
+Our next objective is to prove the first employee-device onboarding path. We also still need dedicated `adm-*` accounts and a tested emergency-access approach before confidently expanding privileged-access controls.
 
-We have now established the identity foundation for Wire Finance.
+So our **planned** security rollout is:
 
-Our initial employees exist in Microsoft Entra ID.
+1. Inspect the existing authentication methods and tenant protection settings rather than assume their state.
+2. Complete Olivia's first Windows onboarding and observe any authentication-method registration at its natural point in the sign-in.
+3. Verify which methods were registered and examine the actual sign-in logs.
+4. Prepare separate privileged and emergency-access controls.
+5. Test a carefully scoped Conditional Access MFA policy in **Report-only**, review its impact, then make a deliberate enforcement decision.
 
-Their organisational attributes and group memberships are configured.
+Report-only is for evaluation: it does **not** enforce the MFA grant requirement. That lets us analyse potential effects before turning a policy on. Microsoft explains this in [Analyse Conditional Access policy impact](https://learn.microsoft.com/en-us/entra/identity/conditional-access/concept-conditional-access-report-only).
 
-We have implemented the initial password-provisioning process and encountered Microsoft Authenticator during our first pilot onboarding experience.
+These steps are a **future implementation plan**, not a description of changes already saved in the tenant.
 
-But identities are only one part of the environment we designed.
+### 5. Where we'll collect evidence later
 
-Earlier, we established that Wire Finance would use corporate-owned Windows endpoints, Microsoft Entra Join, Microsoft Intune, and Windows Autopilot.
+When we reach MFA implementation and validation, we'll use the Microsoft Entra admin center to check:
 
-Now we need to bring that design into the real environment.
+| Question | Where to check |
+|---|---|
+| Which methods are allowed? | **Entra ID → Authentication methods → Policies** |
+| What has Olivia registered? | **Entra ID → Users → All users → Olivia Carter → Authentication methods** |
+| Which Conditional Access requirements apply? | **Entra ID → Conditional Access** |
+| Did a real sign-in satisfy MFA, and how? | **Entra ID → Monitoring & health → Sign-in logs** |
 
-Rather than simply giving Olivia Carter a username and password, we want to provide a workstation that can recognise the organisation, establish its device identity, enrol into management, and receive the required configurations.
+These are **future verification locations**. We'll record the precise settings and screenshots when we actually work through them.
 
-And because this is a learning journey, we'll document the entire process.
+### 6. Microsoft Authenticator belongs with Olivia's first sign-in
 
-From building the Windows 11 virtual machine to resolving the challenges encountered during Autopilot registration and completing the employee onboarding experience.
+We haven't yet built the planned `WF-LT-001` Windows 11 VM in the website walkthrough. That also means we haven't reached Olivia's organizational sign-in on that device.
 
-**Next: Endpoint and Device Management Implementation — building our first Windows 11 corporate workstation and preparing it for Microsoft Autopilot.**
+**We'll document her Microsoft Authenticator registration when it happens during that first sign-in**, alongside the real Windows screens, instructions she follows and any challenges we encounter. We deliberately didn't sign her into a separate browser beforehand just to complete authentication setup early.
+
+There is no Authenticator screenshot on this page because doing so would put the evidence ahead of the actual event in our learning journey.
+
+### Our checkpoint
+
+Our identity and licensing foundation is ready, and Olivia's temporary password has been prepared. **Microsoft Authenticator registration, MFA sign-in verification and Conditional Access enforcement are not completed at this point in the documented sequence.** SSPR remains deferred.
+
+Next, we'll look at **Logging and Monitoring**. The hands-on Authenticator experience will come later, in our first Windows Autopilot deployment walkthrough.
