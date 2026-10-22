@@ -4,6 +4,7 @@ title: "Endpoint and Device Management Implementation"
 chapter: 8
 series: wire-finance
 author: Cybernetswork
+image: assets/images/active-directory/endpoint_management_in_action.png
 show_on_master: true
 nav_id: endpoint-device-management-implementation
 children_heading: "Explore the Endpoint Implementation"
@@ -24,7 +25,7 @@ Now it is time to put those decisions to work.
 
 **We're going to build our first corporate Windows endpoint.**
 
-## From Device Design to Deployment
+### From Device Design to Deployment
 
 Our original device model established three important platform responsibilities.
 
@@ -64,7 +65,7 @@ Instead, we want a repeatable process that allows an approved corporate endpoint
 
 And we need to test whether that process actually works.
 
-## Building Our First Pilot Endpoint
+### Building Our First Pilot Endpoint
 
 For the initial implementation, we selected Olivia Carter, our Finance Analyst.
 
@@ -86,7 +87,7 @@ This is the intended asset identifier from our device naming convention.
 
 The actual Windows computer name will be verified during deployment rather than assumed to match the asset identifier.
 
-## What We'll Implement
+### What We'll Implement
 
 This chapter will follow the technical journey from an empty virtual machine to a managed corporate endpoint.
 
@@ -108,7 +109,7 @@ Once those components are ready, we'll follow Olivia through the Windows onboard
 
 And importantly, we won't skip the parts that didn't work on the first attempt.
 
-## Troubleshooting Is Part of the Implementation
+### Troubleshooting Is Part of the Implementation
 
 A working endpoint is the result we want.
 
@@ -124,7 +125,7 @@ Where something failed, we'll examine what happened, how we investigated it, and
 
 **The goal is not to produce a collection of perfect screenshots. It is to document a deployment that someone else can understand and reproduce.**
 
-## Beyond the First Workstation
+### Beyond the First Workstation
 
 Completing Windows onboarding is an important milestone.
 
@@ -138,7 +139,7 @@ Once those controls are properly configured and tested, we can expand the pilot 
 
 That will allow us to test whether the provisioning model works beyond a single workstation.
 
-## The First Step
+### The First Step
 
 Before we register anything with Windows Autopilot, we need a Windows device to register.
 

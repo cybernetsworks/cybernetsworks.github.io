@@ -4,255 +4,145 @@ title: "Authentication Methods"
 series: wire-finance
 parent: entra-id-implementation
 order: 6
-description: "Implementing the initial Wire Finance authentication process, including temporary passwords, first-sign-in requirements, and preparation for Windows Autopilot."
+description: "Prepare Wire Finance's first employee sign-in using an administrator-generated temporary password, confirm the reset, and distinguish completed onboarding steps from deferred SSPR and MFA controls."
 ---
 
-We have created our first eight employees, established their group memberships, and started implementing administrative access.
+We now had eight standard employees, their security-group memberships, and Microsoft 365 E5 licences. We had also separated our intended privileged administrators from everyday accounts.
 
-But there is another important question.
+But Olivia Carter's first laptop deployment raised a practical question: **how should her first sign-in work?**
 
-**How do these employees actually sign in?**
+I initially considered signing in to a browser as Olivia before starting Windows Autopilot, just to clear any password-change prompts. We decided **not** to do that. The whole point of our first pilot was to observe a genuine first-time employee onboarding experience, not one we had quietly completed on another machine.
 
-Creating an identity in Microsoft Entra ID gives an employee an organisational account.
+So I prepared Olivia's account for its first interactive sign-in and left the actual sign-in for Windows OOBE.
 
-Group membership determines the access that account may receive.
+### 1. The authentication approach for our pilot
 
-But before an employee can use the account, we need to establish an authentication process.
+We used the temporary-password model for our initial cloud-only workforce accounts.
 
-For Wire Finance, we begin with temporary passwords and a controlled first-sign-in experience.
-
-### Establishing the Initial Authentication Process
-
-During user creation, the eight standard workforce identities were provisioned with temporary passwords.
-
-Each employee was required to change their password at their first interactive sign-in.
-
-Our initial authentication process follows this model:
-
-```text
-Employee Account Created
-          ↓
-Temporary Password Assigned
-          ↓
-Employee Receives Credentials
-          ↓
-First Organisational Sign-In
-          ↓
-Password Change Required
-          ↓
-Employee Establishes New Password
-```
-
-The purpose is to give employees a starting credential without expecting them to continue using the password originally assigned during provisioning.
-
-However, this is only the initial authentication process.
-
-**A password change is not the same as multi-factor authentication.**
-
-Our stronger authentication controls will be introduced and validated separately.
-
-### Preparing Olivia Carter for Her First Sign-In
-
-Our first practical authentication test involved Olivia Carter, the Finance Analyst.
-
-Olivia was selected as the first employee to complete the Windows Autopilot deployment journey.
-
-Her organisational account had already been created and configured with the expected attributes, group memberships, and Microsoft 365 E5 licensing.
-
-Before beginning the deployment, we needed to make sure her account was ready for its first organisational sign-in.
-
-One option would have been to sign Olivia into an existing Windows computer to complete the initial password change.
-
-But that would mean her first organisational sign-in happened outside the endpoint onboarding process we wanted to test.
-
-Instead, I chose to preserve that first-sign-in experience for Windows Autopilot.
-
-This meant preparing a fresh temporary password immediately before the device handover.
-
-### Resetting Olivia's Temporary Password
-
-I used the **Microsoft 365 admin center** to reset Olivia's password.
-
-The navigation used was:
-
-```text
-Microsoft 365 Admin Center
-          ↓
-Users
-          ↓
-Active users
-          ↓
-Select Olivia Carter
-          ↓
-Reset password
-```
-
-### Step 1 — Configure the Password Reset
-
-After selecting Olivia's account, I opened the password-reset panel.
-
-The following settings were selected:
-
-| Setting | Configured Value |
+| Decision | Wire Finance pilot approach |
 |---|---|
-| User account | Olivia Carter |
-| Account type | Standard workforce identity |
-| Automatically create a password | Yes |
-| Require password change at first sign-in | Yes |
-| Intended first sign-in | Windows Autopilot |
+| Identity | An enabled Microsoft Entra **Member** account |
+| Sign-in name | The existing tenant-domain UPN, e.g. `olivia.carter@<tenant>.onmicrosoft.com` |
+| Initial credential | Administrator-generated temporary password |
+| Password change | **Required when the user first signs in** |
+| First intended interactive sign-in | Windows Autopilot out-of-box experience (OOBE) |
+| Passwordless / Temporary Access Pass | Not implemented as part of this pilot |
+| Self-service password reset (SSPR) | Discussed, then **deferred** |
+| Pilot-wide MFA / Conditional Access enforcement | Not yet implemented or validated in this phase |
 
-![Olivia Carter password reset settings]({{ '/assets/images/active-directory/user-password-change-required.png' | relative_url }})
+The eight accounts were originally created in **Microsoft Entra admin center → Identity → Users → All users → New user → Create new user**. At creation, we used generated passwords and the employee identity settings described in **User Creation**.
 
-*Figure 1: Microsoft 365 admin center showing automatic password generation and the required first-sign-in password change.*
+But Olivia's account had been created before the Autopilot build was ready. Rather than rely on an old onboarding credential, I generated a **fresh temporary password immediately before deployment**.
 
-These two settings were important.
+### 2. Reset Olivia's password in the actual portal
 
-Automatically generating a password provided a fresh temporary credential.
+This step was completed in the [Microsoft 365 admin center](https://admin.microsoft.com/), not in the Intune portal.
 
-Requiring a password change ensured Olivia would not continue using that temporary credential as her permanent password.
+The navigation I used was:
 
-### Step 2 — Complete the Password Reset
+**Microsoft 365 admin center → Users → Active users → Olivia Carter → Reset password**
 
-With both options selected, I clicked **Reset password**.
+In the **Reset password** panel, I selected both options:
 
-Microsoft 365 confirmed that the operation completed successfully.
-
-![Password reset confirmation]({{ '/assets/images/active-directory/password-reset-confirm.png' | relative_url }})
-
-*Figure 2: Confirmation that Olivia Carter's password was successfully reset. The generated password is masked.*
-
-This confirmed that the temporary credential had been reset and was ready for the upcoming onboarding test.
-
-The actual password is deliberately excluded from this documentation.
-
-This temporary password will be sent to Olivia for her first login.
-
-In a real organisation, temporary credentials should be delivered to employees through an approved secure channel rather than exposed in screenshots, tickets, or public documentation.
-
-### Why Generate a Fresh Password?
-
-Olivia's identity already existed.
-
-We were not creating another account.
-
-We were preparing her existing account for a specific onboarding event.
-
-```text
-Olivia Carter
-Existing Entra Identity
-          ↓
-Fresh Temporary Password
-          ↓
-Password Change Required
-          ↓
-First Autopilot Sign-In
-```
-
-This gave us a useful distinction between **account creation** and **account handover**.
-
-Creating the identity is an administrative task.
-
-The employee's first authentication is a separate event that needs to be validated.
-
-### Authentication During Windows Autopilot
-
-With Olivia's credentials prepared, we continued to our first Windows Autopilot deployment.
-
-The device used the user-driven deployment profile:
-
-`WF_AP_CORPORATE_USER_DRIVEN`
-
-The onboarding journey involved:
-
-```text
-Windows Autopilot OOBE
-          ↓
-Organisational Sign-In
-          ↓
-Microsoft Entra Authentication
-          ↓
-First-Sign-In Requirements
-          ↓
-Microsoft Entra Join
-          ↓
-Automatic Intune Enrollment
-          ↓
-Endpoint Provisioning
-```
-
-Olivia subsequently completed the core user-driven Autopilot deployment successfully.
-
-The device joined Microsoft Entra ID, enrolled into Microsoft Intune, and progressed through the required provisioning stages.
-
-This confirmed that her organisational identity could participate in the endpoint onboarding process.
-
-The detailed Autopilot configuration, Enrollment Status Page, application deployment, and endpoint validation will be covered in the endpoint implementation chapter.
-
-For this page, the important result is that **Olivia's prepared identity was successfully used during the first organisational device onboarding test**.
-
-### What About Self-Service Password Reset?
-
-During this phase, I also considered **Self-Service Password Reset (SSPR)**.
-
-SSPR allows users to reset their own passwords using supported verification methods without depending entirely on an administrator.
-
-This can reduce support requests and improve account recovery.
-
-Interestingly, after completing Olivia's password reset, Microsoft 365 also displayed a recommendation to enable self-service password reset.
-
-However, I deliberately deferred SSPR during the initial pilot.
-
-Our immediate priorities were:
-
-- Establishing the workforce identities
-- Validating initial authentication
-- Confirming group membership and licensing
-- Testing the Windows Autopilot onboarding process
-- Completing the initial Intune enrollment
-
-Introducing a separate password recovery workflow would have expanded the scope of the pilot.
-
-SSPR remains a future authentication-hardening activity requiring its own configuration and validation.
-
-**It has been considered, but it has not yet been implemented for the Wire Finance pilot.**
-
-### Authentication Implementation Status
-
-At this checkpoint, we can distinguish what has been configured from what remains to be implemented.
-
-| Authentication Area | Current Status |
+| Option | Saved selection |
 |---|---|
-| Eight standard user accounts | Created |
-| Initial temporary passwords | Implemented |
-| First-sign-in password change requirement | Configured |
-| Olivia's fresh temporary password reset | Completed |
-| Olivia's Autopilot organisational sign-in | Core onboarding successful |
-| Self-Service Password Reset | Deferred |
-| Organisation-specific MFA rollout | Pending |
-| Conditional Access enforcement | Pending |
+| **Automatically create a password** | **Checked** |
+| **Require this user to change their password when they first sign in** | **Checked** |
 
-This matters because authentication is not a single configuration.
+![Olivia password reset options]({{ '/assets/images/entra-id-implementation/user-password-change-required.png' | relative_url }})
 
-A user having a password does not mean the account is fully protected.
+I then selected **Reset password**. This is an administrative reset of one user's existing credential; it doesn't configure a new authentication policy for the whole tenant.
 
-Likewise, having Microsoft Entra ID P2 capabilities available does not mean all our authentication security controls are already operational.
+The page returned a successful confirmation:
 
-We have implemented the initial credential process.
+![Olivia password reset success]({{ '/assets/images/entra-id-implementation/password-reset-confirm.png' | relative_url }})
 
-The stronger protection model still needs to be established and tested.
+The confirmation matters. Checking the two boxes isn't proof that the operation was submitted. Here we have evidence of both the intended settings **and** the successful reset.
 
-### From Passwords to Stronger Authentication
+Microsoft documents this administrative workflow in [Reset passwords in the Microsoft 365 admin center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/resend-user-password).
 
-Our initial authentication process is now demonstrated.
+#### Handle the temporary credential carefully
 
-We have created employee identities, established temporary credentials, configured first-sign-in password changes, and successfully used Olivia's account during the first Windows Autopilot pilot.
+The reset page can display the generated password. I did **not** record it in our project documentation or publish it in a screenshot.
 
-But passwords alone are not enough for the security model we intend to operate.
+In a real employee handover, IT should share this one-time credential through an approved, secure delivery method after confirming the user's identity. Don't put it into a public tutorial, an ordinary support ticket, a Git repository or an unprotected email.
 
-A compromised password could still allow someone to attempt to authenticate as a legitimate employee.
+The secure-delivery procedure is **guidance for production**, not an additional Wire Finance integration we claim to have built.
 
-That is why our IAM design includes stronger authentication methods, multi-factor authentication, and risk-aware access controls.
+### 3. How we'll handle the first organisational sign-in
 
-These controls will need to be introduced deliberately, with appropriate testing before wider enforcement.
+After resetting Olivia's password, I deliberately did not sign in as her in a browser just to complete the password-change prompts ahead of time. I want her first interactive sign-in to happen during our eventual Windows Autopilot deployment.
 
-**Next: Multi-Factor Authentication — moving beyond passwords to stronger verification of Wire Finance identities.**
+We have not reached device creation in this learning journey yet. In the upcoming endpoint implementation lessons, we'll:
+
+1. Build a local VirtualBox VM running Windows 11 Pro to represent our planned corporate test asset, WF-LT-001.
+2. Register that VM with Windows Autopilot using the Group Tag CORPORATE.
+3. Configure and assign our user-driven Microsoft Entra Join deployment profile, automatic Intune enrollment, Enrollment Status Page and required applications.
+4. Start the Windows out-of-box experience (OOBE), where Olivia will use her work account for the first time.
+
+Once we reach that stage, this is the expected sign-in and provisioning journey—not a sequence we are claiming to have already completed on this page:
+
+
+```text
+Windows 11 OOBE on WF-LT-001
+           ↓
+Wire Finance organizational sign-in
+           ↓
+Olivia enters her work UPN
+           ↓
+Olivia enters the fresh temporary password
+           ↓
+First-sign-in password change / other prompts as required
+           ↓
+Microsoft Entra join and automatic Intune enrollment
+           ↓
+Enrollment Status Page and required applications
+           ↓
+Windows desktop
+```
+
+The actual screens, any errors, the VM restart steps and the resulting device state will be recorded when we reach the deployment walkthrough. We won't treat this expected flow as validation evidence before testing it.
+
+Microsoft's [Windows Autopilot user-driven process](https://learn.microsoft.com/en-us/autopilot/user-driven) explains how organizational sign-in leads into device join, management enrollment and subsequent provisioning.
+
+The actual VM screens and application results belong in our **first Autopilot deployment** lesson, where we'll document them with their own screenshots.
+
+### 4. Why the SSPR suggestion wasn't a completed step
+
+After resetting Olivia's password, Microsoft 365 displayed a recommendation to **allow users to reset their own passwords**.
+
+That was a suggestion, **not** a successful SSPR configuration. We discussed enabling self-service password reset for SG-PILOT-IDENTITY and requiring suitable authentication methods, but explicitly decided to defer implementation so we could focus first on core endpoint onboarding.
+
+The two operations are different:
+
+| Administrator reset — completed | Self-service password reset — deferred |
+|---|---|
+| An authorized administrator resets a user's password | A user proves their identity through permitted recovery methods |
+| We generated Olivia's temporary password | We did **not** configure the pilot's SSPR recovery-method requirements |
+| The portal confirmed the reset | No pilot SSPR registration or reset test was performed |
+
+When we return to SSPR, we will need to scope the correct users, configure recovery requirements, register test methods and perform a real reset test before claiming that it works.
+
+Microsoft's [SSPR tutorial](https://learn.microsoft.com/en-us/entra/identity/authentication/tutorial-enable-sspr) covers that separate implementation.
+
+### 5. What this does *not* prove about MFA
+
+A password reset and an enforced password change are **not the same thing as multifactor authentication**.
+
+The tenant had Microsoft Entra ID P2 licensing, but during this phase we did not finish a Wire Finance authentication-method policy, deploy a Conditional Access MFA requirement to the pilot, or verify an MFA challenge against an enforced policy.
+
+Microsoft sign-in experiences may display additional registration or security prompts depending on tenant configuration. We must not infer that our own MFA design was active simply because a prompt might appear.
+
+MFA, authentication-method registration, Conditional Access and stronger authentication requirements will be handled as separate controls in the next lesson and later security implementation, with their own assignments and evidence.
+
+### What we actually proved
+
+At this checkpoint, **Olivia had an enabled, licensed pilot identity and a newly generated temporary password with the first-sign-in change requirement selected**. The Microsoft 365 admin center confirmed the password reset succeeded.
+
+We have deliberately **left her first interactive organizational sign-in for a future Windows Autopilot lesson.** We have not yet built or registered the VM in this website sequence, and this page makes no claim about device enrollment, application installation or successful OOBE.
+
+We preserved the first real organizational login for the Windows Autopilot pilot, which subsequently reached a usable desktop with corporate applications appearing.
+
+**Still outstanding:** building and registering the VM, performing Olivia's first device sign-in, validating the enrollment result, SSPR enablement and testing, pilot-wide MFA enforcement, and privileged-account authentication controls.
+
+That gives us a truthful handoff to the next page: **MFA**—where we distinguish the protection we intend to enforce from the configuration we have actually deployed.

@@ -3,224 +3,245 @@ layout: lesson
 title: "User Creation"
 series: wire-finance
 parent: entra-id-implementation
-order: 3
-description: "Bringing the first eight Wire Finance employees into Microsoft Entra ID and establishing the identity attributes that will drive access."
+order: 4
+description: "Create and validate Wire Finance's first eight Microsoft Entra workforce identities, including employee IDs, authoritative attributes, pilot group assignments and group-based Microsoft 365 E5 licensing."
 ---
 
-We have established our Microsoft environment.
+Having a well-designed identity and group model is one thing. Giving real employees identities that follow it is another.
 
-We have reviewed the tenant and confirmed that the capabilities we need are available.
+We had already defined our workforce attributes and group rules, but when we reached the first employee-device onboarding checkpoint, we found a missing prerequisite: **our pilot users had not yet been created**.
 
-Now it is time to introduce the people who will use it.
+Rather than create only Olivia Carter, our first intended endpoint user, I decided to build **all eight standard pilot accounts**. That would let us test the same identity standard across IT, HR, Finance, Operations and Sales before proceeding.
 
-Earlier in our IAM design, we defined a 25-person workforce, established naming conventions, and decided how identities should be organised.
+This page records what I actually configured, including the small details I nearly missed.
 
-But those employees still exist only in our design.
+### 1. Find the right place to create a user
 
-**Now we need to turn them into real Microsoft Entra identities.**
+I opened the [Microsoft Entra admin center](https://entra.microsoft.com/) and followed:
 
-And this involves more than creating usernames and passwords.
+**Identity → Users → All users → New user → Create new user**
 
-The information we assign to each employee will eventually help determine which groups they belong to, what resources they can access, and how their identity is managed.
+The wizard had four stages:
 
-### Starting with Eight Employees
+`Basics → Properties → Assignments → Review + create`
 
-Rather than creating all 25 employees immediately, I selected eight users for the initial implementation.
+Under **Basics**, I supplied the user's sign-in name, display name and initial password settings.
 
-These represent different departments and responsibilities across Wire Finance.
-
-| Employee ID | Employee | Department | Job Title |
-|---|---|---|---|
-| WF-EMP-001 | Jordan Lee | IT | Head of Security Operations |
-| WF-EMP-002 | Alex Morgan | IT | IT Administrator |
-| WF-EMP-003 | Taylor Reed | IT | SOC Analyst |
-| WF-EMP-004 | Casey Ng | IT | Deployment/Support Engineer |
-| WF-EMP-005 | Maya Patel | HR | HR Manager |
-| WF-EMP-006 | Olivia Carter | Finance | Finance Analyst |
-| WF-EMP-007 | Ethan Brooks | Operations | Operations Specialist |
-| WF-EMP-008 | Noah Williams | Sales | Sales Representative |
-
-This gives us a useful starting population.
-
-For example, Olivia will help us validate Finance department and role membership.
-
-Taylor represents our security operations function.
-
-And Casey represents the IT responsibilities associated with endpoint deployment.
-
-By starting with known employees and responsibilities, we can test whether our implementation behaves as the design intended.
-
-### Creating Users in Microsoft Entra ID
-
-I created the eight standard user accounts through the Microsoft Entra admin center.
-
-The navigation used was:
-
-```text
-Microsoft Entra Admin Center
-       ↓
-Identity
-       ↓
-Users
-       ↓
-All users
-       ↓
-New user
-       ↓
-Create new user
-```
-
-For each employee, I established their account identity and organisational information.
-
-Our IAM naming convention uses:
-
-```text
-firstname.lastname@wirefinance.com
-```
-
-However, the current lab still uses the Microsoft-provided `onmicrosoft.com` tenant domain.
-
-For example, Olivia's identity follows the same naming structure:
-
-```text
-olivia.carter@<tenant>.onmicrosoft.com
-```
-
-Here, `<tenant>` represents the actual Microsoft tenant prefix.
-
-The custom `wirefinance.com` domain remains part of our target design, not the current lab configuration.
-
-The important point is that our identity naming remains consistent even though the domain suffix differs.
-
-Each employee was created as a **standard workforce identity**, not an administrative account.
-
-### Establishing the Right Identity Attributes
-
-Creating the account is only the first part.
-
-Next, we need to make sure Microsoft Entra understands who the employee is within Wire Finance.
-
-For the initial eight users, I configured the following identity attributes:
-
-| Attribute | Configured Value |
+| Field | Wire Finance setting |
 |---|---|
+| User principal name | `firstname.lastname@<your-tenant-domain>` |
+| Display name | The employee's full name, e.g. `Jordan Lee` |
+| Mail nickname | Derived from the sign-in name |
+| Password | **Auto-generate password** selected |
+| Account enabled | **Yes** — checked |
+
+We used the tenant's existing `onmicrosoft.com` domain for the lab. The custom company domain is a **future target**, not something we had already configured.
+
+![Initial Microsoft Entra user creation screen]({{ '/assets/images/entra-id-implementation/user-creation-basics-initial.png' | relative_url }})
+
+*Figure: The initial Basics screen. This is an in-progress screenshot, not the completed account: I had entered `jordan.lee`, but the display name still needed to be corrected from `Jordan` to `Jordan Lee`.*
+
+That was our first practical reminder to check **both** the login name and the display name before saving.
+
+I also confirmed that **Account enabled** needed to remain checked for active employees. We would use disabled accounts only for a deliberate pre-staging, leaver or security scenario.
+
+### 2. Populate the attributes our groups depend on
+
+On the **Properties** tab, I entered the standard identity data.
+
+These values weren't decorative: the dynamic group model depends on them being consistent.
+
+For Olivia, the example was:
+
+| Property | Value |
+|---|---|
+| First name / Last name | `Olivia` / `Carter` |
+| Display name | `Olivia Carter` |
+| Department | `Finance` |
+| Job title | `Finance Analyst` |
 | Company name | `Wire Finance` |
-| Employee ID | `WF-EMP-###` |
+| Employee ID | `WF-EMP-006` |
 | Employee type | `Employee` |
-| Department | Employee's assigned department |
-| Job title | Employee's assigned role title |
 | User type | `Member` |
 | Account enabled | `Yes` |
-| Usage location | United Kingdom |
-| Country/region | United Kingdom |
-| Administrative role | None assigned to standard identity |
 
-The employee IDs were assigned using our permanent numbering standard, from `WF-EMP-001` through `WF-EMP-008`.
+**Exact wording matters.**
 
-These identifiers remain unique to each employee and are not intended to change when someone moves departments or changes responsibilities.
+`Finance Analyst` and `Financial Analyst` may sound interchangeable, but an exact-match dynamic membership rule does not treat them as the same value.
 
-Some fields, including hire date, office location, and manager, were intentionally left blank where authoritative employee information had not yet been established.
+The same applies to `Wire Finance` versus `Wire Financials`.
 
-We should not invent HR information simply to populate every available field.
+#### The employee ID we added during implementation
 
-### Why These Attributes Matter
+I noticed the **Employee ID** field while filling in the employee properties.
 
-Consider Olivia Carter.
+We had a user naming standard, but not yet a permanent workforce identifier, so we adopted:
 
-Her account includes:
+`WF-EMP-###`
 
-```text
-Employee:     Olivia Carter
-Employee ID:  WF-EMP-006
-Company:      Wire Finance
-Department:   Finance
-Job Title:    Finance Analyst
-User Type:    Member
-```
+This is a unique, permanent identifier. It must not be reused after an employee leaves, and it must not change when their name, department or job title changes.
 
-To a casual observer, these may look like ordinary employee details.
+| Employee ID | Employee | Department | Exact job title |
+|---|---|---|---|
+| `WF-EMP-001` | Jordan Lee | IT | Head of Security Operations |
+| `WF-EMP-002` | Alex Morgan | IT | IT Administrator |
+| `WF-EMP-003` | Taylor Reed | IT | SOC Analyst |
+| `WF-EMP-004` | Casey Ng | IT | Deployment/Support Engineer |
+| `WF-EMP-005` | Maya Patel | HR | HR Manager |
+| `WF-EMP-006` | Olivia Carter | Finance | Finance Analyst |
+| `WF-EMP-007` | Ethan Brooks | Operations | Operations Specialist |
+| `WF-EMP-008` | Noah Williams | Sales | Sales Representative |
 
-But in our access model, several of these values are security-sensitive.
+![Microsoft Entra employment identity fields]({{ '/assets/images/entra-id-implementation/user-creation-employment-fields.png' | relative_url }})
 
-For example, we designed dynamic groups that evaluate employee attributes.
+*Figure: The Properties area where Employee ID, Employee type, hire date, office location and manager are entered. The screenshot shows the fields before their values were populated.*
 
-That means Olivia's department and job title can influence her group membership automatically.
+I set **Employee type = Employee** for all eight.
 
-```text
-Olivia Carter
-      ↓
-Company: Wire Finance
-      ↓
-Department: Finance
-      ↓
-Job Title: Finance Analyst
-      ↓
-Dynamic Group Evaluation
-      ↓
-Company + Department + Role Membership
-```
+I deliberately left **hire date and manager** blank rather than fabricate HR records or reporting lines we hadn't approved.
 
-This is why consistency matters.
+The employee ID and type were added alongside the core company, department and role attributes.
 
-If an employee's department or job title is entered incorrectly, the account may not receive the expected group membership.
+### 3. Assign the pilot group, not administrative permissions
 
-And if those attributes change without proper authorisation, access could change as a result.
+On **Assignments**, we used:
 
-**Identity attributes are not always just descriptive information. Some of them become inputs into access decisions.**
-
-We'll see this in action when we examine our group implementation.
-
-### Pilot Membership and Licensing
-
-The initial workforce was also placed into our controlled pilot population.
-
-Each of the eight employees was explicitly assigned to:
-
-`SG-PILOT-IDENTITY`
-
-This group identifies the employees participating in the initial implementation and testing activities.
-
-Unlike our department and role groups, pilot membership is deliberately assigned.
-
-Being a Finance Analyst does not automatically make Olivia a pilot participant.
-
-That requires a separate decision.
-
-Microsoft 365 E5 licensing was also implemented through a dedicated assigned security group:
-
-`SG-LICENCE-M365-E5`
-
-All eight pilot employees were added to this licensing group, and group-based licence assignment was validated.
-
-These two groups serve different purposes:
-
-| Group | Purpose |
+| Assignment field | Selection |
 |---|---|
-| `SG-PILOT-IDENTITY` | Controls participation in the pilot |
-| `SG-LICENCE-M365-E5` | Controls assignment of Microsoft 365 E5 licences |
+| Groups | `SG-PILOT-IDENTITY` |
+| Microsoft Entra roles | **None** |
+| Administrative unit | **None** |
 
-Keeping these decisions separate prevents pilot participation from becoming the permanent basis for workforce licensing.
+`SG-PILOT-IDENTITY` is an **Assigned** security group.
 
-The pilot licensing model is deliberately controlled while we validate the environment.
+It would not gain members automatically, so I selected it during the user-creation process for each of the eight employees.
 
-### Authentication at Account Creation
+I did **not** manually add users to `SG-BASE-ALL-STAFF`, `SG-DEPT-*` or `SG-ROLE-*`.
 
-The new users were provisioned using temporary passwords, with password changes required at their first interactive sign-in.
+Those groups were designed to evaluate the user's trusted attributes dynamically. Manually trying to reproduce dynamic memberships would hide mistakes in our rules or attributes.
 
-The temporary passwords themselves are not recorded in this documentation.
+Also, **Jordan, Alex, Taylor and Casey received no Entra administrative role through their everyday employee accounts**.
 
-This gives each employee an initial authentication path without treating the provisioning password as a permanent credential.
+Our separate `adm-*` privileged identities and PIM controls are later implementation work, not something to simulate by giving standard accounts elevated access.
 
-For Olivia, the first organisational sign-in would later become part of our Windows Autopilot deployment test.
+After checking **Review + create**, I repeated the process until all eight accounts existed.
 
-Rather than signing her into another workstation beforehand, we preserved that first-sign-in experience for the endpoint provisioning journey.
+### 4. Fix a licensing prerequisite: Usage location
 
-We'll cover the authentication decisions and security controls in their dedicated implementation pages.
+The next important detail appeared **after** account creation.
 
-### Validating the First Eight Identities
+Before group-based licensing, we needed the employees' **Usage location**, not merely a postal country field.
 
-After creating the accounts, I reviewed their configuration and group membership.
+I updated all eight accounts to use the same location values.
 
-The implementation confirmed that:
+To reproduce this, go to **Microsoft Entra admin center → Identity → Users → All users** and edit the users' properties (in bulk where the portal offers **Edit properties**, or individually):
 
-- All eight standard workforce
+| Property | Selected value |
+|---|---|
+| Usage location | **United Kingdom** (`GB`) |
+| Country or region | **United Kingdom** |
+
+These are separate fields.
+
+Usage location affects service licensing eligibility. Country or region is useful profile information, but **it is not a substitute for Usage location**.
+
+We left unnecessary address fields blank.
+
+### 5. Assign E5 through a dedicated security group
+
+We could have assigned Microsoft 365 E5 individually eight times.
+
+Instead, we created a group so that **licensing is separate from pilot participation**.
+
+In **Entra admin center → Identity → Groups → All groups → New group**, I created:
+
+| Setting | Value |
+|---|---|
+| Group type | `Security` |
+| Group name | `SG-LICENCE-M365-E5` |
+| Membership type | **Assigned** |
+| Microsoft Entra roles can be assigned | **No** |
+| Description | Assigns Microsoft 365 E5 licensing to approved Wire Finance standard workforce identities |
+| Members | All eight standard pilot users |
+
+Why **Assigned**, not Dynamic User?
+
+We only had 25 E5 seats and wanted explicit control during the pilot.
+
+Converting licensing membership to a carefully validated dynamic rule is a **future production-maturity decision**, not something we had implemented yet.
+
+For the licensing assignment, the portal route we used was the [Microsoft 365 admin center](https://admin.microsoft.com/):
+
+**Billing → Licenses → Microsoft 365 E5 → Groups → Assign licenses**
+
+We assigned Microsoft 365 E5 to `SG-LICENCE-M365-E5`, leaving the E5 service plans enabled for this initial test.
+
+The group now controlled the pilot users' licensing entitlement, while `SG-PILOT-IDENTITY` continued to represent their pilot participation.
+
+For readers reproducing this step, Microsoft's [group-based licensing walkthrough](https://learn.microsoft.com/en-us/entra/identity/users/groups-dynamic-tutorial#assign-licenses) explains the product's **Groups** assignment tab.
+
+After saving, inspect the licensed users and the product's **Errors & issues** area rather than assuming that selecting **Assign** means every account received a licence successfully.
+
+### 6. Verify the result instead of trusting the creation wizard
+
+For each new identity, I returned to **Entra → Identity → Users → All users → [employee]** and reviewed **Group memberships**, **Assigned licenses** and **Assigned roles**.
+
+Olivia was our most useful test case.
+
+Her identity record displayed **one assigned licence**, and our review showed all five intended Wire Finance memberships:
+
+| Group | Membership method | Result |
+|---|---|---|
+| `SG-BASE-ALL-STAFF` | Dynamic | Present |
+| `SG-DEPT-FINANCE-USERS` | Dynamic | Present |
+| `SG-ROLE-FINANCE-ANALYST` | Dynamic | Present |
+| `SG-PILOT-IDENTITY` | Assigned | Present |
+| `SG-LICENCE-M365-E5` | Assigned | Present |
+
+![Olivia identity and licence count]({{ '/assets/images/entra-id-implementation/olivia-identity-licence-overview.png' | relative_url }})
+
+*Figure: Olivia's Entra account overview. It showed six group memberships and one assigned licence. The sixth membership deserved investigation rather than being ignored.*
+
+![Olivia's actual group memberships]({{ '/assets/images/entra-id-implementation/olivia-group-membership-review.png' | relative_url }})
+
+*Figure: Membership review showing the intended dynamic and assigned groups, alongside a separate Microsoft 365 collaboration group.*
+
+#### Why did Olivia have six groups instead of five?
+
+The extra membership was a **Microsoft 365 group named `Wire Finance`**, with its own group email address.
+
+It was not one of our `SG-*` security groups.
+
+During the wider review, **seven pilot employees had this extra group; Casey Ng had the five intended memberships only**.
+
+We could identify the group's type and cloud-managed source, but **not who originally created it or why**.
+
+A cloud source does not prove the group was created automatically with the tenant.
+
+We therefore did **not** delete it, add Casey simply to equalise counts, or treat it as part of the approved security-group taxonomy.
+
+Its ownership and associated collaboration resources remain an investigation item.
+
+This gave us a useful validation rule: **check for unexpected access as well as missing access**.
+
+If a dynamic membership is missing in your own lab, first verify the exact `companyName`, `department`, `jobTitle`, `userType` and `accountEnabled` values.
+
+Then inspect the group's **Dynamic membership rules → Validate rules** feature.
+
+Group evaluation can be asynchronous, so do not immediately overwrite working rules because the membership has not appeared yet.
+
+See [Microsoft's rule-validation instructions](https://learn.microsoft.com/en-us/entra/identity/users/groups-dynamic-rule-validation).
+
+### What we had achieved
+
+We now had **eight enabled standard employee identities**, consistent workforce IDs and attributes, the intentional pilot membership, and Microsoft 365 E5 licensing managed separately through `SG-LICENCE-M365-E5`.
+
+Olivia's automatic Finance memberships and the five intended security-group relationships were visible in our validation evidence.
+
+We had **not** created separate privileged `adm-*` identities or implemented PIM.
+
+We had also **not** enabled Self-Service Password Reset. Those remained separate tasks.
+
+Most importantly, we avoided signing Olivia into another computer just to prepare her account.
+
+We wanted the first employee sign-in and initial credential experience to be tested through the actual device onboarding journey, which we'll document in the endpoint implementation chapter.

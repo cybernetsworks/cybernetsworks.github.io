@@ -4,383 +4,131 @@ title: "Administrative Roles"
 series: wire-finance
 parent: entra-id-implementation
 order: 5
-description: "Implementing least-privilege administrative access for Wire Finance, starting with Microsoft Intune RBAC and separating permissions across Entra, Intune, and Defender."
+description: "Separate Microsoft Entra directory roles from Intune and Defender permissions, and verify which Wire Finance privileged-access assignments were actually implemented."
 ---
 
-We now have our first eight employees in Microsoft Entra ID.
+We had created our security groups and, later, the eight standard pilot employees. But there was a question our group design couldn't answer on its own:
 
-Their organisational attributes are established, and our group architecture is in place.
+**If someone belongs to `PAG-INTUNE-ENDPOINT-ADMIN`, what can they actually do?**
 
-But there is an important distinction we haven't implemented fully yet.
+At first glance, the group name sounds like a permission. It isn't. A Microsoft Entra security group identifies a population; an administrative **role assignment** is what connects that population to permissions in a particular platform.
 
-**Being responsible for a system does not automatically mean having permission to administer it.**
+That distinction mattered because Wire Finance uses **three different authorization systems**, not one universal Microsoft administrator role.
 
-Earlier, we created groups representing IT administrators, SOC analysts, endpoint administrators, and security leadership.
+### 1. Keep three administrative platforms separate
 
-Those groups identify business responsibilities.
+| Platform | Authorization we planned | Where it belongs | State at this checkpoint |
+|---|---|---|---|
+| Microsoft Entra ID | Built-in **Security Reader** for `PAG-ENTRA-SECURITY-READER` | Entra directory roles | Group created; role assignment **pending verification** |
+| Microsoft Intune | Custom `WF-Intune-Endpoint-Admin` for `PAG-INTUNE-ENDPOINT-ADMIN` | Intune RBAC | **Role created and pilot assignment verified** |
+| Microsoft Defender XDR | Custom `WF-Defender-Security-Operator` for `PAG-DEFENDER-SECURITY-OPERATOR` | Defender Unified RBAC | **Not yet created** |
 
-They do not automatically grant administrative privileges in Microsoft Entra, Intune, or Defender.
+We deliberately created **no custom Microsoft Entra directory role** for endpoint management. We also did not turn the everyday `SG-ROLE-IT-ADMIN` or `SG-ROLE-ENDPOINT-ADMIN` groups into directory administrators.
 
-So how do we connect the right administrators to the right permissions without giving everyone more access than they need?
+Those `SG-ROLE-*` groups represent someone's **business function**. The `PAG-*` groups represent separately approved **privileged access**. A job-title update must not silently become an administrator assignment.
 
-That is our next challenge.
+### 2. What we confirmed in Microsoft Entra
 
-### Understanding Where Administrative Permissions Belong
+In the [Microsoft Entra admin center](https://entra.microsoft.com/), I could inspect our privileged groups under:
 
-Wire Finance uses several Microsoft platforms, each responsible for different administrative functions.
+**Identity → Groups → All groups → [group name] → Properties**
 
-For example:
+The group settings we had established were:
 
-- **Microsoft Entra ID** manages directory identities and directory roles.
-- **Microsoft Intune** controls endpoint management through its own role-based access control system.
-- **Microsoft Defender XDR** provides security administration capabilities through its supported RBAC model.
+| Group | Membership | Microsoft Entra roles can be assigned |
+|---|---|---|
+| `PAG-ENTRA-SECURITY-READER` | Assigned | **Yes** |
+| `PAG-INTUNE-ENDPOINT-ADMIN` | Assigned | **No** |
+| `PAG-DEFENDER-SECURITY-OPERATOR` | Assigned | **No** |
 
-This distinction matters because administrative permissions are not all configured in one place.
+Only the first group needed to be **Entra role-assignable**, because the built-in **Security Reader** is an Entra directory role. That setting was chosen **when the group was created**; it isn't a switch to turn on casually later.
 
-An Intune custom role is not the same thing as a Microsoft Entra directory role.
+However, a role-assignable group is still only a group. The original implementation record **does not confirm that we assigned Security Reader to it**.
 
-And creating an Entra security group does not automatically create permissions in Microsoft Defender.
+When we return to privileged-access implementation, the verification route will be:
 
-Our implementation therefore separates two responsibilities:
+**Entra admin center → Identity → Roles & admins → Roles and administrators → Security Reader → Assignments**
 
-```text
-Microsoft Entra Security Group
-             |
-             v
-Who should receive access?
-             |
-             v
-Platform Role / Permission
-             |
-             v
-What can they actually do?
-```
+Check for `PAG-ENTRA-SECURITY-READER` before describing that authorization as active. If it is absent, its assignment will require an appropriately authorized administrator and a separate implementation decision. We're not presenting that pending step as something we already completed.
 
-For Wire Finance, we created three privileged-access groups to support this model.
+For Microsoft's procedure, see [Assign Microsoft Entra roles](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/manage-roles-portal).
 
-| Privileged Access Group | Intended Platform |
-|---|---|
-| `PAG-ENTRA-SECURITY-READER` | Microsoft Entra ID |
-| `PAG-DEFENDER-SECURITY-OPERATOR` | Microsoft Defender XDR |
-| `PAG-INTUNE-ENDPOINT-ADMIN` | Microsoft Intune |
+### 3. What we actually implemented in Intune
 
-Each group represents a different administrative responsibility.
+When the endpoint-management build resumed, we stopped relying on a planned role name and created a real **Intune custom RBAC role**.
 
-However, the groups are only one part of the access model.
+The actual tenant navigation was:
 
-We still need to connect them to the appropriate platform permissions.
+**[Intune admin center](https://intune.microsoft.com/) → Tenant administration → Roles → All roles → Create → Intune role**
 
-### Our First Implementation: Intune Endpoint Administration
-
-The first custom administrative role I implemented was for Microsoft Intune.
-
-This was a practical starting point because our next technical objective was to begin deploying and managing corporate Windows endpoints.
-
-Wire Finance needs someone who can manage device configurations, applications, compliance policies, and routine endpoint support.
-
-But that person should not automatically receive unrestricted administrative control over the entire Microsoft tenant.
-
-So instead of relying on Global Administrator for routine endpoint operations, I created a dedicated Intune role:
+Our role was named:
 
 `WF-Intune-Endpoint-Admin`
 
-This is a **custom Microsoft Intune RBAC role**, not a custom Microsoft Entra directory role.
+Its **v1 permission intent** was to support routine pilot endpoint operations, such as viewing and updating managed devices, working with configuration and compliance policies, deploying applications and performing approved support tasks. We selected limited enrollment, security-baseline, endpoint-protection and reporting capabilities too.
 
-#### Creating the Intune Role
+We deliberately **excluded** destructive and sensitive powers, including device wipe, retire and delete, access to LAPS or other sensitive credentials, destructive Autopilot deletion and administration of Intune RBAC itself.
 
-I created the role through the Microsoft Intune admin center.
+The original record preserves those selected **capability categories** but not an independently verified screenshot of every permission checkbox. Therefore I won't invent a full action-by-action permission matrix here. We'll revisit the actual role's **Properties → Permissions** in our Chapter 8 Intune RBAC walkthrough and record each enabled action precisely.
 
-The navigation used was:
+#### The pilot role assignment
 
-```text
-Microsoft Intune Admin Center
-             ↓
-Tenant administration
-             ↓
-Roles
-             ↓
-All roles
-             ↓
-Create
-             ↓
-Intune role
-```
-
-The role was named:
-
-`WF-Intune-Endpoint-Admin`
-
-Its purpose is to provide the permissions required for approved endpoint-management activities while withholding unnecessary administrative capabilities.
-
-This is where our earlier least-privilege design begins becoming an actual platform configuration.
-
-### Deciding What the Role Can Do
-
-Creating a custom role means choosing which administrative actions should be available.
-
-We don't want to assign every permission simply because an administrator might need it someday.
-
-Instead, we start with the responsibilities the role is expected to perform.
-
-The documented initial permission set covers activities such as:
-
-| Area | Intended Administrative Capability |
-|---|---|
-| Managed devices | Read and update managed device information |
-| Device configuration | Create, update, assign, and review configuration policies |
-| Device compliance | Manage and review compliance policies |
-| Applications | Create, update, and assign applications |
-| Enrollment | Manage supported enrollment profiles and settings |
-| Security baselines | Configure and assign endpoint security baselines |
-| Endpoint detection and response | Manage supported EDR configurations and reports |
-| Remote support | Perform selected actions such as device sync, reboot, and diagnostic collection |
-
-These permissions support the everyday operational responsibilities of the endpoint-management function.
-
-But just as important is what the role does **not** include.
-
-#### Permissions Deliberately Excluded
-
-The initial role does not include unrestricted access to destructive or highly sensitive operations.
-
-The excluded capabilities include:
-
-- Device wipe
-- Device retirement
-- Device deletion
-- Sensitive credential and LAPS access
-- Intune RBAC administration
-- Destructive Windows Autopilot deletion
-
-Why exclude these?
-
-Because managing an endpoint does not automatically justify the ability to destroy its management record, erase its contents, or retrieve sensitive credentials.
-
-Some of those operations may eventually be necessary.
-
-But they should be introduced through an approved operational requirement rather than granted by default.
-
-**Least privilege is not just about what an administrator can do. It is also about what they are deliberately prevented from doing.**
-
-#### Connecting the Role to a Privileged Group
-
-Creating `WF-Intune-Endpoint-Admin` defined the administrative permissions.
-
-But we still needed to determine who would receive them.
-
-Earlier, we created:
-
-`PAG-INTUNE-ENDPOINT-ADMIN`
-
-This is an Assigned Microsoft Entra security group intended for authorised endpoint administrators.
-
-Rather than assigning the Intune role directly to individual accounts, we use the privileged-access group as the administrative assignment boundary.
-
-The model becomes:
-
-```text
-Approved Administrator
-         |
-         v
-PAG-INTUNE-ENDPOINT-ADMIN
-         |
-         v
-Intune Role Assignment
-         |
-         v
-WF-Intune-Endpoint-Admin
-         |
-         v
-Permitted Endpoint Operations
-```
-
-This separation makes the arrangement easier to manage and review.
-
-The role defines permissions.
-
-The group identifies the intended administrators.
-
-The assignment connects the two.
-
-### Creating the Pilot Role Assignment
-
-In Intune, I created the following role assignment:
+After creating the custom role, we created this assignment:
 
 `WF-ASSIGN-INTUNE-ENDPOINT-ADMIN-PILOT`
 
-The assignment was deliberately scoped to our pilot environment.
+| Assignment element | Saved value | What it determines |
+|---|---|---|
+| Intune role | `WF-Intune-Endpoint-Admin` | **What** actions the role permits |
+| Admin group | `PAG-INTUNE-ENDPOINT-ADMIN` | **Who** receives the role through group membership |
+| Scope (Groups) | `SG-DEVICES-WINDOWS-PILOT` | **Which device population** can be managed through this assignment |
+| Scope tag | `Default` | **Which tagged Intune objects** can be visible to the assigned administrators |
 
-Here is the implemented configuration:
+![Verified pilot Intune role assignment]({{ '/assets/images/entra-id-implementation/intune-rbac-pilot-assignment-verified.png' | relative_url }})
 
-| Assignment Component | Configured Value |
-|---|---|
-| Assignment name | `WF-ASSIGN-INTUNE-ENDPOINT-ADMIN-PILOT` |
-| Intune role | `WF-Intune-Endpoint-Admin` |
-| Admin group | `PAG-INTUNE-ENDPOINT-ADMIN` |
-| Scope group | `SG-DEVICES-WINDOWS-PILOT` |
-| Scope tag | `Default` |
+*Figure: Original assignment verification. `PAG-INTUNE-ENDPOINT-ADMIN` and `SG-DEVICES-WINDOWS-PILOT` are both shown as Active, with the Default scope tag.*
 
-There are four different concepts here, and understanding them is essential.
+I reopened the assignment after creating it and checked those values rather than trusting the creation wizard alone.
 
-#### Who, What, Which, and Where
+To repeat that validation:
 
-```text
-WHO?
-PAG-INTUNE-ENDPOINT-ADMIN
-          |
-          v
-WHAT?
-WF-Intune-Endpoint-Admin
-          |
-          v
-WHICH DEVICES?
-SG-DEVICES-WINDOWS-PILOT
-          |
-          v
-WHERE / OBJECT VISIBILITY?
-Default Scope Tag
-```
+**Intune admin center → Tenant administration → Roles → All roles → WF-Intune-Endpoint-Admin → Assignments → WF-ASSIGN-INTUNE-ENDPOINT-ADMIN-PILOT**
 
-The **admin group** determines the identities targeted by the administrative role assignment.
+Inspect **Members/Admin Groups**, **Scope (Groups)** and **Scope tags**. Do not confuse the **admin group** with the **scope group**: putting an employee in `SG-DEVICES-WINDOWS-PILOT` does **not** make them an endpoint administrator. That group identifies devices eligible for pilot management.
 
-The **Intune role** defines the actions those administrators are permitted to perform.
+Also, `Default` is a scope tag, **not an extra permission** or proof of a fully isolated administrative boundary. Intune roles, group scopes and tags work together, and any other role assignments an administrator holds may affect their effective access. See [Microsoft Intune RBAC overview](https://learn.microsoft.com/en-us/intune/fundamentals/role-based-access-control/overview).
 
-The **scope group** defines the device or user population within the assignment's management scope. In our pilot, this is `SG-DEVICES-WINDOWS-PILOT`.
+**What we verified:** the custom role existed and the saved pilot assignment referenced the correct groups and tag. **What we had not yet verified:** effective permissions by signing in with a dedicated `adm-*` account and demonstrating permitted and denied actions. That test is still required before treating the design as a production-grade least-privilege control.
 
-The **scope tag** contributes to the visibility boundary for Intune objects. Our initial assignment uses `Default`.
+### 4. Why Defender is not configured here
 
-Together, these settings allow us to define administrative access more precisely than simply assigning broad tenant-wide permissions.
+`PAG-DEFENDER-SECURITY-OPERATOR` was created as an **Assigned** Entra security group, but the planned custom authorization object `WF-Defender-Security-Operator` was **not created** during this stage.
 
-### Validating the Assignment
+Defender XDR uses its own **Unified RBAC** model. That is the place to select security-operations capabilities, establish data scopes and associate authorized users or groups. It is not an Intune custom role or an Entra custom directory role.
 
-After creating the role assignment, I reopened it in the Intune admin center.
+When we reach that implementation, the Microsoft Defender portal's **Permissions → Microsoft Defender XDR → Roles** area is the appropriate starting point. Creating a role is not the same as activating the relevant Unified RBAC workload or validating the resulting access; those steps will need their own evidence.
 
-I verified that the configured administrative group, scope group, and scope tag matched the intended pilot design.
+Reference: [Microsoft Defender Unified RBAC](https://learn.microsoft.com/en-us/defender-xdr/manage-rbac).
 
-The assignment was successfully created and its configuration confirmed.
+### 5. What remained unfinished
 
-This established an important implementation milestone:
+The three `PAG-*` groups were a **foundation**, not completed privileged-access operations.
 
-**The Intune administrative role and its pilot assignment now exist.**
+At this point we had **not**:
 
-However, verifying a role assignment's configuration is not the same as completing end-to-end privileged-user testing.
+- Created and validated dedicated `adm-*` privileged user accounts or their memberships.
+- Activated Privileged Identity Management (PIM) for time-limited administrative access.
+- Verified the Entra **Security Reader** group-to-role assignment.
+- Created `WF-Defender-Security-Operator` in Defender Unified RBAC.
+- Tested the Intune custom role from the perspective of an actual assigned administrator.
+- Implemented and tested emergency-access accounts.
 
-Our dedicated `adm-*` administrator identities have not yet been implemented.
+We were still able to use an appropriately authorized tenant administrator for the **setup phase**. That bootstrap access does not prove the delegated, least-privileged operating model has been tested.
 
-That means the final validation of an approved privileged identity using this role remains a follow-on task.
+#### The checkpoint
 
-We have established the authorisation structure, but we should not confuse that with a fully operational privileged-access lifecycle.
+Our **Intune administrative role and scoped pilot assignment were created and their configuration verified**. The Entra Security Reader assignment, Defender role and privileged-identity lifecycle remained pending.
 
-### What About Entra and Defender?
+This separation gives us an honest account of progress: creating a group, configuring a platform role and validating effective access are **three different milestones**.
 
-Intune is only one part of our administrative-access model.
-
-The remaining privileged groups need to be connected to the correct authorisation systems.
-
-#### Microsoft Entra Security Reader
-
-For Entra, we created:
-
-`PAG-ENTRA-SECURITY-READER`
-
-This group is configured as an Entra role-assignable security group.
-
-The intended authorisation is the built-in **Security Reader** directory role.
-
-Unlike the custom Intune role, Security Reader already exists as a Microsoft Entra role.
-
-We do not need to create a new custom directory role to reproduce its permissions.
-
-However, the group-to-role assignment still needs to be verified or completed.
-
-Creating a role-assignable group does not mean that the built-in role has already been assigned.
-
-#### Microsoft Defender Security Operator
-
-For Microsoft Defender, we created:
-
-`PAG-DEFENDER-SECURITY-OPERATOR`
-
-The planned custom authorisation role is:
-
-`WF-Defender-Security-Operator`
-
-This role belongs in the Microsoft Defender XDR Unified RBAC model.
-
-It should not be created as a Microsoft Entra custom directory role simply because its members are represented by an Entra security group.
-
-At our current implementation checkpoint, the Defender custom role has not yet been created.
-
-It remains part of the later security implementation work.
-
-### Administrative Access: Current Implementation Status
-
-The distinction between created groups and operational permissions is worth recording.
-
-| Area | Current Implementation Status |
-|---|---|
-| `PAG-ENTRA-SECURITY-READER` | Created; Entra role assignment pending verification |
-| Built-in Entra Security Reader role | Available |
-| `PAG-DEFENDER-SECURITY-OPERATOR` | Created |
-| `WF-Defender-Security-Operator` | Not yet implemented |
-| `PAG-INTUNE-ENDPOINT-ADMIN` | Created |
-| `WF-Intune-Endpoint-Admin` | Custom Intune role created |
-| Intune pilot role assignment | Created and configuration verified |
-| Dedicated `adm-*` identities | Pending |
-| Privileged Identity Management | Available; implementation pending |
-
-This is our actual implementation state.
-
-We have successfully introduced a custom Intune role and connected it to a scoped administrative assignment.
-
-But the wider privileged-access model remains a work in progress.
-
-### The Next Level: Privileged Identity Management
-
-Our IAM design also established that administrative privileges should be controlled, reviewed, and used only when required.
-
-Microsoft Entra Privileged Identity Management (PIM) is part of that longer-term approach.
-
-The objective is to move towards approved, time-bound administrative access where supported.
-
-However, we have not yet configured PIM for the Wire Finance privileged-access groups.
-
-Before doing that, we still need to establish the dedicated administrative identities and complete the relevant platform authorisation arrangements.
-
-We will not treat PIM as implemented simply because Entra ID P2 makes it available.
-
-### What We Have Achieved
-
-The most important outcome of this stage is the separation of business responsibility from administrative permission.
-
-We now have:
-
-- Privileged-access groups representing different administrative functions.
-- A custom Intune role defining approved endpoint-management capabilities.
-- A pilot role assignment connecting the Intune role to its intended administrative group.
-- A defined pilot management scope.
-- A record of the privileged-access components that still need implementation.
-
-The design principle is beginning to take shape inside the Microsoft environment.
-
-```text
-Business Responsibility
-          ↓
-Privileged Access Group
-          ↓
-Platform Authorisation
-          ↓
-Scoped Administrative Permissions
-          ↓
-Validation and Review
-```
-
-But administrative permissions are only one part of securing an identity.
-
-Even a correctly scoped administrator still needs a secure way to authenticate.
-
-And our standard workforce identities also need appropriate authentication controls before we can trust their sign-ins.
-
-That takes us to the next stage of our implementation.
-
-**Next: Authentication Methods — establishing how Wire Finance users prove their identities when accessing company resources.**
+Next we'll examine how our standard users authenticate, including the temporary-password process used before Olivia Carter's first Autopilot sign-in—and which authentication controls we deliberately postponed.
