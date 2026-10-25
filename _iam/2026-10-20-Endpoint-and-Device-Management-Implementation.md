@@ -8,143 +8,82 @@ image: assets/images/active-directory/endpoint_management_in_action.png
 show_on_master: true
 nav_id: endpoint-device-management-implementation
 children_heading: "Explore the Endpoint Implementation"
-description: "Moving from device design to deployment as we build, register, provision, and validate the first Wire Finance Windows endpoint."
+description: "Prepare Microsoft Intune and Windows Autopilot first, then build, register, deploy, and validate our first Wire Finance Windows 11 endpoint."
 ---
 
-Our identity foundation is taking shape.
+Our identity foundation is in place.
 
-We have created the first Wire Finance employees, established their group memberships, configured licensing, and introduced our initial authentication process.
+We've created our first Wire Finance employees, assigned their group memberships and licences, and introduced the authentication process they'll use when they sign in.
 
-But employees need more than an identity.
+But having an account doesn't give Olivia Carter a company workstation.
 
-They need somewhere to work.
+**Now we need to turn an ordinary Windows computer into a Wire Finance-managed endpoint.**
 
-Earlier in our Device Identity and Provisioning Model, we defined how Wire Finance endpoints should be owned, named, classified, provisioned, managed, and secured.
+Earlier, in our Device Identity and Provisioning Model, we decided how devices should be owned, classified, joined, managed, and secured. This chapter is where we put those decisions into practice.
 
-Now it is time to put those decisions to work.
+### Prepare the Cloud, Then Build the Device
 
-**We're going to build our first corporate Windows endpoint.**
+Three Microsoft services will work together:
 
-### From Device Design to Deployment
+- **Microsoft Entra ID** gives the device an organisational identity.
+- **Microsoft Intune** manages its configuration and applications.
+- **Windows Autopilot** guides the corporate provisioning experience.
 
-Our original device model established three important platform responsibilities.
-
-**Microsoft Entra ID** provides the device identity.
-
-**Microsoft Intune** provides the management platform.
-
-**Windows Autopilot** provides the corporate provisioning experience.
-
-These technologies work together, but they do not perform the same job.
-
-For Wire Finance, our intended provisioning journey looks like this:
+Rather than creating the VM first and stopping repeatedly to configure cloud services, we'll prepare the management environment *before* starting Windows setup.
 
 ```text
-Windows 11 Corporate Endpoint
-            ↓
-Windows Autopilot Registration
-            ↓
-Corporate Device Classification
-            ↓
-Autopilot Deployment Profile
-            ↓
-Employee Organisational Sign-In
-            ↓
-Microsoft Entra Join
-            ↓
-Microsoft Intune Enrollment
-            ↓
-Required Apps and Configuration
-            ↓
-Device Validation
+Prepare the Microsoft environment
+   Intune RBAC → Entra join + MDM enrollment
+   → Enrollment Status Page → Autopilot profile
+   → Required applications
+                    ↓
+Prepare the Windows device
+   Build Windows 11 VM → Register with Autopilot
+                    ↓
+Deploy and verify
+   Olivia signs in → Provisioning → Device validation
 ```
 
-The objective is to move away from manually preparing every employee workstation.
+This way, when we start the Windows onboarding journey, the policies and applications it needs will already be waiting in Intune.
 
-Instead, we want a repeatable process that allows an approved corporate endpoint to receive its organisational identity and management configuration during onboarding.
+### Our First Pilot Endpoint
 
-And we need to test whether that process actually works.
+We'll use a local **Oracle VirtualBox VM running Windows 11 Pro**, rather than purchasing hardware or consuming Azure VM compute resources for the first test.
 
-### Building Our First Pilot Endpoint
+The VM will represent asset **`WF-LT-001`**, intended for **Olivia Carter**, our Finance Analyst. `WF-LT-001` is our asset identifier; we'll verify the actual Windows computer name rather than assume it matches.
 
-For the initial implementation, we selected Olivia Carter, our Finance Analyst.
+We'll also preserve the normal Windows **Out-of-Box Experience (OOBE)**. Olivia's first organisational sign-in and Microsoft Authenticator setup will be documented when we reach the real deployment—not performed early to make the walkthrough look smoother.
 
-Her account already exists in Microsoft Entra ID.
+### The Nine Lessons
 
-Her organisational attributes, pilot membership, and Microsoft 365 E5 licensing have also been configured.
+| Order | Implementation lesson | What we'll do |
+|---|---|---|
+| **1** | **Intune Administrative Access and RBAC** | Establish the custom endpoint-administrator role and its pilot scope. |
+| **2** | **Automatic MDM Enrollment and Microsoft Entra Join** | Configure who can join and automatically enroll Windows devices. |
+| **3** | **Enrollment Status Page Configuration** | Create the provisioning progress and blocking experience. |
+| **4** | **Windows Autopilot Deployment Profile** | Define the corporate user-driven deployment settings. |
+| **5** | **Company Portal and Microsoft 365 Apps Deployment** | Create application assignments and finalise which app blocks completion. |
+| **6** | **Building Our First Windows 11 Virtual Machine** | Build `WF-LT-001` in VirtualBox and stop at OOBE. |
+| **7** | **Windows Autopilot Registration and Troubleshooting** | Register the VM, apply `CORPORATE` classification, and investigate the issues we encounter. |
+| **8** | **First Windows Autopilot Deployment — Olivia Carter** | Follow Olivia's real first sign-in, authentication setup, and corporate provisioning. |
+| **9** | **Post-Deployment Validation** | Verify Entra and Intune device records, management state, and application delivery. |
 
-Now she needs a corporate workstation.
+Some settings depend on objects created later in the chapter. For example, we'll create the Enrollment Status Page in Lesson 3 and **finalise its Company Portal blocking-app selection in Lesson 5**, after that app exists. We'll call out those handoffs so no one is asked to select an application they haven't created yet.
 
-Rather than purchasing a physical computer for our first deployment, we will use a local **Oracle VirtualBox virtual machine running Windows 11 Pro**.
+### What Success Means
 
-This gives us a controlled environment for testing the provisioning process.
+We want to prove that our first device can be recognised by Autopilot, joined to Microsoft Entra, enrolled in Intune, configured with required applications, and inspected after deployment.
 
-The VM represents our first corporate device asset:
+We'll show the real portal settings, commands, screenshots, problems and fixes—not just the happy path.
 
-`WF-LT-001`
+And we'll keep one principle in view:
 
-This is the intended asset identifier from our device naming convention.
+**Enrolled does not automatically mean secure, compliant, or trusted.**
 
-The actual Windows computer name will be verified during deployment rather than assumed to match the asset identifier.
+BitLocker, Defender for Endpoint, device compliance and Conditional Access enforcement still need their own configurations and validation. Those are later milestones, not conclusions we can draw simply because Windows reaches the desktop.
 
-### What We'll Implement
+### Let's Begin
 
-This chapter will follow the technical journey from an empty virtual machine to a managed corporate endpoint.
+First, we'll establish who can manage our endpoints and who is permitted to enroll them. Then we'll configure the provisioning experience, build the VM, and follow Olivia's deployment through to verification.
 
-We'll begin by documenting the Windows 11 VM build, including the configuration decisions needed to preserve the native Windows Out-of-Box Experience.
-
-Next, we'll configure the Microsoft environment to support automatic enrollment and Windows Autopilot provisioning.
-
-That includes:
-
-- Automatic MDM enrollment
-- Autopilot device registration
-- Corporate device classification
-- Dynamic device-group membership
-- Enrollment Status Page configuration
-- Autopilot deployment profile
-- Required application assignments
-
-Once those components are ready, we'll follow Olivia through the Windows onboarding process.
-
-And importantly, we won't skip the parts that didn't work on the first attempt.
-
-### Troubleshooting Is Part of the Implementation
-
-A working endpoint is the result we want.
-
-But getting there is part of the learning.
-
-During the implementation, we encountered challenges involving PowerShell execution policy, authentication, Microsoft Graph permissions, portal navigation, and configuration naming.
-
-These are not details to hide.
-
-They're useful opportunities to understand how the different components interact and why particular decisions matter.
-
-Where something failed, we'll examine what happened, how we investigated it, and what change allowed us to continue.
-
-**The goal is not to produce a collection of perfect screenshots. It is to document a deployment that someone else can understand and reproduce.**
-
-### Beyond the First Workstation
-
-Completing Windows onboarding is an important milestone.
-
-But a device reaching the desktop does not automatically mean it meets our corporate security requirements.
-
-We still need to validate the resulting device identity, management state, application delivery, and security posture.
-
-Our later implementation work will introduce endpoint protection, device compliance, and identity-based access controls.
-
-Once those controls are properly configured and tested, we can expand the pilot to additional employees representing different departments.
-
-That will allow us to test whether the provisioning model works beyond a single workstation.
-
-### The First Step
-
-Before we register anything with Windows Autopilot, we need a Windows device to register.
-
-That means creating the virtual machine, installing Windows 11, and preparing the environment for corporate provisioning.
-
-We'll begin with the foundation of our first endpoint.
-
-**Next: Building the First Windows 11 Virtual Machine — preparing Olivia Carter's pilot workstation in Oracle VirtualBox.**
+**Next: Intune Administrative Access and RBAC.**
